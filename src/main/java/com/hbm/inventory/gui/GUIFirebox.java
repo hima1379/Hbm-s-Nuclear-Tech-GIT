@@ -1,8 +1,8 @@
 package com.hbm.inventory.gui;
 
 import com.hbm.inventory.container.ContainerFirebox;
-import com.hbm.tileentity.machine.TileEntityFireboxBase;
-import com.hbm.tileentity.machine.TileEntityHeaterOven;
+import com.hbm.main.tileentity.machine.TileEntityFireboxBase;
+import com.hbm.main.tileentity.machine.TileEntityHeaterOven;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;

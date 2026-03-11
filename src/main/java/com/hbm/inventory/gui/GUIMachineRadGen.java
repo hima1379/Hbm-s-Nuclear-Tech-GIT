@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.inventory.container.ContainerMachineRadGen;
 import com.hbm.lib.RefStrings;
 import com.hbm.lib.Library;
-import com.hbm.tileentity.machine.TileEntityMachineRadGen;
+import com.hbm.main.tileentity.machine.TileEntityMachineRadGen;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -29,7 +29,7 @@ public class GUIMachineRadGen extends GuiInfoContainer {
 	public void drawScreen(int mouseX, int mouseY, float f) {
 		super.drawScreen(mouseX, mouseY, f);
 
-		this.drawCustomInfo(this, mouseX, mouseY, guiLeft + 35, guiTop + 69 - 52, 16, 52, new String[] { "Fuel: " + Library.roundFloat(radgen.fuel * 100D/ TileEntityMachineRadGen.maxFuel, 3) + "%" });
+		this.drawCustomInfo(this, mouseX, mouseY, guiLeft + 35, guiTop + 69 - 52, 16, 52, new String[] { "Fuel: " + Library.roundFloat(radgen.fuel * 100D/radgen.maxFuel, 3) + "%" });
 		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 143, guiTop + 69 - 52, 16, 52, radgen.power, TileEntityMachineRadGen.maxPower);
 		
 		String[] text = new String[] { "Accepted Fuels:",

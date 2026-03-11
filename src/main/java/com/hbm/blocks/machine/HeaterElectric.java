@@ -8,8 +8,8 @@ import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.blocks.ITooltipProvider;
 import com.hbm.lib.ForgeDirection;
-import com.hbm.tileentity.TileEntityProxyEnergy;
-import com.hbm.tileentity.machine.TileEntityHeaterElectric;
+import com.hbm.main.tileentity.TileEntityProxyEnergy;
+import com.hbm.main.tileentity.machine.TileEntityHeaterElectric;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.block.material.Material;

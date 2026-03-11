@@ -3,7 +3,7 @@ package com.hbm.blocks.machine;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityMachineSiren;
+import com.hbm.main.tileentity.machine.TileEntityMachineSiren;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

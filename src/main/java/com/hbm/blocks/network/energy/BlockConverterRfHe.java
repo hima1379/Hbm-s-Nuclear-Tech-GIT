@@ -2,7 +2,7 @@ package com.hbm.blocks.network.energy;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.network.energy.TileEntityConverterRfHe;
+import com.hbm.main.tileentity.network.energy.TileEntityConverterRfHe;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

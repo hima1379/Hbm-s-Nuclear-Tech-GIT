@@ -3,7 +3,10 @@ package com.hbm.render.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -249,7 +252,8 @@ public class ModelRendererUtil {
 		float f;
 		
 		for(f = yawOffset - prevYawOffset; f < -180.0F; f += 360.0F) {
-        }
+			;
+		}
 
 		while(f >= 180.0F) {
 			f -= 360.0F;
@@ -442,8 +446,8 @@ public class ModelRendererUtil {
 			}
 			returnData[2] = compress(cap);
 		}
-		returnData[0] = compress(side1.toArray(new Triangle[0]));
-		returnData[1] = compress(side2.toArray(new Triangle[0]));
+		returnData[0] = compress(side1.toArray(new Triangle[side1.size()]));
+		returnData[1] = compress(side2.toArray(new Triangle[side2.size()]));
 		return returnData;
 	}
 	
@@ -541,7 +545,9 @@ public class ModelRendererUtil {
 			List<Triangle> tris = new ArrayList<>();
 			for(CutModelData d : top){
 				if(d.cap != null)
-                    tris.addAll(Arrays.asList(decompress(d.cap)));
+					for(Triangle t : decompress(d.cap)){
+						tris.add(t);
+					}
 			}
 			capConsumer.accept(tris);
 		}
@@ -596,7 +602,7 @@ public class ModelRendererUtil {
 			particles.add(new ParticleSlicedMob(ent.world, body, bodyDL, capDL, tex, capTex, capBloom));
 		}
 		
-		return particles.toArray(new ParticleSlicedMob[0]);
+		return particles.toArray(new ParticleSlicedMob[particles.size()]);
 	}
 	
 	public static RigidBody[] generateRigidBodiesFromBoxes(Entity ent, List<Pair<Matrix4f, ModelRenderer>> boxes){

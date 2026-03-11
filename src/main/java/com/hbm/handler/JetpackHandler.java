@@ -96,8 +96,10 @@ public class JetpackHandler {
 	public static boolean hasJetpack(EntityPlayer p){
 		ItemStack chest = p.inventory.armorInventory.get(2);
 		ItemStack stack = ArmorModHandler.pryMod(chest, 1);
-        return stack.getItem() == ModItems.jetpack_glider;
-    }
+		if(stack.getItem() == ModItems.jetpack_glider)
+			return true;
+		return false;
+	}
 	
 	public static FluidTank getTank(EntityPlayer p){
 		ItemStack chest = p.inventory.armorInventory.get(2);
@@ -615,6 +617,7 @@ public class JetpackHandler {
         float f;
 
         for (f = yawOffset - prevYawOffset; f < -180.0F; f += 360.0F) {
+            ;
         }
 
         while (f >= 180.0F) {

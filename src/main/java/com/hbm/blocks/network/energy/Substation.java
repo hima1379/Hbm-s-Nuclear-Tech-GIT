@@ -5,9 +5,9 @@ import java.util.List;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ITooltipProvider;
 import com.hbm.lib.ForgeDirection;
-import com.hbm.tileentity.TileEntityProxyConductor;
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
-import com.hbm.tileentity.network.energy.TileEntitySubstation;
+import com.hbm.main.tileentity.TileEntityProxyConductor;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.network.energy.TileEntitySubstation;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.block.material.Material;

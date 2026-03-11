@@ -6,7 +6,7 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
 import com.hbm.blocks.ITooltipProvider;
-import com.hbm.tileentity.machine.TileEntityWasteDrum;
+import com.hbm.main.tileentity.machine.TileEntityWasteDrum;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;

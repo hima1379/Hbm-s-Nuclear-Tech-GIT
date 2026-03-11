@@ -3,7 +3,7 @@ package com.hbm.inventory.control_panel;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hbm.tileentity.machine.TileEntityControlPanel;
+import com.hbm.main.tileentity.machine.TileEntityControlPanel;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

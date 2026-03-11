@@ -6,7 +6,7 @@ import com.hbm.util.I18nUtil;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.bomb.TileEntityRailgun;
+import com.hbm.main.tileentity.bomb.TileEntityRailgun;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;

@@ -1,7 +1,7 @@
 package com.hbm.inventory.gui;
 
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.turret.TileEntityTurretBaseNT;
+import com.hbm.main.tileentity.turret.TileEntityTurretBaseNT;
 
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;

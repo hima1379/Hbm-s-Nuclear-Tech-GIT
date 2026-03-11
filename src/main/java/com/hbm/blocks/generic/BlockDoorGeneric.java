@@ -10,8 +10,8 @@ import com.hbm.blocks.BlockDummyable;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.items.ModItems;
 import com.hbm.items.tool.ItemLock;
-import com.hbm.tileentity.DoorDecl;
-import com.hbm.tileentity.TileEntityDoorGeneric;
+import com.hbm.main.tileentity.DoorDecl;
+import com.hbm.main.tileentity.TileEntityDoorGeneric;
 
 import micdoodle8.mods.galacticraft.api.block.IPartialSealableBlock;
 import net.minecraft.item.ItemStack;
@@ -203,8 +203,14 @@ public class BlockDoorGeneric extends BlockDummyable implements IRadResistantBlo
 		return false;
 	}
 
-    @Override
-    public boolean isRadResistant(){
-        return this.isRadResistant;
-    }
+	@Override
+	public void addInformation(ItemStack stack, World player, List<String> tooltip, ITooltipFlag advanced) {
+		float hardness = this.getExplosionResistance(null);
+		if(this.isRadResistant){
+			tooltip.add("§2[" + I18nUtil.resolveKey("trait.radshield") + "]");
+		}
+		if(hardness > 50){
+			tooltip.add("§6" + I18nUtil.resolveKey("trait.blastres", hardness));
+		}
+	}
 }

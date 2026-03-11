@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntityMachineFENSU;
+import com.hbm.main.tileentity.machine.TileEntityMachineFENSU;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -29,10 +29,12 @@ public class RenderFENSU extends TileEntitySpecialRenderer<TileEntityMachineFENS
 		case 5: GL11.glRotatef(0, 0F, 1F, 0F); break;
 		}
 
+        
 
-        bindTexture(ResourceManager.fensu_tex[te.color.getMetadata()]);
+        TileEntityMachineFENSU fensu = (TileEntityMachineFENSU)te;
+        bindTexture(ResourceManager.fensu_tex[fensu.color.getMetadata()]);
         ResourceManager.fensu.renderPart("Base");
-        float rot = te.prevRotation + (te.rotation - te.prevRotation) * partialTicks;
+        float rot = fensu.prevRotation + (fensu.rotation - fensu.prevRotation) * partialTicks;
 
         GL11.glTranslated(0, 2.5, 0);
         GL11.glRotated(rot, 1, 0, 0);

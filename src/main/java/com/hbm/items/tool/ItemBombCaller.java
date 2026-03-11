@@ -82,46 +82,127 @@ public class ItemBombCaller extends Item {
 			int y = trace.getBlockPos().getY();
 			int z = trace.getBlockPos().getZ();
 
+			EntityBomber bomber = null;
+
 			switch (getTypeFromStack(stack)) {
 			case CARPET:
-				if (world.spawnEntity(EntityBomber.statFacCarpet(world, x, y, z)))
-					b = true;
+				bomber = EntityBomber.statFacCarpet(world, x, y, z);
 				break;
 			case NAPALM:
-				if (world.spawnEntity(EntityBomber.statFacNapalm(world, x, y, z)))
-					b = true;
+				bomber = EntityBomber.statFacNapalm(world, x, y, z);
 				break;
 			case POISON:
-				if (world.spawnEntity(EntityBomber.statFacChlorine(world, x, y, z)))
-					b = true;
+				bomber = EntityBomber.statFacChlorine(world, x, y, z);
 				break;
 			case ORANGE:
-				if (world.spawnEntity(EntityBomber.statFacOrange(world, x, y, z)))
-					b = true;
+				bomber = EntityBomber.statFacOrange(world, x, y, z);
 				break;
 			case ATOMIC:
-				if (world.spawnEntity(EntityBomber.statFacABomb(world, x, y, z)))
-					b = true;
+				bomber = EntityBomber.statFacABomb(world, x, y, z);
 				break;
 			case STINGER:
-				if (world.spawnEntity(EntityBomber.statFacStinger(world, x, y, z)))
-					b = true;
+				bomber = EntityBomber.statFacStinger(world, x, y, z);
 				break;
 			case PIP:
-				if (world.spawnEntity(EntityBomber.statFacBoxcar(world, x, y, z)))
-					b = true;
+				bomber = EntityBomber.statFacBoxcar(world, x, y, z);
 				break;
 			case CLOUD:
-				if (world.spawnEntity(EntityBomber.statFacPC(world, x, y, z)))
-					b = true;
+				bomber = EntityBomber.statFacPC(world, x, y, z);
 				break;
 			default:
 				break;
 			}
-			if (b) {
-				playerIn.sendMessage(new TextComponentTranslation("chat.callas"));
-				if (!playerIn.capabilities.isCreativeMode)
-					stack.shrink(1);
+
+			if (bomber != null) {
+				// Set calling player UUID for countdown system
+				bomber.setCallingPlayer(playerIn.getUniqueID());
+
+				// === FORMATION SYSTEM ===
+				com.hbm.entity.logic.EntityBomberFormationManager formationManager =
+					com.hbm.entity.logic.EntityBomberFormationManager.getInstance();
+
+				// Get bombing type for formation grouping
+				int bombingType = getTypeFromStack(stack).ordinal();
+
+				// Check if there's an active formation accepting members
+				com.hbm.entity.logic.EntityBomberFormation formation =
+					formationManager.findActiveFormation(world, bombingType);
+
+				boolean isNewFormation = false;
+				if (formation == null) {
+					// Create new formation
+					formation = formationManager.createFormation(world, x, y, z, bombingType);
+					isNewFormation = true;
+					MainRegistry.logger.info("Created new formation: " + formation.getFormationId());
+				}
+
+				// Add bomber to formation
+				int[] position = formation.addBomber(bomber.getUniqueID());
+				if (position != null) {
+					int row = position[0];
+					int column = position[1];
+					boolean isLeader = (formation.getBomberCount() == 1);
+
+					// Re-initialize bomber with formation positioning
+					// This recalculates spawn position using formation's approach vector and position offsets
+					bomber.fac(world, x, y, z, formation, row, column);
+
+					// Set formation data
+					bomber.setFormation(formation.getFormationId(), row, column, isLeader);
+
+					MainRegistry.logger.info("Added bomber to formation at row=" + row + ", column=" + column +
+						" (Total: " + formation.getBomberCount() + " bombers)");
+				}
+
+				// Spawn the bomber
+				boolean spawned = world.spawnEntity(bomber);
+
+				if (spawned) {
+					b = true;
+
+					// Send formation messages
+					if (isNewFormation) {
+						// First bomber in new formation
+						playerIn.sendMessage(new net.minecraft.util.text.TextComponentString(
+							TextFormatting.AQUA + "B-29 編隊を要請しました"
+						));
+						playerIn.sendMessage(new net.minecraft.util.text.TextComponentString(
+							TextFormatting.YELLOW + "編隊機数: " + TextFormatting.GOLD + "1機"
+						));
+					} else {
+						// Added to existing formation
+						playerIn.sendMessage(new net.minecraft.util.text.TextComponentString(
+							TextFormatting.GREEN + "編隊追加！"
+						));
+						playerIn.sendMessage(new net.minecraft.util.text.TextComponentString(
+							TextFormatting.YELLOW + "現在の編隊: " + TextFormatting.GOLD + formation.getBomberCount() + "機" +
+							TextFormatting.GRAY + " / " + com.hbm.entity.logic.EntityBomberFormation.MAX_BOMBERS_PER_FORMATION + "機"
+						));
+
+						// Show formation status
+						int row0 = Math.min(formation.getBomberCount(), 10);
+						int row1 = Math.max(0, Math.min(formation.getBomberCount() - 10, 10));
+						int row2 = Math.max(0, formation.getBomberCount() - 20);
+
+						if (row2 > 0) {
+							playerIn.sendMessage(new net.minecraft.util.text.TextComponentString(
+								TextFormatting.GRAY + "配置: 第3列" + row2 + "機 | 第1列" + row0 + "機 | 第2列" + row1 + "機"
+							));
+						} else if (row1 > 0) {
+							playerIn.sendMessage(new net.minecraft.util.text.TextComponentString(
+								TextFormatting.GRAY + "配置: 第1列" + row0 + "機 | 第2列" + row1 + "機"
+							));
+						}
+					}
+
+					if (!playerIn.capabilities.isCreativeMode)
+						stack.shrink(1);
+				} else {
+					MainRegistry.logger.error("Failed to spawn B-29! Check world height limits and chunk loading.");
+					playerIn.sendMessage(new net.minecraft.util.text.TextComponentString(
+						TextFormatting.RED + "エラー: B-29のスポーンに失敗しました"
+					));
+				}
 			}
 			world.playSound(playerIn.posX, playerIn.posY, playerIn.posZ, HBMSoundHandler.techBoop, SoundCategory.PLAYERS, 1.0F, 1.0F, true);
 
@@ -144,7 +225,7 @@ public class ItemBombCaller extends Item {
 		return getTypeFromStack(stack).ordinal() >= 4;
 	}
 
-	public enum EnumCallerType {
+	public static enum EnumCallerType {
 		CARPET, NAPALM, POISON, ORANGE, ATOMIC, STINGER, PIP, CLOUD, NONE
 	}
 

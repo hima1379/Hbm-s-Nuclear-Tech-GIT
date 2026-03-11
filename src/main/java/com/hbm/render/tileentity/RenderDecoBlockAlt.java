@@ -8,7 +8,7 @@ import com.hbm.lib.RefStrings;
 import com.hbm.render.RenderHelper;
 import com.hbm.render.model.ModelGun;
 import com.hbm.render.model.ModelStatue;
-import com.hbm.tileentity.deco.TileEntityDecoBlockAlt;
+import com.hbm.main.tileentity.deco.TileEntityDecoBlockAlt;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;

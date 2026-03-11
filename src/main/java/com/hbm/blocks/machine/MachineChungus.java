@@ -10,8 +10,8 @@ import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.handler.MultiblockHandlerXR;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityChungus;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityChungus;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -132,8 +132,10 @@ public class MachineChungus extends BlockDummyable implements ILookOverlay {
 		if(!MultiblockHandlerXR.checkSpace(world, x + dir.offsetX * o , y + dir.offsetY * o, z + dir.offsetZ * o, getDimensions(), x, y, z, dir)) return false;
 		if(!MultiblockHandlerXR.checkSpace(world, x + dir.offsetX * o , y + dir.offsetY * o, z + dir.offsetZ * o, new int[] {3, 0, 6, -1, 1, 1}, x, y, z, dir)) return false;
 		if(!MultiblockHandlerXR.checkSpace(world, x + dir.offsetX * o , y + dir.offsetY * o, z + dir.offsetZ * o, new int[] {2, 0, 10, -7, 1, 1}, x, y, z, dir)) return false;
-        return world.getBlockState(new BlockPos(x + dir.offsetX, y + 2, z + dir.offsetZ)).getBlock().canPlaceBlockAt(world, new BlockPos(x + dir.offsetX, y + 2, z + dir.offsetZ));
-    }
+		if(!world.getBlockState(new BlockPos(x + dir.offsetX, y + 2, z + dir.offsetZ)).getBlock().canPlaceBlockAt(world, new BlockPos(x + dir.offsetX, y + 2, z + dir.offsetZ))) return false;
+		
+		return true;
+	}
 
 	@Override
 	public void printHook(Pre event, World world, int x, int y, int z) {
@@ -150,7 +152,7 @@ public class MachineChungus extends BlockDummyable implements ILookOverlay {
 		TileEntityChungus chungus = (TileEntityChungus) te;
 		
 		List<String> text = new ArrayList();
-		text.add(Library.getShortNumber(chungus.power) + "/" + Library.getShortNumber(TileEntityChungus.maxPower) + " HE");
+		text.add(Library.getShortNumber(chungus.power) + "/" + Library.getShortNumber(chungus.maxPower) + " HE");
 		text.add("§a-> §r" + Library.getShortNumber(20 * chungus.powerProduction) + "HE/s");
 		if(chungus.types[0] != null)
 			text.add("§a-> §r" + chungus.types[0].getLocalizedName(new FluidStack(chungus.types[0], 1)) + ": " + chungus.tanks[0].getFluidAmount() + "/" + chungus.tanks[0].getCapacity() + "mB");

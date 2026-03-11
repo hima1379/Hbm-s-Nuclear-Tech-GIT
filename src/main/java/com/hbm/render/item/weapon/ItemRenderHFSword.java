@@ -91,8 +91,10 @@ public class ItemRenderHFSword extends TEISRBase {
 			GL11.glRotated(180, 0, 1, 0);
 			Minecraft.getMinecraft().getTextureManager().bindTexture(ResourceManager.hf_sword_tex);
 			ResourceManager.hf_sword.render((prevFrame, currentFrame, model, diffN, modelName) -> {
-                return modelName.equals("rightArm");
-            });
+				if(modelName.equals("rightArm"))
+					return true;
+				return false;
+			});
 			break;
 		case GUI:
 			GL11.glTranslated(-0.6, 0.1, 0);
@@ -103,8 +105,10 @@ public class ItemRenderHFSword extends TEISRBase {
 
 			Minecraft.getMinecraft().getTextureManager().bindTexture(ResourceManager.hf_sword_tex);
 			ResourceManager.hf_sword.render((prevFrame, currentFrame, model, diffN, modelName) -> {
-                return modelName.equals("rightArm");
-            });
+				if(modelName.equals("rightArm"))
+					return true;
+				return false;
+			});
 			break;
 		case NONE:
 			break;

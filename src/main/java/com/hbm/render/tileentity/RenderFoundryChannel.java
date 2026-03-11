@@ -2,7 +2,7 @@ package com.hbm.render.tileentity;
 
 import com.hbm.blocks.machine.FoundryChannel;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityFoundryChannel;
+import com.hbm.main.tileentity.machine.TileEntityFoundryChannel;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;

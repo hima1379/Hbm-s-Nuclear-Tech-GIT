@@ -1,7 +1,6 @@
 package com.hbm.inventory.control_panel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -46,7 +45,9 @@ public class ItemList {
 	}
 	
 	public ItemList addItems(String... items){
-        itemNames.addAll(Arrays.asList(items));
+		for(String i : items){
+			itemNames.add(i);
+		}
 		return this;
 	}
 	

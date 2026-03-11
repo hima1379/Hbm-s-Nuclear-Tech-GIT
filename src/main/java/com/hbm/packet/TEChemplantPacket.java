@@ -1,6 +1,6 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.machine.TileEntityMachineChemplant;
+import com.hbm.main.tileentity.machine.TileEntityMachineChemplant;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -50,13 +50,13 @@ public class TEChemplantPacket implements IMessage {
 		
 		@Override
 		public IMessage onMessage(TEChemplantPacket m, MessageContext ctx) {
-            if(m == null) return null;
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				TileEntity te = Minecraft.getMinecraft().world.getTileEntity(new BlockPos(m.x, m.y, m.z));
 
-				if (te != null && te instanceof TileEntityMachineChemplant gen) {
-
-                    gen.isProgressing = m.isProgressing;
+				if (te != null && te instanceof TileEntityMachineChemplant) {
+						
+					TileEntityMachineChemplant gen = (TileEntityMachineChemplant) te;
+					gen.isProgressing = m.isProgressing;
 				}
 			});
 			

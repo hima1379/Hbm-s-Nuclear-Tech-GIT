@@ -3,7 +3,7 @@ package com.hbm.blocks.machine;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.config.WeaponConfig;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityMachineRadar;
+import com.hbm.main.tileentity.machine.TileEntityMachineRadar;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

@@ -31,11 +31,13 @@ public class RenderRBMKDebris extends Render<EntityRBMKDebris> {
 	public void doRender(EntityRBMKDebris entity, double x, double y, double z, float entityYaw, float partialTicks){
 		GL11.glPushMatrix();
 		GL11.glTranslated(x, y + 0.125D, z);
-
-        GL11.glRotatef(((EntityRBMKDebris)entity).getEntityId() % 360, 0, 1, 0); //rotate based on entity ID to add unique randomness
-		GL11.glRotatef(((EntityRBMKDebris)entity).lastRot + (((EntityRBMKDebris)entity).rot - ((EntityRBMKDebris)entity).lastRot) * partialTicks, 1, 1, 1);
 		
-		DebrisType type = ((EntityRBMKDebris)entity).getType();
+		EntityRBMKDebris debris = (EntityRBMKDebris)entity;
+
+		GL11.glRotatef(debris.getEntityId() % 360, 0, 1, 0); //rotate based on entity ID to add unique randomness
+		GL11.glRotatef(debris.lastRot + (debris.rot - debris.lastRot) * partialTicks, 1, 1, 1);
+		
+		DebrisType type = debris.getType();
 		
 		switch(type) {
 		case BLANK: bindTexture(tex_blank); ResourceManager.deb_blank.renderAll(); break;

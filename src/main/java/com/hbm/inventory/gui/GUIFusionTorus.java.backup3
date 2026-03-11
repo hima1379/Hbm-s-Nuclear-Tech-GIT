@@ -1,0 +1,128 @@
+package com.hbm.inventory.gui;
+
+import com.hbm.inventory.container.ContainerFusionTorus;
+import com.hbm.lib.RefStrings;
+import com.hbm.main.tileentity.machine.fusion.TileEntityFusionTorus;
+import com.hbm.render.util.GaugeUtil;
+import com.hbm.util.BobMathUtil;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.FluidStack;
+
+/**
+ * GUI for Fusion Torus - Adapted for 1.12.2 with 230x244 size
+ */
+public class GUIFusionTorus extends GuiInfoContainer {
+
+	private static ResourceLocation texture = new ResourceLocation(RefStrings.MODID + ":textures/gui/reactors/gui_fusion_torus.png");
+	private TileEntityFusionTorus torus;
+
+	public GUIFusionTorus(InventoryPlayer invPlayer, TileEntityFusionTorus torus) {
+		super(new ContainerFusionTorus(invPlayer, torus));
+		this.torus = torus;
+
+		this.xSize = 230;
+		this.ySize = 244;
+	}
+
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		this.drawDefaultBackground();
+		super.drawScreen(mouseX, mouseY, partialTicks);
+		this.renderHoveredToolTip(mouseX, mouseY);
+
+		// Power tooltip
+		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 8, guiTop + 18, 16, 62, torus.power, torus.getMaxPower());
+
+		// Tank tooltips (4 fuel tanks)
+		for(int i = 0; i < 4; i++) {
+			int x = (i < 3 ? 44 + i * 18 : 152);
+			renderFluidTankTooltip(torus.tanks[i], mouseX, mouseY, guiLeft + x, guiTop + 18, 16, 52);
+		}
+	}
+
+	@Override
+	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+		String name = I18n.format(torus.getName());
+		this.fontRenderer.drawString(name, 106 - this.fontRenderer.getStringWidth(name) / 2, 6, 4210752);
+		this.fontRenderer.drawString(I18n.format("container.inventory"), 35, this.ySize - 93, 4210752);
+
+		// Status info
+		String status = torus.didProcess ? "Processing" : "Idle";
+		this.fontRenderer.drawString(status, 100, 20, torus.didProcess ? 0x00FF00 : 0xFF0000);
+	}
+
+	@Override
+	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+		Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
+		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+
+		// Power bar
+		if(torus.getMaxPower() > 0) {
+			int p = (int) (torus.power * 62 / torus.getMaxPower());
+			drawTexturedModalRect(guiLeft + 8, guiTop + 80 - p, 230, 62 - p, 16, p);
+		}
+
+		// Progress bar
+		if(torus.fusionModule != null && torus.fusionModule.progress > 0) {
+			int prog = (int) Math.ceil(70 * torus.fusionModule.progress);
+			drawTexturedModalRect(guiLeft + 98, guiTop + 81, 0, 244, prog, 6);
+		}
+
+		// Render fluid tanks
+		for(int i = 0; i < 4; i++) {
+			int x = (i < 3 ? 44 + i * 18 : 152);
+			renderFluidTank(torus.tanks[i], guiLeft + x, guiTop + 70, 16, 52);
+		}
+	}
+
+	/**
+	 * Renders a fluid tank using Forge FluidStack rendering
+	 */
+	private void renderFluidTank(net.minecraftforge.fluids.FluidTank tank, int x, int y, int width, int height) {
+		FluidStack fluid = tank.getFluid();
+		if(fluid == null || fluid.amount <= 0) return;
+
+		int fluidHeight = (int) ((float) fluid.amount / tank.getCapacity() * height);
+		if(fluidHeight <= 0) return;
+
+		Minecraft mc = Minecraft.getMinecraft();
+		TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite(fluid.getFluid().getStill().toString());
+		if(sprite == null) sprite = mc.getTextureMapBlocks().getMissingSprite();
+
+		mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+
+		int color = fluid.getFluid().getColor(fluid);
+		float r = ((color >> 16) & 0xFF) / 255.0F;
+		float g = ((color >> 8) & 0xFF) / 255.0F;
+		float b = (color & 0xFF) / 255.0F;
+
+		GlStateManager.color(r, g, b, 1.0F);
+
+		int yStart = y + height - fluidHeight;
+		drawTexturedModalRect(x, yStart, sprite, width, fluidHeight);
+
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	/**
+	 * Renders tooltip for a fluid tank
+	 */
+	private void renderFluidTankTooltip(net.minecraftforge.fluids.FluidTank tank, int mouseX, int mouseY, int x, int y, int width, int height) {
+		if(mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height) {
+			FluidStack fluid = tank.getFluid();
+			if(fluid != null && fluid.amount > 0) {
+				this.drawHoveringText(fluid.getLocalizedName() + ": " + fluid.amount + " / " + tank.getCapacity() + " mB", mouseX, mouseY);
+			} else {
+				this.drawHoveringText("Empty", mouseX, mouseY);
+			}
+		}
+	}
+}

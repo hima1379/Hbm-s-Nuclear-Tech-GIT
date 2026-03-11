@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntityFurnaceIron;
+import com.hbm.main.tileentity.machine.TileEntityFurnaceIron;
 
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -26,11 +26,13 @@ public class RenderFurnaceIron extends TileEntitySpecialRenderer<TileEntityFurna
 		}
 		
 		GL11.glTranslated(-0.5D, 0, -0.5D);
-
-        bindTexture(ResourceManager.furnace_iron_tex);
+		
+		TileEntityFurnaceIron furnace = (TileEntityFurnaceIron) tileEntity;
+		
+		bindTexture(ResourceManager.furnace_iron_tex);
 		ResourceManager.furnace_iron.renderPart("Main");
 		
-		if(((TileEntityFurnaceIron) tileEntity).wasOn) {
+		if(furnace.wasOn) {
 			GL11.glPushMatrix();
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			

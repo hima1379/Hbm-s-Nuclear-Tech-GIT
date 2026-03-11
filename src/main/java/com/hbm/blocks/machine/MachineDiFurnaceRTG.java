@@ -5,7 +5,7 @@ import java.util.Random;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityDiFurnaceRTG;
+import com.hbm.main.tileentity.machine.TileEntityDiFurnaceRTG;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;

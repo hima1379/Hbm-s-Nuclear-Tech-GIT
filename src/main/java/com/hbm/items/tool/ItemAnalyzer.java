@@ -2,10 +2,11 @@ package com.hbm.items.tool;
 
 import java.util.List;
 
+import com.hbm.interfaces.IFluidPipe;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.machine.TileEntityDummy;
-import com.hbm.tileentity.machine.TileEntityLockableBase;
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityLockableBase;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
 
 import api.hbm.energy.IEnergyConnector;
 import net.minecraft.block.Block;
@@ -81,6 +82,12 @@ public class ItemAnalyzer extends Item {
 					
 					player.sendMessage(new TextComponentString(
 							"Electricity: " + ((IEnergyConnector)te).getPower() + " HE"));
+				}
+				
+				if(te instanceof IFluidPipe) {
+					
+					player.sendMessage(new TextComponentString(
+							"Duct Type: " + I18n.format(((IFluidPipe)te).getType().getUnlocalizedName())));
 				}
 				
 				if(te instanceof TileEntityPylonBase) {

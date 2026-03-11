@@ -144,7 +144,8 @@ public class ContainerAnvil extends Container {
 		
 		@Override
 		public ItemStack onTake(EntityPlayer player, ItemStack stack) {
-            ContainerAnvil.this.updateSmithing();
+			;
+			ContainerAnvil.this.updateSmithing();
 			return super.onTake(player, stack);
 		}
 	}

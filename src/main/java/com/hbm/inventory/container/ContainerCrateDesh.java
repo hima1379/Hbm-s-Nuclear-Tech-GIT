@@ -1,6 +1,6 @@
 package com.hbm.inventory.container;
 
-import com.hbm.tileentity.machine.TileEntityCrateDesh;
+import com.hbm.main.tileentity.machine.TileEntityCrateDesh;
 
 import invtweaks.api.container.ChestContainer;
 import net.minecraft.entity.player.EntityPlayer;

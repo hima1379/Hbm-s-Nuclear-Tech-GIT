@@ -4,7 +4,7 @@ import java.util.Random;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.bomb.TileEntityCrashedBomb;
+import com.hbm.main.tileentity.bomb.TileEntityCrashedBomb;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;

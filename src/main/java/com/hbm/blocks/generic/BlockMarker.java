@@ -1,7 +1,7 @@
 package com.hbm.blocks.generic;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntityStructureMarker;
+import com.hbm.main.tileentity.machine.TileEntityStructureMarker;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;

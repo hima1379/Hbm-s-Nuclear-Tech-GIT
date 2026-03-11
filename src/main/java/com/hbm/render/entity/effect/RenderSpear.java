@@ -36,13 +36,15 @@ public class RenderSpear extends Render<EntitySpear> {
 		
 		GL11.glRotated(180, 1, 0, 0);
 		GL11.glScaled(2, 2, 2);
-
-        GlStateManager.shadeModel(GL11.GL_SMOOTH);
+		
+		EntitySpear spear = (EntitySpear) entity;
+		
+		GlStateManager.shadeModel(GL11.GL_SMOOTH);
 		bindTexture(ResourceManager.lance_tex);
 		ResourceManager.lance.renderPart("Spear");
 		
-		if(((EntitySpear) entity).ticksInGround > 0) {
-			float occupancy = Math.min((((EntitySpear) entity).ticksInGround + partialTicks) / 100F, 1F);
+		if(spear.ticksInGround > 0) {
+			float occupancy = Math.min((spear.ticksInGround + partialTicks) / 100F, 1F);
 			GlStateManager.color(1F, 1F, 1F, occupancy);
 
 			GlStateManager.disableLighting();
@@ -61,7 +63,7 @@ public class RenderSpear extends Render<EntitySpear> {
 			
 			GlStateManager.color(1, 1, 1, 1);
 			
-			renderFlash((((EntitySpear) entity).ticksInGround + partialTicks) / 200D);
+			renderFlash((spear.ticksInGround + partialTicks) / 200D);
 		}
 		
 		GlStateManager.shadeModel(GL11.GL_FLAT);

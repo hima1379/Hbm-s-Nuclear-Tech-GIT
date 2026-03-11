@@ -1,7 +1,7 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.machine.TileEntityCoreEmitter;
-import com.hbm.tileentity.machine.TileEntityCoreReceiver;
+import com.hbm.main.tileentity.machine.TileEntityCoreEmitter;
+import com.hbm.main.tileentity.machine.TileEntityCoreReceiver;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;

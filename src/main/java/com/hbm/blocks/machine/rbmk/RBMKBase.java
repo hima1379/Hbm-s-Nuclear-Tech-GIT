@@ -11,8 +11,8 @@ import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.MainRegistry;
 import com.hbm.blocks.ITooltipProvider;
-import com.hbm.tileentity.machine.rbmk.RBMKDials;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKBase;
+import com.hbm.main.tileentity.machine.rbmk.RBMKDials;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKBase;
 
 import api.hbm.block.IToolable;
 import net.minecraft.block.material.Material;

@@ -4,7 +4,7 @@ import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.deco.TileEntityDecoBlockAlt;
+import com.hbm.main.tileentity.deco.TileEntityDecoBlockAlt;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;

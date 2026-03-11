@@ -7,8 +7,8 @@ import com.hbm.handler.MultiblockHandler;
 import com.hbm.interfaces.IMultiBlock;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityDummy;
-import com.hbm.tileentity.machine.oil.TileEntityMachinePumpjack;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachinePumpjack;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;

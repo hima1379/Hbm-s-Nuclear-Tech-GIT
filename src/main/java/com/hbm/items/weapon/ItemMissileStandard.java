@@ -1,5 +1,6 @@
 package com.hbm.items.weapon;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.hbm.config.BombConfig;
@@ -150,6 +151,11 @@ public class ItemMissileStandard extends Item {
 		if(this == ModItems.missile_anti_ballistic){
 			list.add("§2["+I18nUtil.resolveKey("desc.abmissile")+"]§r");
 			list.add(TextFormatting.GREEN+" "+I18nUtil.resolveKey("desc.abmissile1"));
+		}
+		if(this == ModItems.missile_sm6){
+			list.add("§b["+I18nUtil.resolveKey("desc.sm6missile")+"]§r");
+			list.add(TextFormatting.AQUA+" "+I18nUtil.resolveKey("desc.sm6missile1"));
+			list.add(TextFormatting.AQUA+" "+I18nUtil.resolveKey("desc.sm6missile2"));
 		}
 	}
 }

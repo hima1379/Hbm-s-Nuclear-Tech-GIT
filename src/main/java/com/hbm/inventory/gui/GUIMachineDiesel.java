@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.inventory.container.ContainerMachineDiesel;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineDiesel;
+import com.hbm.main.tileentity.machine.TileEntityMachineDiesel;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

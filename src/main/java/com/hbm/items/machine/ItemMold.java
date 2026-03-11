@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
 
+import com.hbm.items.ModItems;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.inventory.material.Mats;
 import com.hbm.inventory.material.MaterialShapes;
@@ -16,6 +17,7 @@ import com.hbm.lib.RefStrings;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.util.NonNullList;
 import net.minecraft.init.Blocks;
@@ -24,7 +26,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraftforge.oredict.OreDictionary;
-import org.lwjgl.input.Keyboard;
 
 public class ItemMold extends Item implements IHasCustomMetaModels {
 	
@@ -78,34 +79,34 @@ public class ItemMold extends Item implements IHasCustomMetaModels {
 
 		registerMold(new MoldShape(		10, S, "shell", MaterialShapes.SHELL));
 		registerMold(new MoldShape(		11, S, "pipe", MaterialShapes.PIPE));
-        registerMold(new MoldShape(		12, S, "bolt", MaterialShapes.BOLT));
+		
+		registerMold(new MoldShape(		12, L, "ingots", MaterialShapes.INGOT, 9));
+		registerMold(new MoldShape(		13, L, "plates", MaterialShapes.PLATE, 9));
+        registerMold(new MoldShape(		14, L, "wires", MaterialShapes.WIRE, 16));
+        registerMold(new MoldShape(		15, L, "wires_dense", MaterialShapes.DENSEWIRE, 9));
+		registerMold(new MoldBlock(		16, L, "block", MaterialShapes.BLOCK));
+		registerMold(new MoldSingle(	17, L, "pipes", new ItemStack(ModItems.pipes_steel), Mats.MAT_STEEL, MaterialShapes.BLOCK.q(3)));
 
-        registerMold(new MoldShape(		13, L, "ingots", MaterialShapes.INGOT, 9));
-		registerMold(new MoldShape(		14, L, "plates", MaterialShapes.PLATE, 9));
-        registerMold(new MoldShape(		15, L, "wires", MaterialShapes.WIRE, 16));
-        registerMold(new MoldShape(		16, L, "wires_dense", MaterialShapes.DENSEWIRE, 9));
-		registerMold(new MoldBlock(		17, L, "block", MaterialShapes.BLOCK));
-		registerMold(new MoldSingle(	18, L, "pipes", new ItemStack(ModItems.pipes_steel), Mats.MAT_STEEL, MaterialShapes.BLOCK.q(3)));
-
-		registerMold(new MoldSingle(	19, S, "c357", new ItemStack(ModItems.casing_357), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
-		registerMold(new MoldSingle(	20, S, "c44", new ItemStack(ModItems.casing_44), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
-		registerMold(new MoldSingle(	21, S, "c9", new ItemStack(ModItems.casing_9), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
-		registerMold(new MoldSingle(	22, S, "c50", new ItemStack(ModItems.casing_50), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
-		registerMold(new MoldSingle(	23, S, "cbuckshot", new ItemStack(ModItems.casing_buckshot), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
+		registerMold(new MoldSingle(	18, S, "c357", new ItemStack(ModItems.casing_357), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
+		registerMold(new MoldSingle(	19, S, "c44", new ItemStack(ModItems.casing_44), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
+		registerMold(new MoldSingle(	20, S, "c9", new ItemStack(ModItems.casing_9), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
+		registerMold(new MoldSingle(	21, S, "c50", new ItemStack(ModItems.casing_50), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
+		registerMold(new MoldSingle(	22, S, "cbuckshot", new ItemStack(ModItems.casing_buckshot), Mats.MAT_COPPER, MaterialShapes.PLATE.q(1)));
 		ModItems.ALL_ITEMS.add(this);
 	}
 	
 	public void registerMold(Mold mold) {
-		molds.add(mold);
-		moldById.put(mold.id, mold);
+		this.molds.add(mold);
+		this.moldById.put(mold.id, mold);
 	}
 
 	@Override
 	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> list) {
 		if(tab == this.getCreativeTab() || tab == CreativeTabs.SEARCH){
-            for (Mold mold : molds) {
-                list.add(new ItemStack(this, 1, mold.id));
-            }
+			for(int i = 0; i < molds.size(); i++) {
+				Mold mold = molds.get(i);
+				list.add(new ItemStack(this, 1, mold.id));
+			}
 		}
 	}
 
@@ -123,7 +124,7 @@ public class ItemMold extends Item implements IHasCustomMetaModels {
 	@Override
 	public void addInformation(ItemStack stack, World worldIn, List<String> list, ITooltipFlag flagIn) {
 		Mold mold = getMold(stack);
-		list.add("§e" + mold.getTitle() + " §6(" + Mats.formatAmount(mold.getCost(), Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) + ")");
+		list.add("§e" + mold.getTitle());
 		
 		if(mold.size == 0) list.add("§6" + I18nUtil.resolveKey(ModBlocks.foundry_mold.getTranslationKey() + ".name"));
 		else if(mold.size == 1) list.add("§c" + I18nUtil.resolveKey(ModBlocks.foundry_basin.getTranslationKey() + ".name"));

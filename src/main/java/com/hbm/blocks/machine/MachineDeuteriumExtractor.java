@@ -7,7 +7,7 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.lib.Library;
 import com.hbm.forgefluid.ModForgeFluids;
-import com.hbm.tileentity.machine.TileEntityDeuteriumExtractor;
+import com.hbm.main.tileentity.machine.TileEntityDeuteriumExtractor;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.block.BlockContainer;

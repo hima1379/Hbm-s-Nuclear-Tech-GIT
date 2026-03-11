@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.inventory.container.ContainerMachineTurbofan;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineTurbofan;
+import com.hbm.main.tileentity.machine.TileEntityMachineTurbofan;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -30,7 +30,7 @@ public class GUIMachineTurbofan extends GuiInfoContainer {
 		super.drawScreen(mouseX, mouseY, f);
 
 		FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 35, guiTop + 16, 34, 52, turbofan.tank);
-		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 143, guiTop + 16, 16, 52, turbofan.power, TileEntityMachineTurbofan.maxPower);
+		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 143, guiTop + 16, 16, 52, turbofan.power, turbofan.maxPower);
 
 		super.renderHoveredToolTip(mouseX, mouseY);
 	}

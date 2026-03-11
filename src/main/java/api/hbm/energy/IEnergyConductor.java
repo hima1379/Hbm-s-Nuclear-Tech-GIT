@@ -15,23 +15,23 @@ import net.minecraft.tileentity.TileEntity;
  */
 public interface IEnergyConductor extends IEnergyConnector {
 
-	IPowerNet getPowerNet();
+	public IPowerNet getPowerNet();
 	
-	void setPowerNet(IPowerNet network);
+	public void setPowerNet(IPowerNet network);
 	
 	/**
 	 * A unique identifier for every conductor tile. Used to prevent duplicates when loading previously persistent unloaded tiles.
 	 * @return
 	 */
-	default int getIdentity() {
+	public default int getIdentity() {
 		return getIdentityFromTile((TileEntity) this);
 	}
 	
-	static int getIdentityFromTile(TileEntity te) {
+	public static int getIdentityFromTile(TileEntity te) {
 		return getIdentityFromPos(te.getPos());
 	}
 	
-	static int getIdentityFromPos(BlockPos pos) {
+	public static int getIdentityFromPos(BlockPos pos) {
 		final int prime = 27644437; // must be this large to minimize localized collisions
 		int result = 1;
 		result = prime * result + pos.getX();
@@ -45,7 +45,7 @@ public interface IEnergyConductor extends IEnergyConnector {
 	 * I.e. if this link should join any of the new networks (FALSE for switches that are turned off for example)
 	 * @return
 	 */
-	default boolean canReevaluate() {
+	public default boolean canReevaluate() {
 		return !((TileEntity) this).isInvalid();
 	}
 	
@@ -54,7 +54,7 @@ public interface IEnergyConductor extends IEnergyConnector {
 	 * Each link has to decide what other links will join the same net.
 	 * @param copy
 	 */
-	default void reevaluate(HashMap<Integer, IEnergyConductor> copy, HashMap<Integer, Integer> proxies) {
+	public default void reevaluate(HashMap<Integer, IEnergyConductor> copy, HashMap<Integer, Integer> proxies) {
 
 		for(BlockPos pos : getConnectionPoints()) {
 			int id = IEnergyConductor.getIdentityFromPos(pos);
@@ -91,7 +91,7 @@ public interface IEnergyConductor extends IEnergyConnector {
 	 * DEFAULT: Connects to all six neighboring blocks.
 	 * @return
 	 */
-	default List<BlockPos> getConnectionPoints() {
+	public default List<BlockPos> getConnectionPoints() {
 
 		List<BlockPos> pos = new ArrayList();
 		TileEntity tile = (TileEntity) this;
@@ -109,33 +109,50 @@ public interface IEnergyConductor extends IEnergyConnector {
 	 * Perhaps this indicates a minor flaw in the new API, but I physically lack the ability to worry about it.
 	 */
 	@Override
-    default boolean isLoaded() {
+	public default boolean isLoaded() {
 		return true;
 	}
 
 	//TODO: check if this standard implementation doesn't break anything (it shouldn't but right now it's a bit redundant) also: remove duplicate implementations
 	@Override
-    default long transferPower(long power) {
-		
+	public default long transferPower(long power) {
+
 		if(this.getPowerNet() == null)
 			return power;
-		
+
 		return this.getPowerNet().transferPower(power);
 	}
-	
+
+	// ===== EnergyValue-based methods (for BigInteger support) =====
+
+	/**
+	 * Transfer power using EnergyValue through the PowerNet
+	 * Default implementation delegates to the network's transferPowerEV method
+	 * @param power The amount of power to transfer
+	 * @return The amount of power that could not be transferred
+	 */
+	@Override
+	public default EnergyValue transferPowerEV(EnergyValue power) {
+
+		if(this.getPowerNet() == null)
+			return power;
+
+		return this.getPowerNet().transferPowerEV(power);
+	}
+
 	/**
 	 * Returns whether the conductor has mutliblock proxies which need to be taken into consideration for re-eval.
 	 * @return
 	 */
-	default boolean hasProxies() {
+	public default boolean hasProxies() {
 		return false;
 	}
-	
+
 	/**
 	 * Returns the identities (position-based) of proxies which resolve into the conductor's own identity.
 	 * @return
 	 */
-	default List<Integer> getProxies() {
+	public default List<Integer> getProxies() {
 		return new ArrayList();
 	}
 }

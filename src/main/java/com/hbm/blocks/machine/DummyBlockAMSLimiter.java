@@ -5,9 +5,9 @@ import java.util.Random;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.interfaces.IDummy;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityAMSLimiter;
-import com.hbm.tileentity.machine.TileEntityDummy;
-import com.hbm.tileentity.machine.TileEntityDummyFluidPort;
+import com.hbm.main.tileentity.machine.TileEntityAMSLimiter;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityDummyFluidPort;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -80,8 +80,13 @@ public class DummyBlockAMSLimiter extends BlockContainer implements IDummy {
 			return false;
 		}
 	}
-
-    @Override
+	
+	@Override
+	public EnumBlockRenderType getRenderType(IBlockState state) {
+		return EnumBlockRenderType.INVISIBLE;
+	}
+	
+	@Override
 	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
 		return Items.AIR;
 	}

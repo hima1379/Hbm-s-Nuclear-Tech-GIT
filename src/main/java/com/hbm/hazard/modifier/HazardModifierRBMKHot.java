@@ -14,7 +14,8 @@ public class HazardModifierRBMKHot extends HazardModifier {
 		
 		if(stack.getItem() instanceof ItemRBMKRod) {
 			double heat = ItemRBMKRod.getHullHeat(stack);
-            level = (int)Math.min(Math.ceil((heat - 100) / 10D), 60);
+			int fire = (int)Math.min(Math.ceil((heat - 100) / 10D), 60);
+			level = fire;
 		}
 		
 		return level;

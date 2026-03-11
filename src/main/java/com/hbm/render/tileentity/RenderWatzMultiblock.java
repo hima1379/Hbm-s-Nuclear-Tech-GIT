@@ -1,7 +1,7 @@
 package com.hbm.render.tileentity;
 
 import com.hbm.render.RenderHelper;
-import com.hbm.tileentity.machine.TileEntityWatzStruct;
+import com.hbm.main.tileentity.machine.TileEntityWatzStruct;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;

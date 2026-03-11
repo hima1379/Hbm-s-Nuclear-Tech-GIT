@@ -3,7 +3,7 @@ package com.hbm.packet;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hbm.tileentity.machine.TileEntityTesla;
+import com.hbm.main.tileentity.machine.TileEntityTesla;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -61,7 +61,6 @@ public class TETeslaPacket implements IMessage {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public IMessage onMessage(TETeslaPacket m, MessageContext ctx) {
-            if(m == null) return null;
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				TileEntity te = Minecraft.getMinecraft().world.getTileEntity(m.pos);
 				if(te instanceof TileEntityTesla){

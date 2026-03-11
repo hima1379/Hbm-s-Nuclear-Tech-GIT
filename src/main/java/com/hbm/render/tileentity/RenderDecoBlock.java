@@ -9,7 +9,7 @@ import com.hbm.main.ResourceManager;
 import com.hbm.render.model.ModelSteelCorner;
 import com.hbm.render.model.ModelSteelRoof;
 import com.hbm.render.model.ModelSteelWall;
-import com.hbm.tileentity.deco.TileEntityDecoBlock;
+import com.hbm.main.tileentity.deco.TileEntityDecoBlock;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;

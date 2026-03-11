@@ -2,7 +2,6 @@ package com.hbm.inventory.gui;
 
 import java.io.IOException;
 
-import net.minecraftforge.fluids.FluidRegistry;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.forgefluid.FFUtils;
@@ -11,7 +10,7 @@ import com.hbm.inventory.container.ContainerRBMKBoiler;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKBoiler;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKBoiler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -38,8 +37,8 @@ public class GUIRBMKBoiler extends GuiInfoContainer {
 	public void drawScreen(int mouseX, int mouseY, float f) {
 		super.drawScreen(mouseX, mouseY, f);
 
-		FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 126, guiTop + 24, 16, 56, boiler.feed, FluidRegistry.WATER);
-		FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 89, guiTop + 39, 8, 28, boiler.steam, boiler.steamType);
+		FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 126, guiTop + 24, 16, 56, boiler.feed);
+		FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 89, guiTop + 39, 8, 28, boiler.steam);
 		
 		super.renderHoveredToolTip(mouseX, mouseY);
 	}

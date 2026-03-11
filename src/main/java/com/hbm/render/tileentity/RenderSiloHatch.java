@@ -7,7 +7,7 @@ import com.hbm.animloader.AnimationWrapper;
 import com.hbm.animloader.AnimationWrapper.EndResult;
 import com.hbm.animloader.AnimationWrapper.EndType;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntitySiloHatch;
+import com.hbm.main.tileentity.machine.TileEntitySiloHatch;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;

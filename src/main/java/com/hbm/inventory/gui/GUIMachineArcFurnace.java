@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.inventory.container.ContainerMachineArcFurnace;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineArcFurnace;
+import com.hbm.main.tileentity.machine.TileEntityMachineArcFurnace;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

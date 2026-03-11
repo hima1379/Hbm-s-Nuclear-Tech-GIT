@@ -10,7 +10,7 @@ import com.hbm.entity.logic.EntityNukeExplosionMK3;
 import com.hbm.interfaces.IBomb;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.bomb.TileEntityNukeSolinium;
+import com.hbm.main.tileentity.bomb.TileEntityNukeSolinium;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.block.Block;

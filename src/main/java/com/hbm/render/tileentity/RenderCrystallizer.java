@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.main.ResourceManager;
 import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.render.RenderHelper;
-import com.hbm.tileentity.machine.TileEntityMachineCrystallizer;
+import com.hbm.main.tileentity.machine.TileEntityMachineCrystallizer;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;

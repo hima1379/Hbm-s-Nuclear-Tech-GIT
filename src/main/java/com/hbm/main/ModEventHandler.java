@@ -1,13 +1,11 @@
 package com.hbm.main;
 
-
 import java.lang.reflect.Field;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.hbm.crafting.handlers.MKUCraftingHandler;
 import com.hbm.items.gear.ModShield;
 import net.minecraft.entity.item.EntityArmorStand;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -25,6 +23,7 @@ import com.hbm.entity.logic.IChunkLoader;
 import com.hbm.entity.mob.EntityCyberCrab;
 import com.hbm.entity.mob.EntityTaintedCreeper;
 import com.hbm.entity.projectile.EntityBurningFOEQ;
+import com.hbm.forgefluid.FFPipeNetwork;
 import com.hbm.potion.HbmDetox;
 import com.hbm.handler.ArmorModHandler;
 import com.hbm.handler.ArmorUtil;
@@ -62,8 +61,8 @@ import com.hbm.packet.PlayerInformPacket;
 import com.hbm.packet.SurveyPacket;
 import com.hbm.particle.bullet_hit.EntityHitDataHandler;
 import com.hbm.render.amlfrom1710.Vec3;
-import com.hbm.tileentity.machine.rbmk.RBMKDials;
-import com.hbm.tileentity.network.RTTYSystem;
+import com.hbm.main.tileentity.machine.rbmk.RBMKDials;
+import com.hbm.main.tileentity.network.RTTYSystem;
 import com.hbm.util.EnchantmentUtil;
 import com.hbm.util.EntityDamageUtil;
 import com.hbm.world.generator.TimedGenerator;
@@ -180,6 +179,18 @@ public class ModEventHandler {
 	}
 
 	@SubscribeEvent
+	public void worldUnload(WorldEvent.Unload e) {
+		Iterator<FFPipeNetwork> itr = MainRegistry.allPipeNetworks.iterator();
+		while(itr.hasNext()) {
+			FFPipeNetwork net = itr.next();
+			if(net.getNetworkWorld() == e.getWorld()) {
+				net.destroySoft();
+				itr.remove();
+			}
+		}
+	}
+
+	@SubscribeEvent
 	public void potionCheck(PotionApplicableEvent e) {
 		if(HbmDetox.isBlacklisted(e.getPotionEffect().getPotion()) && ArmorUtil.checkForHazmat(e.getEntityLiving()) && ArmorRegistry.hasProtection(e.getEntityLiving(), EntityEquipmentSlot.HEAD, HazardClass.BACTERIA)){
 			e.setResult(Result.DENY);
@@ -189,8 +200,8 @@ public class ModEventHandler {
 
 	@SubscribeEvent
 	public void enteringChunk(EnteringChunk evt) {
-		if(evt.getEntity() instanceof IChunkLoader ech) {
-            ech.loadNeighboringChunks(evt.getNewChunkX(), evt.getNewChunkZ(), evt.getOldChunkX(), evt.getOldChunkZ());
+		if(evt.getEntity() instanceof IChunkLoader) {
+			((IChunkLoader) evt.getEntity()).loadNeighboringChunks(evt.getNewChunkX(), evt.getNewChunkZ());
 		}
 	}
 	
@@ -383,21 +394,42 @@ public class ModEventHandler {
 		}
 	}
 
+	/**
+	 * Suppress natural entity spawning inside the Nuclear Crater biome.
+	 * LivingSpawnEvent.CheckSpawn fires for natural spawning and mob spawners,
+	 * but NOT for spawn eggs (ItemSpawnEgg.onItemUse → direct world.spawnEntity),
+	 * so intentional spawning still works.
+	 */
+	@SubscribeEvent
+	public void suppressCraterSpawn(LivingSpawnEvent.CheckSpawn event) {
+		if (MainRegistry.biome_crater == null) return;
+		World world = event.getWorld();
+		if (world == null) return;
+		net.minecraft.world.biome.Biome biome = world.getBiome(event.getEntityLiving().getPosition());
+		if (biome == MainRegistry.biome_crater) {
+			event.setResult(Result.DENY);
+		}
+	}
+
 	private static final Set<String> hashes = new HashSet();
-	
+
 	static {
 		hashes.add("41de5c372b0589bbdb80571e87efa95ea9e34b0d74c6005b8eab495b7afd9994");
 		hashes.add("31da6223a100ed348ceb3254ceab67c9cc102cb2a04ac24de0df3ef3479b1036");
 	}
 
 	@SubscribeEvent
-	public void onClickSign(PlayerInteractEvent.RightClickBlock event) {
+	public void onClickSign(PlayerInteractEvent event) {
+
+		BlockPos pos = event.getPos();
 		World world = event.getWorld();
-        if(world.isRemote) return;
-        BlockPos pos = event.getPos();
-		if(world.getTileEntity(pos) instanceof TileEntitySign sign) {
-            String result = smoosh(sign.signText[0].getUnformattedText(), sign.signText[1].getUnformattedText(), sign.signText[2].getUnformattedText(), sign.signText[3].getUnformattedText());
-			//System.out.println("("+sign.signText[0].getUnformattedText()+")("+sign.signText[1].getUnformattedText()+")("+sign.signText[2].getUnformattedText()+")("+sign.signText[3].getUnformattedText()+") "+result);
+
+		if(!world.isRemote && world.getBlockState(pos).getBlock() == Blocks.STANDING_SIGN) {
+
+			TileEntitySign sign = (TileEntitySign) world.getTileEntity(pos);
+
+			String result = smoosh(sign.signText[0].getUnformattedText(), sign.signText[1].getUnformattedText(), sign.signText[2].getUnformattedText(), sign.signText[3].getUnformattedText());
+			//System.out.println(result);
 
 			if(hashes.contains(result)){
 				world.destroyBlock(pos, false);
@@ -406,6 +438,7 @@ public class ModEventHandler {
 				world.spawnEntity(entityitem);
 			}
 		}
+
 	}
 
 	private String smoosh(String s1, String s2, String s3, String s4) {
@@ -450,14 +483,14 @@ public class ModEventHandler {
 		try {
 			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
 			byte[] bytes = sha256.digest(inp.getBytes());
-			StringBuilder str = new StringBuilder();
+			String str = "";
 
 			for(int b : bytes)
-				str.append(Integer.toString((b & 0xFF) + 256, 16).substring(1));
+				str = str + Integer.toString((b & 0xFF) + 256, 16).substring(1);
 
-			return str.toString();
+			return str;
 
-		} catch(NoSuchAlgorithmException ignored) {
+		} catch(NoSuchAlgorithmException e) {
 		}
 
 		return "";
@@ -539,7 +572,22 @@ public class ModEventHandler {
 
 	@SubscribeEvent
 	public void worldTick(WorldTickEvent event) {
-		
+		if(!MainRegistry.allPipeNetworks.isEmpty() && !event.world.isRemote) {
+			Iterator<FFPipeNetwork> itr = MainRegistry.allPipeNetworks.iterator();
+			while(itr.hasNext()) {
+				FFPipeNetwork net = itr.next();
+				if(net.getNetworkWorld() != event.world)
+					continue;
+				if(net != null)
+					net.updateTick();
+				if(net.getPipes().isEmpty()) {
+					net.destroySoft();
+					itr.remove();
+				}
+
+			}
+		}
+
 		if(event.world != null && !event.world.isRemote && event.world.getTotalWorldTime() % 100 == 97){
 			//Drillgon200: Retarded hack because I'm not convinced game rules are client sync'd
 			PacketDispatcher.wrapper.sendToAll(new SurveyPacket(RBMKDials.getColumnHeight(event.world)));
@@ -548,6 +596,12 @@ public class ModEventHandler {
 		if(event.phase == Phase.START) {
 			BossSpawnHandler.rollTheDice(event.world);
 			TimedGenerator.automaton(event.world, 100);
+		}
+
+		// Update UniNodespace at the end of each world tick
+		// This handles all fusion reactor network updates
+		if(event.phase == Phase.END && !event.world.isRemote) {
+			com.hbm.uninos.UniNodespace.updateNodespace();
 		}
 	}
 	
@@ -575,7 +629,7 @@ public class ModEventHandler {
 		
 		/// V1 ///
 		if(EntityDamageUtil.wasAttackedByV1(e.getSource())) {
-			EntityPlayer attacker = (EntityPlayer) e.getSource().getImmediateSource();
+			EntityPlayer attacker = (EntityPlayer) ((EntityDamageSource)e.getSource()).getImmediateSource();
 					
 			NBTTagCompound data = new NBTTagCompound();
 			data.setString("type", "vanillaburst");
@@ -832,6 +886,34 @@ public class ModEventHandler {
 				attacker.heal(entity.getMaxHealth() * 0.25F);
 			}
 		}
+		
+		if(entity instanceof EntityPlayer player) {
+
+            for(int i = 0; i < player.inventory.getSizeInventory(); i++) {
+				
+				ItemStack stack = player.inventory.getStackInSlot(i);
+				
+				if(stack.getItem() == ModItems.detonator_deadman) {
+					
+					if(stack.getTagCompound() != null) {
+						
+						int x = stack.getTagCompound().getInteger("x");
+						int y = stack.getTagCompound().getInteger("y");
+						int z = stack.getTagCompound().getInteger("z");
+
+						if(!player.world.isRemote && player.world.getBlockState(new BlockPos(x, y, z)).getBlock() instanceof IBomb) {
+							
+							((IBomb) player.world.getBlockState(new BlockPos(x, y, z)).getBlock()).explode(player.world, new BlockPos(x, y, z));
+							
+							if(GeneralConfig.enableExtendedLogging)
+								MainRegistry.logger.log(Level.INFO, "[DET] Tried to detonate block at " + x + " / " + y + " / " + z + " by dead man's switch from " + player.getDisplayName() + "!");
+						}
+						
+						player.inventory.setInventorySlotContents(i, ItemStack.EMPTY);
+					}
+				}
+			}
+		}
 	}
 	
 	public static Field r_handInventory = null;
@@ -984,7 +1066,6 @@ public class ModEventHandler {
 	@SubscribeEvent
 	public void worldLoad(WorldEvent.Load e) {
 		JetpackHandler.worldLoad(e);
-        MKUCraftingHandler.initMKU(e.getWorld());
 	}
 
 	@SubscribeEvent

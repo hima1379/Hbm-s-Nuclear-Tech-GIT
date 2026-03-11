@@ -8,8 +8,8 @@ import com.hbm.lib.Library;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.blocks.ITooltipProvider;
-import com.hbm.tileentity.INBTPacketReceiver;
-import com.hbm.tileentity.network.energy.TileEntityCableBaseNT;
+import com.hbm.main.tileentity.INBTPacketReceiver;
+import com.hbm.main.tileentity.network.energy.TileEntityCableBaseNT;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.block.BlockContainer;

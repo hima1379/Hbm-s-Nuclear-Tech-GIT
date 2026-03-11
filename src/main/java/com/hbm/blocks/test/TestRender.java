@@ -2,7 +2,7 @@ package com.hbm.blocks.test;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.deco.TileEntityTestRender;
+import com.hbm.main.tileentity.deco.TileEntityTestRender;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

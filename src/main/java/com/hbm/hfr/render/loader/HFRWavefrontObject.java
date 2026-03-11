@@ -263,9 +263,9 @@ public class HFRWavefrontObject implements IModelCustom
             boolean skipPart=false;
             for (String excludedGroupName : excludedGroupNames)
             {
-                if (excludedGroupName.equalsIgnoreCase(groupObject.name)) {
-                    skipPart = true;
-                    break;
+                if (excludedGroupName.equalsIgnoreCase(groupObject.name))
+                {
+                    skipPart=true;
                 }
             }
             if(!skipPart)
@@ -284,9 +284,9 @@ public class HFRWavefrontObject implements IModelCustom
             exclude=false;
             for (String excludedGroupName : excludedGroupNames)
             {
-                if (excludedGroupName.equalsIgnoreCase(groupObject.name)) {
-                    exclude = true;
-                    break;
+                if (excludedGroupName.equalsIgnoreCase(groupObject.name))
+                {
+                    exclude=true;
                 }
             }
             if(!exclude)
@@ -503,7 +503,7 @@ public class HFRWavefrontObject implements IModelCustom
         {
             String trimmedLine = line.substring(line.indexOf(" ") + 1);
 
-            if (!trimmedLine.isEmpty())
+            if (trimmedLine.length() > 0)
             {
                 group = new S_GroupObject(trimmedLine);
             }

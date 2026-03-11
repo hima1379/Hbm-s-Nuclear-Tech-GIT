@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
 import com.hbm.render.amlfrom1710.Vec3;
-import com.hbm.tileentity.deco.TileEntitySpinnyLight;
+import com.hbm.main.tileentity.deco.TileEntitySpinnyLight;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;

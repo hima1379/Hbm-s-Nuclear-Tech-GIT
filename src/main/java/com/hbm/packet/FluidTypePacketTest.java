@@ -1,9 +1,9 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.machine.TileEntityITER;
-import com.hbm.tileentity.machine.TileEntityMachineLargeTurbine;
-import com.hbm.tileentity.machine.TileEntityMachineReactorLarge;
-import com.hbm.tileentity.machine.TileEntityMachineTurbine;
+import com.hbm.main.tileentity.machine.TileEntityITER;
+import com.hbm.main.tileentity.machine.TileEntityMachineLargeTurbine;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactorLarge;
+import com.hbm.main.tileentity.machine.TileEntityMachineTurbine;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;

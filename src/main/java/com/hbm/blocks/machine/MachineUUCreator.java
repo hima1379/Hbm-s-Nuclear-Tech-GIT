@@ -5,8 +5,8 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.handler.MultiblockHandlerXR;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityMachineUUCreator;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityMachineUUCreator;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

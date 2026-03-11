@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ITooltipProvider;
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
-import com.hbm.tileentity.network.energy.TileEntityPylonLarge;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonLarge;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.block.material.Material;

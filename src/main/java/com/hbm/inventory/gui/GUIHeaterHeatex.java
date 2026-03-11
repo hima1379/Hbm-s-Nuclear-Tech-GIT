@@ -5,7 +5,7 @@ import com.hbm.inventory.container.ContainerHeaterHeatex;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityHeaterHeatex;
+import com.hbm.main.tileentity.machine.TileEntityHeaterHeatex;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
@@ -19,7 +19,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 public class GUIHeaterHeatex extends GuiInfoContainer {
     private final static ResourceLocation texture = new ResourceLocation(RefStrings.MODID + ":textures/gui/machine/gui_heatex.png");

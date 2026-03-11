@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.hbm.inventory.control_panel.ControlPanel;
 import com.hbm.inventory.control_panel.DataValue;
-import com.hbm.tileentity.machine.TileEntityControlPanel;
+import com.hbm.main.tileentity.machine.TileEntityControlPanel;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

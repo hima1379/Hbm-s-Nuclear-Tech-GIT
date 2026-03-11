@@ -3,7 +3,7 @@ package com.hbm.items.tool;
 import java.util.List;
 
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.machine.TileEntityLockableBase;
+import com.hbm.main.tileentity.machine.TileEntityLockableBase;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;

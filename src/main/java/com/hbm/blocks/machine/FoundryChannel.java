@@ -6,7 +6,7 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.inventory.material.Mats.MaterialStack;
 import com.hbm.items.machine.ItemScraps;
 import com.hbm.lib.ForgeDirection;
-import com.hbm.tileentity.machine.TileEntityFoundryChannel;
+import com.hbm.main.tileentity.machine.TileEntityFoundryChannel;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;

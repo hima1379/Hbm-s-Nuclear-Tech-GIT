@@ -33,7 +33,7 @@ public class HbmGroupObject {
     @SideOnly(Side.CLIENT)
     public void render()
     {
-        if (!faces.isEmpty())
+        if (faces.size() > 0)
         {
             Tessellator tessellator = Tessellator.instance;
             tessellator.startDrawing(glDrawingMode);
@@ -45,7 +45,7 @@ public class HbmGroupObject {
     @SideOnly(Side.CLIENT)
     public void render(Tessellator tessellator)
     {
-        if (!faces.isEmpty())
+        if (faces.size() > 0)
         {
             for (HbmFace face : faces)
             {

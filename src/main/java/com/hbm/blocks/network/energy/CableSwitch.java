@@ -2,7 +2,7 @@ package com.hbm.blocks.network.energy;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.tileentity.network.energy.TileEntityCableSwitch;
+import com.hbm.main.tileentity.network.energy.TileEntityCableSwitch;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -70,7 +70,7 @@ public class CableSwitch extends BlockContainer {
 
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		return this.getDefaultState().withProperty(STATE, meta == 1);
+		return this.getDefaultState().withProperty(STATE, meta == 1 ? true : false);
 	}
 	
 	@Override

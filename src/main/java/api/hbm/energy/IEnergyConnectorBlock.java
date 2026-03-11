@@ -22,5 +22,5 @@ public interface IEnergyConnectorBlock {
 	 * @param dir
 	 * @return
 	 */
-    boolean canConnect(IBlockAccess world, BlockPos pos, ForgeDirection dir);
+	public boolean canConnect(IBlockAccess world, BlockPos pos, ForgeDirection dir);
 }

@@ -4,8 +4,8 @@ import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.handler.MultiblockHandlerXR;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.oil.TileEntityMachineFrackingTower;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineFrackingTower;
 import com.hbm.lib.ForgeDirection;
 
 import net.minecraft.block.material.Material;
@@ -65,6 +65,31 @@ public class MachineFrackingTower extends BlockDummyable {
 //    public EnumBlockRenderType getRenderType(IBlockState state) {
 //        return EnumBlockRenderType.MODEL;
 //    }
+
+    @Override
+    public boolean isOpaqueCube(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isBlockNormalCube(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isNormalCube(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return false;
+    }
+
+    @Override
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+        return false;
+    }
 
     @Override
     public boolean onBlockActivated(World world, BlockPos pos1, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {

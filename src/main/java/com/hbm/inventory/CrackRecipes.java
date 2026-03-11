@@ -12,7 +12,7 @@ import net.minecraftforge.fluids.FluidStack;
 @Spaghetti("everything")
 public class CrackRecipes {
 
-	public static LinkedHashMap<String, FluidStack[]> recipeFluids = new LinkedHashMap<>();
+	public static LinkedHashMap<Fluid, FluidStack[]> recipeFluids = new LinkedHashMap<>();
 
 	public static void registerRecipes() {
 		makeRecipe(ModForgeFluids.OIL,				new FluidStack[]{ new FluidStack(ModForgeFluids.CRACKOIL,		80),	new FluidStack(ModForgeFluids.PETROLEUM,	20)});
@@ -32,16 +32,16 @@ public class CrackRecipes {
 
 	public static void makeRecipe(Fluid inputFluid, FluidStack[] outputFluids) {
 		if(inputFluid != null && outputFluids != null)
-			recipeFluids.put(inputFluid.getName(), outputFluids);
+			recipeFluids.put(inputFluid, outputFluids);
 	}
 
 	public static FluidStack[] getOutputsFromFluid(Fluid fluid) {
-		if (fluid == null) return null;
-		return recipeFluids.get(fluid.getName());
+		if (fluid == null)
+			return null;
+		return recipeFluids.get(fluid);
 	}
 
 	public static boolean hasRecipe(Fluid fluid) {
-        if(fluid == null) return false;
-		return recipeFluids.containsKey(fluid.getName());
+		return recipeFluids.containsKey(fluid);
 	}
 }

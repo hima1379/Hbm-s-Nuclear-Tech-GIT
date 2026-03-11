@@ -6,6 +6,8 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.config.GeneralConfig;
 import com.hbm.main.MainRegistry;
 import com.hbm.potion.HbmPotion;
+import com.hbm.items.ModItems;
+import com.hbm.saveddata.RadiationSavedData;
 import com.hbm.util.ContaminationUtil;
 
 import net.minecraft.block.Block;
@@ -25,6 +27,7 @@ import net.minecraft.item.Item;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -79,20 +82,24 @@ public class WasteEarth extends Block {
 	
 	@Override
 	public void onEntityWalk(World worldIn, BlockPos pos, Entity entity) {
-        if(!(entity instanceof EntityLivingBase base)) return;
-        if(this == ModBlocks.frozen_grass) {
-            base.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 2 * 60 * 20, 2));
-        } else if(this == ModBlocks.waste_mycelium) {
-            base.addPotionEffect(new PotionEffect(HbmPotion.radiation, 30 * 20, 29));
-            base.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 5 * 20, 0));
+		if (entity instanceof EntityLivingBase && this == ModBlocks.waste_earth) {
 
-        } else if(!ContaminationUtil.isRadImmune(base)){
-            if(this == ModBlocks.waste_earth) {
-                base.addPotionEffect(new PotionEffect(HbmPotion.radiation, 15 * 20, 4));
-            } else if(this == ModBlocks.waste_dirt) {
-                base.addPotionEffect(new PotionEffect(HbmPotion.radiation, 20 * 20, 9));
-            }
-        }
+    		((EntityLivingBase) entity).addPotionEffect(new PotionEffect(HbmPotion.radiation, 15 * 20, 4));
+    	}
+    	if (entity instanceof EntityLivingBase && this == ModBlocks.waste_dirt) {
+
+    		((EntityLivingBase) entity).addPotionEffect(new PotionEffect(HbmPotion.radiation, 20 * 20, 9));
+    	}
+    	
+    	if (entity instanceof EntityLivingBase && this == ModBlocks.frozen_grass) {
+    	
+    		((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 2 * 60 * 20, 2));
+    	}
+    	if (entity instanceof EntityLivingBase && this == ModBlocks.waste_mycelium) {
+    	
+    		((EntityLivingBase) entity).addPotionEffect(new PotionEffect(HbmPotion.radiation, 30 * 20, 29));
+    		((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 5 * 20, 0));
+    	}
 	}
 	
 	@Override

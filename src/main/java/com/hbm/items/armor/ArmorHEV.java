@@ -26,6 +26,8 @@ public class ArmorHEV extends ArmorFSBPowered {
 	
 	public ArmorHEV(ArmorMaterial material, int layer, EntityEquipmentSlot slot, String texture, long maxPower, long chargeRate, long consumption, long drain, String s) {
 		super(material, layer, slot, texture, maxPower, chargeRate, consumption, drain, s);
+
+
 	}
 	
 	@Override

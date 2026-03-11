@@ -2,8 +2,8 @@ package com.hbm.inventory.gui;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.lang.Math;
 
 import com.hbm.inventory.container.ContainerMachineBattery;
 import com.hbm.lib.RefStrings;
@@ -11,7 +11,8 @@ import com.hbm.lib.Library;
 import com.hbm.util.I18nUtil;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityMachineBattery;
+import com.hbm.main.tileentity.machine.TileEntityMachineBattery;
+import com.hbm.main.tileentity.machine.TileEntityMachineFENSU;
 
 import api.hbm.energy.IEnergyConnector.ConnectionPriority;
 import net.minecraft.client.Minecraft;
@@ -42,15 +43,20 @@ public class GUIMachineBattery extends GuiInfoContainer {
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 
-		String deltaText = Library.getShortNumber(Math.abs(battery.powerDelta)) + "HE/s";
-		if(battery.powerDelta > 0) 
+		String deltaText = Library.getShortNumber(Math.abs(battery.getPowerDelta())) + "HE/s";
+		if(battery.getPowerDelta() > 0)
 			deltaText = TextFormatting.GREEN + "+" + deltaText;
-		else if(battery.powerDelta < 0) 
+		else if(battery.getPowerDelta() < 0)
 			deltaText = TextFormatting.RED + "-" + deltaText;
-		else 
+		else
 			deltaText = TextFormatting.YELLOW + "0HE/s";
 
-		String[] info = new String[] { Library.getShortNumber(battery.power)+"HE/"+Library.getShortNumber(battery.getMaxPower())+"HE", deltaText};
+		String[] info;
+		if(battery instanceof TileEntityMachineFENSU) {
+			info = new String[] { Library.getShortNumber(battery.getPowerEV().toBigDecimal())+"HE/"+Library.getShortNumber(battery.getMaxPowerEV().toBigDecimal())+"HE", deltaText};
+		} else {
+			info = new String[] { Library.getShortNumber(battery.getPower())+"HE/"+Library.getShortNumber(battery.getMaxPower())+"HE", deltaText};
+		}
 		this.drawCustomInfoStat(mouseX, mouseY, guiLeft + 71, guiTop + 69 - 52, 34, 52, mouseX, mouseY, info);
 
 		String lang = null;
@@ -64,9 +70,10 @@ public class GUIMachineBattery extends GuiInfoContainer {
 		priority.add(I18nUtil.resolveKey("battery.priority." + lang));
 		priority.add(I18nUtil.resolveKey("battery.priority.recommended"));
 		String[] desc = I18nUtil.resolveKeyArray("battery.priority." + lang + ".desc");
-        priority.addAll(Arrays.asList(desc));
+		for(String s : desc) 
+			priority.add(s);
 		
-		this.drawCustomInfoStat(mouseX, mouseY, guiLeft + 151, guiTop + 16, 16, 16, mouseX, mouseY, priority.toArray(new String[0]));
+		this.drawCustomInfoStat(mouseX, mouseY, guiLeft + 151, guiTop + 16, 16, 16, mouseX, mouseY, priority.toArray(new String[priority.size()]));
 
 		String[] text = I18nUtil.resolveKeyArray("desc.guimachbattery");
 				
@@ -100,8 +107,12 @@ public class GUIMachineBattery extends GuiInfoContainer {
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		String name = this.battery.hasCustomInventoryName() ? this.battery.getInventoryName() : I18n.format(this.battery.getInventoryName());
-		name += (" (" + Library.getShortNumber(battery.power) + " HE)");
-		
+		if(battery instanceof TileEntityMachineFENSU) {
+			name += (" (" + Library.getShortNumber(battery.getPowerEV().toBigDecimal()) + " HE)");
+		} else {
+			name += (" (" + Library.getShortNumber(battery.getPower()) + " HE)");
+		}
+
 		this.fontRenderer.drawString(name, this.xSize / 2 - this.fontRenderer.getStringWidth(name) / 2, 6, 4210752);
 		this.fontRenderer.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
 	}
@@ -113,7 +124,7 @@ public class GUIMachineBattery extends GuiInfoContainer {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
 		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 		
-		if(battery.power > 0) {
+		if(battery.getPowerEV().isGreaterThan(api.hbm.energy.EnergyValue.ZERO)) {
 			int i = (int)battery.getPowerRemainingScaled(52);
 			drawTexturedModalRect(guiLeft + 71, guiTop + 69 - i, 176, 52 - i, 34, i);
 		}

@@ -3,34 +3,92 @@ package com.hbm.config;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
+/**
+ * IMPORTANT NAMING CONVENTION:
+ *
+ * Despite the variable names ending in "Radius", nuclear weapon values represent KILOTONS!
+ * Variable names kept for backward compatibility with existing code.
+ *
+ * For historical nuclear weapons (Gadget, Fat Man, Ivy Mike, Tsar Bomba, etc.):
+ *   - The value IS the yield in kilotons (NOT radius)
+ *   - Radius is calculated automatically using: R = 90 * Y^(1/3) meters
+ *
+ * For non-nuclear weapons (Prototype, F.L.E.I.J.A., etc.):
+ *   - The value IS the radius in blocks
+ *   - Yield is calculated for visual effects only
+ */
 public class BombConfig {
 
-	public static int gadgetRadius = 150;
-	public static int boyRadius = 120;
-	public static int manRadius = 175;
-	public static int tsarRadius = 500;
-	public static int mikeRadius = 250;
-	public static int prototypeRadius = 150;
-	public static int fleijaRadius = 50;
-	public static int soliniumRadius = 150;
-	public static int n2Radius = 200;
-	public static int missileRadius = 100;
-	public static int mirvRadius = 70;
-	public static int fatmanRadius = 35;
-	public static int nukaRadius = 25;
-	public static int aSchrabRadius = 20;
+	// ===== NUCLEAR WEAPONS (VALUES ARE KILOTONS, NOT RADIUS!) =====
+
+	/** Gadget/Trinity test: 21 KILOTONS (variable name is misleading but kept for compatibility)
+	 *  Calculated fireball radius: ~170m, 5 PSI radius: ~260m */
+	public static int gadgetRadius = 21;
+
+	/** Little Boy (Hiroshima): 15 KILOTONS
+	 *  Calculated fireball radius: ~140m, 5 PSI radius: ~220m */
+	public static int boyRadius = 15;
+
+	/** Fat Man (Nagasaki): 21 KILOTONS
+	 *  Calculated fireball radius: ~170m, 5 PSI radius: ~260m */
+	public static int manRadius = 21;
+
+	/** Ivy Mike (first H-bomb): 10,400 KILOTONS = 10.4 megatons
+	 *  Calculated fireball radius: ~1,150m, 5 PSI radius: ~1,980m */
+	public static int mikeRadius = 10400;
+
+	/** Tsar Bomba: 50,000 KILOTONS = 50 megatons
+	 *  Calculated fireball radius: ~1,920m, 5 PSI radius: ~3,300m */
+	public static int tsarRadius = 50000;
+
+	/** Standard ICBM warhead (W87): 300 KILOTONS
+	 *  Calculated fireball radius: ~350m, 5 PSI radius: ~600m */
+	public static int missileRadius = 300;
+
+	/** MIRV warhead (W88): 170 KILOTONS
+	 *  Calculated fireball radius: ~290m, 5 PSI radius: ~500m */
+	public static int mirvRadius = 170;
+
+	// ===== NON-NUCLEAR WEAPONS (VALUES ARE RADIUS IN BLOCKS) =====
+
+	public static int prototypeRadius = 150;  // Non-nuclear prototype (actual radius)
+	public static int fleijaRadius = 50;      // Non-nuclear F.L.E.I.J.A. (actual radius)
+	public static int soliniumRadius = 150;   // Non-nuclear Solinium (actual radius)
+	public static int n2Radius = 200;         // Non-nuclear N2 mine (actual radius)
+	public static int fatmanRadius = 35;      // Fatman Launcher (actual radius)
+	public static int nukaRadius = 25;        // Nuka grenade (actual radius)
+	public static int aSchrabRadius = 20;     // Anti-schrabidium (actual radius)
+
 	public static int riggedStarRange = 50;
 	public static int riggedStarTicks = 60 * 20;
 
+	// ===== CUSTOM WEAPON LIMITS =====
+
+	/** Max TNT radius (non-nuclear): 150 blocks (actual radius) */
 	public static int maxCustomTNTRadius = 150;
-	public static int maxCustomNukeRadius = 250;
-	public static int maxCustomHydroRadius = 400;
-	public static int maxCustomDirtyRadius = 200;
+
+	/** Max fission bomb: 500 KILOTONS (not radius) */
+	public static int maxCustomNukeRadius = 500;
+
+	/** Max thermonuclear: 50,000 KILOTONS = 50 megatons (not radius) */
+	public static int maxCustomHydroRadius = 50000;
+
+	/** Max dirty bomb fallout: 100 KILOTONS equivalent (not radius) */
+	public static int maxCustomDirtyRadius = 100;
+
+	/** Max balefire radius (non-nuclear): 750 blocks (actual radius) */
 	public static int maxCustomBaleRadius = 750;
+
+	/** Max schrabidium radius (non-nuclear): 500 blocks (actual radius) */
 	public static int maxCustomSchrabRadius = 500;
+
+	/** Max solinium radius (non-nuclear): 1000 blocks (actual radius) */
 	public static int maxCustomSolRadius = 1000;
+
 	public static int maxCustomEuphLvl = 20;
-	
+
+	// ===== PROCESSING SETTINGS =====
+
 	public static int mk5 = 40;
 	public static int blastSpeed = 1024;
 	public static int falloutRange = 100;
@@ -40,125 +98,148 @@ public class BombConfig {
 	public static boolean disableNuclear = false;
 	public static boolean enableNukeClouds = true;
 	public static boolean enableNukeNBTSaving = true;
-	
+
 	public static void loadFromConfig(Configuration config) {
 		final String CATEGORY_NUKES = "03_nukes";
-		Property propGadget = config.get(CATEGORY_NUKES, "3.00_gadgetRadius", 150);
-		propGadget.setComment("Radius of the Gadget");
+
+		// === NUCLEAR WEAPONS (VALUES ARE KILOTONS, NOT RADIUS!) ===
+
+		Property propGadget = config.get(CATEGORY_NUKES, "3.00_gadgetRadius", 21);
+		propGadget.setComment("Gadget (Trinity) yield in KILOTONS (not radius). Historical: 21 kt. Fireball: ~170m, 5 PSI: ~260m");
 		gadgetRadius = propGadget.getInt();
-		Property propBoy = config.get(CATEGORY_NUKES, "3.01_boyRadius", 120);
-		propBoy.setComment("Radius of Little Boy");
+
+		Property propBoy = config.get(CATEGORY_NUKES, "3.01_boyRadius", 15);
+		propBoy.setComment("Little Boy (Hiroshima) yield in KILOTONS (not radius). Historical: 15 kt. Fireball: ~140m, 5 PSI: ~220m");
 		boyRadius = propBoy.getInt();
-		Property propMan = config.get(CATEGORY_NUKES, "3.02_manRadius", 175);
-		propMan.setComment("Radius of Fat Man");
+
+		Property propMan = config.get(CATEGORY_NUKES, "3.02_manRadius", 21);
+		propMan.setComment("Fat Man (Nagasaki) yield in KILOTONS (not radius). Historical: 21 kt. Fireball: ~170m, 5 PSI: ~260m");
 		manRadius = propMan.getInt();
-		Property propMike = config.get(CATEGORY_NUKES, "3.03_mikeRadius", 250);
-		propMike.setComment("Radius of Ivy Mike");
+
+		Property propMike = config.get(CATEGORY_NUKES, "3.03_mikeRadius", 10400);
+		propMike.setComment("Ivy Mike (first H-bomb) yield in KILOTONS (not radius). Historical: 10,400 kt (10.4 Mt). Fireball: ~1,150m");
 		mikeRadius = propMike.getInt();
-		Property propTsar = config.get(CATEGORY_NUKES, "3.04_tsarRadius", 500);
-		propTsar.setComment("Radius of the Tsar Bomba");
+
+		Property propTsar = config.get(CATEGORY_NUKES, "3.04_tsarRadius", 50000);
+		propTsar.setComment("Tsar Bomba yield in KILOTONS (not radius). Historical: 50,000 kt (50 Mt). Fireball: ~1,920m");
 		tsarRadius = propTsar.getInt();
-		Property propPrototype = config.get(CATEGORY_NUKES, "3.05_prototypeRadius", 150);
-		propPrototype.setComment("Radius of the Prototype");
-		prototypeRadius = propPrototype.getInt();
-		Property propFleija = config.get(CATEGORY_NUKES, "3.06_fleijaRadius", 50);
-		propFleija.setComment("Radius of F.L.E.I.J.A.");
-		fleijaRadius = propFleija.getInt();
-		Property propMissile = config.get(CATEGORY_NUKES, "3.07_missileRadius", 100);
-		propMissile.setComment("Radius of the nuclear missile");
+
+		Property propMissile = config.get(CATEGORY_NUKES, "3.07_missileRadius", 300);
+		propMissile.setComment("ICBM warhead (W87) yield in KILOTONS (not radius). Reference: 300 kt. Fireball: ~350m");
 		missileRadius = propMissile.getInt();
-		Property propMirv = config.get(CATEGORY_NUKES, "3.08_mirvRadius", 70);
-		propMirv.setComment("Radius of a MIRV");
+
+		Property propMirv = config.get(CATEGORY_NUKES, "3.08_mirvRadius", 170);
+		propMirv.setComment("MIRV warhead (W88) yield in KILOTONS (not radius). Reference: 170 kt. Fireball: ~290m");
 		mirvRadius = propMirv.getInt();
-		Property propFatman = config.get(CATEGORY_NUKES, "3.09_fatmanRadius", 35);
-		propFatman.setComment("Radius of the Fatman Launcher");
-		fatmanRadius = propFatman.getInt();
-		Property propNuka = config.get(CATEGORY_NUKES, "3.10_nukaRadius", 25);
-		propNuka.setComment("Radius of the nuka grenade");
-		nukaRadius = propNuka.getInt();
-		Property propASchrab = config.get(CATEGORY_NUKES, "3.11_aSchrabRadius", 20);
-		propASchrab.setComment("Radius of dropped anti schrabidium");
-		aSchrabRadius = propASchrab.getInt();
+
+		// === NON-NUCLEAR WEAPONS (VALUES ARE ACTUAL RADIUS IN BLOCKS) ===
+
+		Property propPrototype = config.get(CATEGORY_NUKES, "3.05_prototypeRadius", 150);
+		propPrototype.setComment("Prototype (non-nuclear) radius in BLOCKS (this IS actual radius)");
+		prototypeRadius = propPrototype.getInt();
+
+		Property propFleija = config.get(CATEGORY_NUKES, "3.06_fleijaRadius", 50);
+		propFleija.setComment("F.L.E.I.J.A. (non-nuclear) radius in BLOCKS (this IS actual radius)");
+		fleijaRadius = propFleija.getInt();
+
 		Property propSolinium = config.get(CATEGORY_NUKES, "3.12_soliniumRadius", 150);
-		propSolinium.setComment("Radius of the blue rinse");
+		propSolinium.setComment("Solinium (non-nuclear) radius in BLOCKS (this IS actual radius)");
 		soliniumRadius = propSolinium.getInt();
+
 		Property propN2 = config.get(CATEGORY_NUKES, "3.13_n2Radius", 200);
-		propN2.setComment("Radius of the N2 mine");
+		propN2.setComment("N2 mine (non-nuclear) radius in BLOCKS (this IS actual radius)");
 		n2Radius = propN2.getInt();
 
+		Property propFatman = config.get(CATEGORY_NUKES, "3.09_fatmanRadius", 35);
+		propFatman.setComment("Fatman Launcher (non-nuclear) radius in BLOCKS (this IS actual radius)");
+		fatmanRadius = propFatman.getInt();
+
+		Property propNuka = config.get(CATEGORY_NUKES, "3.10_nukaRadius", 25);
+		propNuka.setComment("Nuka grenade (non-nuclear) radius in BLOCKS (this IS actual radius)");
+		nukaRadius = propNuka.getInt();
+
+		Property propASchrab = config.get(CATEGORY_NUKES, "3.11_aSchrabRadius", 20);
+		propASchrab.setComment("Anti-schrabidium (non-nuclear) radius in BLOCKS (this IS actual radius)");
+		aSchrabRadius = propASchrab.getInt();
+
 		Property propRS1 = config.get(CATEGORY_NUKES, "3.14_riggedStarRadius", 50);
-		propRS1.setComment("Radius of the Rigged Star Blaster Energy Cell");
+		propRS1.setComment("Rigged Star Blaster radius in BLOCKS");
 		riggedStarRange = propRS1.getInt();
+
 		Property propRS2 = config.get(CATEGORY_NUKES, "3.15_riggedStarFuse", 1200);
-		propRS2.setComment("Time in ticks before the Rigged Star Blaster Energy Cell explodes after being dropped - default 60s");
+		propRS2.setComment("Rigged Star fuse time in ticks (default 60s = 1200 ticks)");
 		riggedStarTicks = propRS2.getInt();
 
+		// === CUSTOM LIMITS ===
+
 		Property propTNT = config.get(CATEGORY_NUKES, "4.00_maxCustomTNTRadius", 150);
-		propTNT.setComment("Maximum TNT radius of custom nukes - default 150m");
+		propTNT.setComment("Maximum custom TNT radius in BLOCKS (non-nuclear, this IS actual radius)");
 		maxCustomTNTRadius = propTNT.getInt();
 
-		Property propNuke = config.get(CATEGORY_NUKES, "4.01_maxCustomNukeRadius", 250);
-		propNuke.setComment("Maximum Nuke radius of custom nukes - default 250m");
+		Property propNuke = config.get(CATEGORY_NUKES, "4.01_maxCustomNukeRadius", 500);
+		propNuke.setComment("Maximum fission bomb yield in KILOTONS (not radius)");
 		maxCustomNukeRadius = propNuke.getInt();
 
-		Property propHydro = config.get(CATEGORY_NUKES, "4.02_maxCustomHydroRadius", 400);
-		propHydro.setComment("Maximum Thermonuclear radius of custom nukes - default 400m");
+		Property propHydro = config.get(CATEGORY_NUKES, "4.02_maxCustomHydroRadius", 50000);
+		propHydro.setComment("Maximum thermonuclear yield in KILOTONS (not radius). 50,000 kt = 50 Mt");
 		maxCustomHydroRadius = propHydro.getInt();
 
-		Property propDirty = config.get(CATEGORY_NUKES, "4.04_maxCustomDirtyRadius", 200);
-		propDirty.setComment("Maximum fallout additional radius that can be added to custom nukes - default 200m");
+		Property propDirty = config.get(CATEGORY_NUKES, "4.04_maxCustomDirtyRadius", 100);
+		propDirty.setComment("Maximum dirty bomb fallout in KILOTONS equivalent (not radius)");
 		maxCustomDirtyRadius = propDirty.getInt();
-		
+
 		Property propBale = config.get(CATEGORY_NUKES, "4.03_maxCustomBaleRadius", 750);
-		propBale.setComment("Maximum balefire radius of custom nukes - default 750m");
+		propBale.setComment("Maximum balefire radius in BLOCKS (non-nuclear, this IS actual radius)");
 		maxCustomBaleRadius = propBale.getInt();
 
 		Property propSchrab = config.get(CATEGORY_NUKES, "4.05_maxCustomSchrabRadius", 500);
-		propSchrab.setComment("Maximum Antischrabidium radius of custom nukes - default 500m");
+		propSchrab.setComment("Maximum Antischrabidium radius in BLOCKS (non-nuclear, this IS actual radius)");
 		maxCustomSchrabRadius = propSchrab.getInt();
 
 		Property propSol = config.get(CATEGORY_NUKES, "4.06_maxCustomSolRadius", 1000);
-		propSol.setComment("Maximum Solinium radius of custom nukes - default 1000m");
+		propSol.setComment("Maximum Solinium radius in BLOCKS (non-nuclear, this IS actual radius)");
 		maxCustomSolRadius = propSol.getInt();
-		
+
 		Property propEuph = config.get(CATEGORY_NUKES, "4.07_maxCustomEuphLvl", 20);
-		propEuph.setComment("Maximum Euphemium Lvl of custom nukes (1Lvl = 100 Rays) - default 20");
+		propEuph.setComment("Maximum Euphemium Level (1 Lvl = 100 Rays)");
 		maxCustomEuphLvl = propEuph.getInt();
-		
-		
+
+		// === PROCESSING SETTINGS ===
+
 		final String CATEGORY_NUKE = "06_explosions";
+
 		Property propLimitExplosionLifespan = config.get(CATEGORY_NUKE, "6.00_limitExplosionLifespan", 0);
-		propLimitExplosionLifespan.setComment("How long an explosion can be unloaded until it dies in seconds. Based of system time. 0 disables the effect");
+		propLimitExplosionLifespan.setComment("Explosion unload timeout in seconds (0 = disabled)");
 		limitExplosionLifespan = propLimitExplosionLifespan.getInt();
-		// explosion speed
+
 		Property propBlastSpeed = config.get(CATEGORY_NUKE, "6.01_blastSpeed", 1024);
-		propBlastSpeed.setComment("Base speed of MK3 system (old and schrabidium) detonations (Blocks / tick)");
+		propBlastSpeed.setComment("MK3 system detonation speed (Blocks/tick)");
 		blastSpeed = propBlastSpeed.getInt();
-		// fallout range
-		Property propFalloutRange = config.get(CATEGORY_NUKE, "6.02_mk5BlastTime", 40);
-		propFalloutRange.setComment("Maximum amount of milliseconds per tick allocated for mk5 chunk processing");
-		mk5 = propFalloutRange.getInt();
-		// fallout speed
+
+		Property propMk5Time = config.get(CATEGORY_NUKE, "6.02_mk5BlastTime", 40);
+		propMk5Time.setComment("Maximum milliseconds per tick for MK5 chunk processing");
+		mk5 = propMk5Time.getInt();
+
 		Property falloutRangeProp = config.get(CATEGORY_NUKE, "6.03_falloutRange", 100);
-		falloutRangeProp.setComment("Radius of fallout area (base radius * value in percent)");
+		falloutRangeProp.setComment("Fallout area radius (base radius * value in percent)");
 		falloutRange = falloutRangeProp.getInt();
-		// fallout speed
+
 		Property falloutChunkSpeed = config.get(CATEGORY_NUKE, "6.04_falloutChunkSpeed", 5);
-		falloutChunkSpeed.setComment("Process a Chunk every nth tick by the fallout rain");
+		falloutChunkSpeed.setComment("Process a chunk every nth tick (fallout rain)");
 		fChunkSpeed = falloutChunkSpeed.getInt();
-		// new explosion speed
-		Property falloutMSProp = config.get(CATEGORY_NUKE, "6.04_falloutTime", 30);
-		falloutMSProp.setComment("Maximum amount of milliseconds per tick allocated for fallout chunk processing");
+
+		Property falloutMSProp = config.get(CATEGORY_NUKE, "6.05_falloutTime", 30);
+		falloutMSProp.setComment("Maximum milliseconds per tick for fallout chunk processing");
 		falloutMS = falloutMSProp.getInt();
-		//Whether fallout and nuclear radiation is enabled at all
+
 		Property disableNuclearP = config.get(CATEGORY_NUKE, "6.06_disableNuclear", false);
-		disableNuclearP.setComment("Disable the nuclear part of nukes");
+		disableNuclearP.setComment("Disable nuclear effects (fallout/radiation)");
 		disableNuclear = disableNuclearP.getBoolean();
 
 		enableNukeClouds = config.get(CATEGORY_NUKE, "6.07_enableMushroomClouds", true).getBoolean(true);
 
 		Property enableNukeNBTSavingP = config.get(CATEGORY_NUKE, "6.08_enableNukeNBTSaving", true);
-		enableNukeNBTSavingP.setComment("If true then nukes will save the blocks they want to destroy so they can resume work rather then restart after a crash/reload. For big nukes this can take a while tho.");
+		enableNukeNBTSavingP.setComment("Save nuke destruction data for resume after crash/reload");
 		enableNukeNBTSaving = enableNukeNBTSavingP.getBoolean();
 	}
 }

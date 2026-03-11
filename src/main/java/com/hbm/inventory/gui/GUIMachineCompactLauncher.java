@@ -9,7 +9,7 @@ import com.hbm.items.weapon.ItemCustomMissile;
 import com.hbm.lib.RefStrings;
 import com.hbm.render.misc.MissileMultipart;
 import com.hbm.render.misc.MissilePronter;
-import com.hbm.tileentity.bomb.TileEntityCompactLauncher;
+import com.hbm.main.tileentity.bomb.TileEntityCompactLauncher;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

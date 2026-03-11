@@ -12,8 +12,8 @@ import com.hbm.packet.PacketSpecialDeath;
 import com.hbm.particle.bullet_hit.ParticleDecalFlow;
 import com.hbm.render.util.BakedModelUtil;
 import com.hbm.render.util.BakedModelUtil.DecalType;
-import com.hbm.tileentity.conductor.TileEntityFFDuctBaseMk2;
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.conductor.TileEntityFFDuctBaseMk2;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
 
 import com.hbm.util.I18nUtil;
 import net.minecraft.block.Block;
@@ -108,6 +108,8 @@ public class ItemWandD extends Item {
 		((TileEntitySafe) world.getTileEntity(new BlockPos(x, y, z))).setMod(1);
 		((TileEntitySafe) world.getTileEntity(new BlockPos(x, y, z))).lock();*/
 		
+		MainRegistry.time = System.currentTimeMillis();
+		
 		return EnumActionResult.SUCCESS;
 	}
 	
@@ -143,8 +145,11 @@ public class ItemWandD extends Item {
 	
 	@Override
 	public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand) {
-        //DisintegrationParticleHandler.spawnGluonDisintegrateParticles(target);
-        return super.itemInteractionForEntity(stack, playerIn, target, hand);
+		if(target.world.isRemote){
+			//DisintegrationParticleHandler.spawnGluonDisintegrateParticles(target);
+		} else {
+		}
+		return super.itemInteractionForEntity(stack, playerIn, target, hand);
 	}
 	
 	@Override

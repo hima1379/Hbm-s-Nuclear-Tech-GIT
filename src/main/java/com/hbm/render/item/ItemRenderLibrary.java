@@ -496,9 +496,7 @@ public class ItemRenderLibrary {
 			public void renderCommon() {
 				GL11.glScaled(0.5, 0.5, 0.5);
 		        GlStateManager.disableCull();
-                GlStateManager.shadeModel(GL11.GL_SMOOTH);
-                bindTexture(ResourceManager.oilflare_tex); ResourceManager.oilflare.renderAll();
-                GlStateManager.shadeModel(GL11.GL_FLAT);
+				bindTexture(ResourceManager.oilflare_tex); ResourceManager.oilflare.renderAll();
 		        GlStateManager.enableCull();
 			}});
 
@@ -631,17 +629,6 @@ public class ItemRenderLibrary {
 				ResourceManager.crucible_heat.renderAll();
 				GlStateManager.shadeModel(GL11.GL_FLAT);
 			}});
-        renderers.put(Item.getItemFromBlock(ModBlocks.machine_strand_caster), new ItemRenderBase() {
-            public void renderInventory() {
-                GlStateManager.translate(2, 0, 2);
-                GlStateManager.scale(2, 2, 2);
-            }
-            public void renderCommon() {
-                GlStateManager.shadeModel(GL11.GL_SMOOTH);
-                bindTexture(ResourceManager.strand_caster_tex);
-                ResourceManager.strand_caster.renderAll();
-                GlStateManager.shadeModel(GL11.GL_FLAT);
-            }});
 		renderers.put(Item.getItemFromBlock(ModBlocks.heater_oilburner), new ItemRenderBase() {
 			public void renderInventory() {
 				GL11.glTranslated(0, -1, 0);
@@ -1551,6 +1538,36 @@ public class ItemRenderLibrary {
 		renderers.put(Item.getItemFromBlock(ModBlocks.rbmk_control), rbmkControl);
 		renderers.put(Item.getItemFromBlock(ModBlocks.rbmk_control_mod), rbmkControl);
 		renderers.put(Item.getItemFromBlock(ModBlocks.rbmk_control_auto), rbmkControl);
+
+		// FCS Console 3D item renderer
+		ItemRenderBase fcsConsole = new ItemRenderBase(){
+			public void renderInventory(ItemStack stack){
+				GL11.glTranslated(0, -3, 0);
+				GL11.glRotatef(180, 0, 1, 0);
+				GL11.glScaled(2.5, 2.5, 2.5);
+			}
+			public void renderCommon(ItemStack stack){
+				GlStateManager.enableLighting();
+				GlStateManager.enableTexture2D();
+				GlStateManager.enableCull();
+
+				// Render main console body
+				bindTexture(ResourceManager.fcs_console_main_tex);
+				ResourceManager.fcs_console.renderPart("Cube");
+				ResourceManager.fcs_console.renderPart("Main");
+
+				// Render sub screens
+				bindTexture(ResourceManager.fcs_console_sub_tex);
+				ResourceManager.fcs_console.renderPart("Sub1");
+				ResourceManager.fcs_console.renderPart("Sub2");
+				ResourceManager.fcs_console.renderPart("Sub3");
+				ResourceManager.fcs_console.renderPart("Sub4");
+			}
+			public boolean doNullTransform(){
+				return true;
+			}
+		};
+		renderers.put(Item.getItemFromBlock(ModBlocks.fcs_console), fcsConsole);
 		renderers.put(Item.getItemFromBlock(ModBlocks.rbmk_blank), rbmkPassive);
 		renderers.put(Item.getItemFromBlock(ModBlocks.rbmk_boiler), rbmkControl);
 		renderers.put(Item.getItemFromBlock(ModBlocks.rbmk_heater), rbmkControl);

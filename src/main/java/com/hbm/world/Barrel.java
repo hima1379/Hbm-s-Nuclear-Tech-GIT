@@ -7,7 +7,7 @@ import com.hbm.config.GeneralConfig;
 import com.hbm.handler.WeightedRandomChestContentFrom1710;
 import com.hbm.lib.HbmChestContents;
 import com.hbm.lib.Library;
-import com.hbm.tileentity.machine.TileEntityCrateSteel;
+import com.hbm.main.tileentity.machine.TileEntityCrateSteel;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLadder;

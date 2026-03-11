@@ -8,7 +8,7 @@ import com.hbm.inventory.container.ContainerForceField;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityForceField;
+import com.hbm.main.tileentity.machine.TileEntityForceField;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;

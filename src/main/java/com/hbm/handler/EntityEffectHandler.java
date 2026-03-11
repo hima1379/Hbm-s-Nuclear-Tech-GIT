@@ -9,9 +9,9 @@ import com.hbm.capability.HbmLivingCapability.IEntityHbmProps;
 import com.hbm.capability.HbmLivingProps;
 import com.hbm.capability.HbmLivingProps.ContaminationEffect;
 import com.hbm.config.CompatibilityConfig;
+import com.hbm.config.GeneralConfig;
 import com.hbm.config.RadiationConfig;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.lib.Library;
 import com.hbm.lib.ModDamageSource;
 import com.hbm.main.MainRegistry;
 import com.hbm.packet.AuxParticlePacketNT;
@@ -27,6 +27,7 @@ import com.hbm.util.ContaminationUtil.HazardType;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -35,6 +36,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -47,17 +49,29 @@ public class EntityEffectHandler {
 	public static void onUpdate(EntityLivingBase entity) {
 
 		if(!entity.world.isRemote) {
-			
+
 			if(entity.ticksExisted % 20 == 0) {
 				HbmLivingProps.setRadBuf(entity, HbmLivingProps.getRadEnv(entity));
 				HbmLivingProps.setRadEnv(entity, 0);
 			}
-			
+
+			// 放射線データ同期（安全性チェック追加）
 			if(entity instanceof EntityPlayerMP) {
-				NBTTagCompound data = new NBTTagCompound();
-				IEntityHbmProps props = HbmLivingProps.getData(entity);
-				props.saveNBTData(data);
-				PacketDispatcher.wrapper.sendTo(new ExtPropPacket(data), (EntityPlayerMP) entity);
+				EntityPlayerMP player = (EntityPlayerMP) entity;
+
+				// プレイヤーが有効な状態でパケットを受信可能かチェック
+				// これによりタレット射撃中のクラッシュを防止
+				if(player != null && !player.isDead && player.connection != null) {
+					try {
+						NBTTagCompound data = new NBTTagCompound();
+						IEntityHbmProps props = HbmLivingProps.getData(entity);
+						props.saveNBTData(data);
+						PacketDispatcher.wrapper.sendTo(new ExtPropPacket(data), player);
+					} catch (Exception e) {
+						// パケット送信失敗時はログのみ（ゲームを続行）
+						// System.out.println("[EntityEffectHandler] Failed to sync radiation data: " + e.getMessage());
+					}
+				}
 			}
 		}
 		
@@ -121,7 +135,7 @@ public class EntityEffectHandler {
 				ContaminationUtil.contaminate(entity, HazardType.RADIATION, ContaminationType.CREATIVE, RadiationConfig.cont * 0.0005F);
 			}
 			
-			if(Library.isCreative(entity))
+			if(entity instanceof EntityPlayer && ((EntityPlayer)entity).capabilities.isCreativeMode)
 				return;
 			
 			Random rand = new Random(entity.getEntityId());

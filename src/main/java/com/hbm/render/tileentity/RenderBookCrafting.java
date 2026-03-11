@@ -1,6 +1,6 @@
 package com.hbm.render.tileentity;
 
-import com.hbm.tileentity.machine.TileEntityBlackBook;
+import com.hbm.main.tileentity.machine.TileEntityBlackBook;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
 public class RenderBookCrafting extends TileEntitySpecialRenderer<TileEntityBlackBook> {

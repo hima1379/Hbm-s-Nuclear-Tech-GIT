@@ -1,6 +1,6 @@
 package com.hbm.inventory.container;
 
-import com.hbm.tileentity.bomb.TileEntityNukeFleija;
+import com.hbm.main.tileentity.bomb.TileEntityNukeFleija;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

@@ -1,7 +1,7 @@
 package com.hbm.handler;
 
 import com.hbm.interfaces.IDummy;
-import com.hbm.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -13,8 +13,8 @@ import net.minecraft.world.World;
 
 public class MultiblockHandler {
 
-	public enum EnumDirection { North, East, South, West }
-    //                            2      5     3      4
+	public enum EnumDirection { North, East, South, West };
+	//                            2      5     3      4
 	//                           -z     +x    +z     -x
 
 	public static int EnumToInt(EnumDirection dir) {

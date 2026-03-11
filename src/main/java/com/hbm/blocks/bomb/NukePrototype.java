@@ -11,7 +11,7 @@ import com.hbm.interfaces.IBomb;
 import com.hbm.items.ModItems;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.bomb.TileEntityNukePrototype;
+import com.hbm.main.tileentity.bomb.TileEntityNukePrototype;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.block.Block;

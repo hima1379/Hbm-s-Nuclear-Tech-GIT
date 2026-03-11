@@ -1,5 +1,7 @@
 package com.hbm.config;
 
+import java.util.Locale;
+
 import org.apache.logging.log4j.Level;
 import org.lwjgl.opengl.GLContext;
 

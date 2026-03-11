@@ -2,7 +2,7 @@ package api.hbm.entity;
 
 public interface IRadarDetectable {
 
-	enum RadarTargetType {
+	public static enum RadarTargetType {
 		MISSILE_TIER0("Micro Missile"),				//tier 0 missile (micro missile assemblies)
 		MISSILE_TIER1("Tier 1 Missile"),			//tier 1 missiles
 		MISSILE_TIER2("Tier 2 Missile"),			//tier 2 missiles
@@ -17,12 +17,12 @@ public interface IRadarDetectable {
 		MIRVLET("Mirvlet"),							//mirvlet
 		PLAYER("Player");							//airborne players
 
-		public final String name;
+		public String name;
 
-		RadarTargetType(String name) {
+		private RadarTargetType(String name) {
 			this.name = name;
 		}
 	}
 
-	RadarTargetType getTargetType();
+	public RadarTargetType getTargetType();
 }

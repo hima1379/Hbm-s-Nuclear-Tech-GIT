@@ -2,8 +2,8 @@ package com.hbm.blocks.network;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
-import com.hbm.tileentity.network.TileEntityCraneBase;
-import com.hbm.tileentity.network.TileEntityCraneGrabber;
+import com.hbm.main.tileentity.network.TileEntityCraneBase;
+import com.hbm.main.tileentity.network.TileEntityCraneGrabber;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -29,7 +29,7 @@ public class CraneGrabber extends BlockCraneBase {
         TileEntity tileentity = world.getTileEntity(pos);
 
         if(tileentity instanceof TileEntityCraneGrabber) {
-            InventoryHelper.dropInventoryItems(world, pos, tileentity, 9, 10);
+            InventoryHelper.dropInventoryItems(world, pos, (TileEntityCraneGrabber) tileentity);
         }
         super.breakBlock(world, pos, state);
     }

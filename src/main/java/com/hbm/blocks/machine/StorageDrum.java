@@ -3,7 +3,7 @@ package com.hbm.blocks.machine;
 import java.util.List;
 
 import com.hbm.blocks.ITooltipProvider;
-import com.hbm.tileentity.machine.TileEntityStorageDrum;
+import com.hbm.main.tileentity.machine.TileEntityStorageDrum;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

@@ -2,8 +2,8 @@ package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityDiFurnace;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityDiFurnace;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

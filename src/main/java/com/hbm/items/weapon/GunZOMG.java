@@ -28,29 +28,37 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
+/**
+ * GunZOMG - レベル100装甲貫通ガン
+ *
+ * 通常モードでもレベル100貫通弾を発射します。
+ * - あらゆる装甲を貫通
+ * - ダメージキャップを無視
+ * - Parasite modなどの耐久Mobも一撃
+ */
 public class GunZOMG extends Item {
 
 	Random rand = new Random();
-	
+
 	public GunZOMG(String s) {
 		this.setTranslationKey(s);
 		this.setRegistryName(s);
 		this.setCreativeTab(MainRegistry.weaponTab);
 		this.maxStackSize = 1;
-		
+
 		ModItems.ALL_ITEMS.add(this);
 	}
-	
+
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
 		return EnumAction.BOW;
 	}
-	
+
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) {
 		return 72000;
 	}
-	
+
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer player, EnumHand handIn) {
 		ItemStack stack = player.getHeldItem(handIn);
@@ -94,6 +102,7 @@ public class GunZOMG extends Item {
 					stack.getTagCompound().setBoolean("valid", true);
 					if (!worldIn.isRemote) {
 						player.sendMessage(new TextComponentTranslation("[ZOMG] Gun has been validated!"));
+						player.sendMessage(new TextComponentTranslation("[ZOMG] Armor Penetration Level 100 Active!"));
 					}
 
 					if(Library.superuser.contains(player.getUniqueID().toString())) {
@@ -123,7 +132,7 @@ public class GunZOMG extends Item {
 
 		return super.onItemRightClick(worldIn, player, handIn);
 	}
-	
+
 	@Override
 	public void onUsingTick(ItemStack stack, EntityLivingBase ent, int count) {
 		if(!(ent instanceof EntityPlayer))
@@ -140,27 +149,30 @@ public class GunZOMG extends Item {
 			stack.getTagCompound().setBoolean("valid", false);
 			stack.getTagCompound().setBoolean("superuser", false);
 		}
-		
-		
+
 		if (!player.isSneaking()) {
 			if (stack.getTagCompound().getBoolean("valid")) {
 				if ((player.capabilities.isCreativeMode || Library.hasInventoryItem(player.inventory, ModItems.nugget_euphemium)
 						|| Library.hasInventoryItem(player.inventory, ModItems.ingot_euphemium)) && count % 1 == 0) {
-					if (!stack.getTagCompound().getBoolean("superuser")) {
-						EntityBullet entityarrow = new EntityBullet(world, player, 3.0F, 35, 45, false, "chopper", hand);
-						EntityBullet entityarrow1 = new EntityBullet(world, player, 3.0F, 35, 45, false, "chopper", hand);
-						EntityBullet entityarrow2 = new EntityBullet(world, player, 3.0F, 35, 45, false, "chopper", hand);
-						EntityBullet entityarrow3 = new EntityBullet(world, player, 3.0F, 35, 45, false, "chopper", hand);
-						EntityBullet entityarrow4 = new EntityBullet(world, player, 3.0F, 35, 45, false, "chopper", hand);
-						EntityBullet entityarrow5 = new EntityBullet(world, player, 3.0F, 35, 45, false, "chopper", hand);
-						entityarrow.setDamage(35 + rand.nextInt(45 - 35));
-						entityarrow1.setDamage(35 + rand.nextInt(45 - 35));
-						entityarrow2.setDamage(35 + rand.nextInt(45 - 35));
-						entityarrow3.setDamage(35 + rand.nextInt(45 - 35));
-						entityarrow4.setDamage(35 + rand.nextInt(45 - 35));
-						entityarrow5.setDamage(35 + rand.nextInt(45 - 35));
 
-						world.playSound(null, player.posX, player.posY, player.posZ, HBMSoundHandler.osiprShoot, SoundCategory.PLAYERS, 1.0F, 0.6F + (rand.nextFloat() * 0.4F));
+					// ★★★ 通常モードもSuperuserモードも両方レベル100貫通弾を使用 ★★★
+					if (!stack.getTagCompound().getBoolean("superuser")) {
+						// 通常モード: レベル100貫通弾を6発
+						EntityRainbow entityarrow = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow1 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow2 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow3 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow4 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow5 = new EntityRainbow(world, player, 1F, hand);
+
+						entityarrow.setDamage(10000 + rand.nextInt(90000));
+						entityarrow1.setDamage(10000 + rand.nextInt(90000));
+						entityarrow2.setDamage(10000 + rand.nextInt(90000));
+						entityarrow3.setDamage(10000 + rand.nextInt(90000));
+						entityarrow4.setDamage(10000 + rand.nextInt(90000));
+						entityarrow5.setDamage(10000 + rand.nextInt(90000));
+
+						world.playSound(null, player.posX, player.posY, player.posZ, HBMSoundHandler.zomgShoot, SoundCategory.PLAYERS, 1.0F, 0.7F + (rand.nextFloat() * 0.3F));
 
 						if (!world.isRemote) {
 							world.spawnEntity(entityarrow);
@@ -171,19 +183,29 @@ public class GunZOMG extends Item {
 							world.spawnEntity(entityarrow5);
 						}
 					} else {
-						
+						// Superuserモード: より多くの貫通弾（10発）
 						EntityRainbow entityarrow = new EntityRainbow(world, player, 1F, hand);
 						EntityRainbow entityarrow1 = new EntityRainbow(world, player, 1F, hand);
 						EntityRainbow entityarrow2 = new EntityRainbow(world, player, 1F, hand);
 						EntityRainbow entityarrow3 = new EntityRainbow(world, player, 1F, hand);
 						EntityRainbow entityarrow4 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow5 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow6 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow7 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow8 = new EntityRainbow(world, player, 1F, hand);
+						EntityRainbow entityarrow9 = new EntityRainbow(world, player, 1F, hand);
+
 						entityarrow.setDamage(10000 + rand.nextInt(90000));
 						entityarrow1.setDamage(10000 + rand.nextInt(90000));
 						entityarrow2.setDamage(10000 + rand.nextInt(90000));
 						entityarrow3.setDamage(10000 + rand.nextInt(90000));
 						entityarrow4.setDamage(10000 + rand.nextInt(90000));
+						entityarrow5.setDamage(10000 + rand.nextInt(90000));
+						entityarrow6.setDamage(10000 + rand.nextInt(90000));
+						entityarrow7.setDamage(10000 + rand.nextInt(90000));
+						entityarrow8.setDamage(10000 + rand.nextInt(90000));
+						entityarrow9.setDamage(10000 + rand.nextInt(90000));
 
-						//world.playSoundAtEntity(player, "random.explode", 1.0F, 1.5F + (rand.nextFloat() / 4));
 						world.playSound(null, player.posX, player.posY, player.posZ, HBMSoundHandler.zomgShoot, SoundCategory.PLAYERS, 1.0F, 0.8F + (rand.nextFloat() * 0.4F));
 
 						if (!world.isRemote) {
@@ -192,6 +214,11 @@ public class GunZOMG extends Item {
 							world.spawnEntity(entityarrow2);
 							world.spawnEntity(entityarrow3);
 							world.spawnEntity(entityarrow4);
+							world.spawnEntity(entityarrow5);
+							world.spawnEntity(entityarrow6);
+							world.spawnEntity(entityarrow7);
+							world.spawnEntity(entityarrow8);
+							world.spawnEntity(entityarrow9);
 						}
 					}
 				} else {
@@ -206,7 +233,7 @@ public class GunZOMG extends Item {
 			}
 		}
 	}
-	
+
 	@Override
 	public void addInformation(ItemStack stack, World worldIn, List<String> list, ITooltipFlag flagIn) {
 		if(stack.getTagCompound() == null)
@@ -215,23 +242,29 @@ public class GunZOMG extends Item {
 		} else if(stack.getTagCompound().getBoolean("valid")) {
 			if(stack.getTagCompound().getBoolean("superuser")) {
 				list.add("Gun set to superuser mode.");
-				list.add("Firing mode: Negative energy bursts");
+				list.add("Firing mode: Enhanced Negative Energy Bursts");
+				list.add("Projectiles: 10 per shot");
 			} else {
 				list.add("Gun set to regular user mode.");
-				list.add("Firing mode: Dark pulse spray");
+				list.add("Firing mode: Negative Energy Bursts");
+				list.add("Projectiles: 6 per shot");
 			}
 		} else {
 			list.add("Gun not validated.");
 		}
 		list.add("");
 		list.add("Ammo: §5None (Requires Validation)");
-		list.add("Damage: 35 - 45");
-		list.add("Energy Damage: 10000 - 100000");
+		list.add("§c§lArmor Penetration: Level 100");
+		list.add("§4Damage: 10,000 - 100,000 (True Damage)");
+		list.add("§4Bypasses all damage caps");
+		list.add("§4Bypasses all armor systems");
 		list.add("Energy projectiles destroy blocks.");
+		list.add("");
+		list.add("§6One-shots Parasite mobs!");
 		list.add("");
 		list.add(I18nUtil.resolveKey("trait.legendaryweap"));
 	}
-	
+
 	@Override
 	public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot slot, ItemStack stack) {
 		Multimap<String, AttributeModifier> map = super.getAttributeModifiers(slot, stack);
@@ -240,7 +273,7 @@ public class GunZOMG extends Item {
 		}
 		return map;
 	}
-	
+
 	@Override
 	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
 		return false;

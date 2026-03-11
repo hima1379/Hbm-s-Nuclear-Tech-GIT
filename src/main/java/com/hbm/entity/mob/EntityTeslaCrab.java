@@ -3,7 +3,7 @@ package com.hbm.entity.mob;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hbm.tileentity.machine.TileEntityTesla;
+import com.hbm.main.tileentity.machine.TileEntityTesla;
 
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.world.World;

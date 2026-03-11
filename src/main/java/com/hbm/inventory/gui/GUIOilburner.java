@@ -5,7 +5,7 @@ import com.hbm.inventory.FluidFlameRecipes;
 import com.hbm.inventory.container.ContainerOilburner;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityHeaterOilburner;
+import com.hbm.main.tileentity.machine.TileEntityHeaterOilburner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;

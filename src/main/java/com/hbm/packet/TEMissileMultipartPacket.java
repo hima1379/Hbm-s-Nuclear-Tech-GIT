@@ -1,9 +1,9 @@
 package com.hbm.packet;
 
 import com.hbm.handler.MissileStruct;
-import com.hbm.tileentity.bomb.TileEntityCompactLauncher;
-import com.hbm.tileentity.bomb.TileEntityLaunchTable;
-import com.hbm.tileentity.machine.TileEntityMachineMissileAssembly;
+import com.hbm.main.tileentity.bomb.TileEntityCompactLauncher;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchTable;
+import com.hbm.main.tileentity.machine.TileEntityMachineMissileAssembly;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -12,8 +12,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TEMissileMultipartPacket implements IMessage {
 
@@ -22,14 +20,17 @@ public class TEMissileMultipartPacket implements IMessage {
 	int z;
 	MissileStruct missile;
 
-	public TEMissileMultipartPacket() {
+	public TEMissileMultipartPacket()
+	{
+		
 	}
 	
 	public TEMissileMultipartPacket(BlockPos pos, MissileStruct missile){
 		this(pos.getX(), pos.getY(), pos.getZ(), missile);
 	}
 
-	public TEMissileMultipartPacket(int x, int y, int z, MissileStruct missile) {
+	public TEMissileMultipartPacket(int x, int y, int z, MissileStruct missile)
+	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -55,24 +56,29 @@ public class TEMissileMultipartPacket implements IMessage {
 	public static class Handler implements IMessageHandler<TEMissileMultipartPacket, IMessage> {
 		
 		@Override
-        @SideOnly(Side.CLIENT)
-        public IMessage onMessage(TEMissileMultipartPacket m, MessageContext ctx) {
-            if(m == null) return null;
-            Minecraft.getMinecraft().addScheduledTask(() -> {
+		public IMessage onMessage(TEMissileMultipartPacket m, MessageContext ctx) {
 
-                TileEntity te = Minecraft.getMinecraft().world.getTileEntity(new BlockPos(m.x, m.y, m.z));
-                if (te != null && te instanceof TileEntityCompactLauncher launcher) {
-                    launcher.load = m.missile;
-                }
-                if (te != null && te instanceof TileEntityLaunchTable launcher) {
-                    launcher.load = m.missile;
-                }
-                if (te != null && te instanceof TileEntityMachineMissileAssembly rack) {
-                    rack.load = m.missile;
-                }
+			TileEntity te = Minecraft.getMinecraft().world.getTileEntity(new BlockPos(m.x, m.y, m.z));
 
-            });
-            return null;
-        }
+			if (te != null && te instanceof TileEntityCompactLauncher) {
+				
+				TileEntityCompactLauncher launcher = (TileEntityCompactLauncher) te;
+				launcher.load = m.missile;
+			}
+
+			if (te != null && te instanceof TileEntityLaunchTable) {
+				
+				TileEntityLaunchTable launcher = (TileEntityLaunchTable) te;
+				launcher.load = m.missile;
+			}
+
+			if (te != null && te instanceof TileEntityMachineMissileAssembly) {
+				
+				TileEntityMachineMissileAssembly rack = (TileEntityMachineMissileAssembly) te;
+				rack.load = m.missile;
+			}
+			
+			return null;
+		}
 	}
 }

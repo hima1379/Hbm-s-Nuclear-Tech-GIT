@@ -82,9 +82,7 @@ public class JEIConfig implements IModPlugin {
 			return;
 		registry.addRecipeRegistryPlugin(new HbmJeiRegistryPlugin());
 
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_autocrafter), VanillaRecipeCategoryUid.CRAFTING);
-
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_electric_furnace_off), VanillaRecipeCategoryUid.SMELTING);
+		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_electric_furnace_off), VanillaRecipeCategoryUid.SMELTING);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.furnace_iron), VanillaRecipeCategoryUid.SMELTING);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.furnace_steel), VanillaRecipeCategoryUid.SMELTING);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_arc_furnace_off), VanillaRecipeCategoryUid.SMELTING);
@@ -109,8 +107,7 @@ public class JEIConfig implements IModPlugin {
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_crucible), FOUNDRYSMELT);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_crucible), FOUNDRYMIX);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_crucible), FOUNDRYPOUR);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_strand_caster), FOUNDRYPOUR);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_arc_welder), ARCWELDER);
+		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_arc_welder), ARCWELDER);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_soldering_station), SOLDERINGSTATION);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_boiler_off), BOILER);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_boiler_electric_off), BOILER);
@@ -123,7 +120,6 @@ public class JEIConfig implements IModPlugin {
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_centrifuge), CENTRIFUGE);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_gascent), GAS_CENT);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_reactor), REACTOR);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.iter), REACTOR);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_waste_drum), WASTEDRUM);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_storage_drum), STORAGEDRUM);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_refinery), REFINERY);
@@ -134,16 +130,8 @@ public class JEIConfig implements IModPlugin {
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_vacuum_distill), VACUUMDISTILL);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_coker), COKER);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_shredder), SHREDDER);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_fluidtank), FLUIDS);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_bat9000), FLUIDS);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_orbus), FLUIDS);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.barrel_antimatter), FLUIDS);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.barrel_tcalloy), FLUIDS);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.barrel_steel), FLUIDS);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.barrel_iron), FLUIDS);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.barrel_corroded), FLUIDS);
-		registry.addRecipeCatalyst(new ItemStack(ModBlocks.barrel_plastic), FLUIDS);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_crystallizer), CRYSTALLIZER);
+		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_fluidtank), FLUIDS);
+		registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_crystallizer), CRYSTALLIZER);
 		//This recipe catalyst doesn't work, since the book of is blacklisted.
 		registry.addRecipeCatalyst(new ItemStack(ModItems.book_of_), BOOK);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.iter), FUSION_BYPRODUCT);
@@ -158,18 +146,8 @@ public class JEIConfig implements IModPlugin {
 		registry.addRecipeCatalyst(new ItemStack(ModItems.laser_crystal_bale), SILEX_GAMMA);
 		registry.addRecipeCatalyst(new ItemStack(ModItems.laser_crystal_digamma), SILEX_DIGAMMA);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_iron), SMITHING);
-		registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_iron), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_lead), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_steel), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_meteorite), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_starmetal), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_ferrouranium), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_bismuth), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_schrabidate), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_dnt), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_osmiridium), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_murky), ANVIL);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.rbmk_outgasser), RBMKOUTGASSER);
+		registry.addRecipeCatalyst(new ItemStack(ModBlocks.anvil_steel), ANVIL);
+		registry.addRecipeCatalyst(new ItemStack(ModBlocks.rbmk_outgasser), RBMKOUTGASSER);
 		registry.addRecipeCatalyst(new ItemStack(Blocks.CRAFTING_TABLE), RBMKFUEL);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.fwatz_core), SAFE_REACTOR);
 		registry.addRecipeCatalyst(new ItemStack(ModBlocks.crate_tungsten), DFC);
@@ -224,8 +202,7 @@ public class JEIConfig implements IModPlugin {
 		registry.addRecipes(JeiRecipes.getSAFERecipes(), SAFE_REACTOR);
 		registry.addRecipes(DFCRecipes.getDFCRecipes(), DFC);
 
-        registry.addRecipeClickArea(GUIAutocrafter.class, 97, 39, 17, 17, VanillaRecipeCategoryUid.CRAFTING);
-        registry.addRecipeClickArea(GUIMachineAssembler.class, 45, 83, 82, 30, ASSEMBLY);
+		registry.addRecipeClickArea(GUIMachineAssembler.class, 45, 83, 82, 30, ASSEMBLY);
 		registry.addRecipeClickArea(GUIMachineChemplant.class, 45, 90, 85, 15, CHEMPLANT);
 		registry.addRecipeClickArea(GUIMixer.class, 62, 36, 52, 44, MIXER);
 		registry.addRecipeClickArea(GUIMachineCyclotron.class, 50, 24, 40, 40, CYCLOTRON);
@@ -239,12 +216,11 @@ public class JEIConfig implements IModPlugin {
 		registry.addRecipeClickArea(GUIMachineBoilerRTG.class, 61, 34, 17, 17, BOILER);
 		registry.addRecipeClickArea(GUIMachineArcWelder.class, 70, 35, 35, 17, ARCWELDER);
 		registry.addRecipeClickArea(GUIMachineSolderingStation.class, 70, 26, 35, 17, SOLDERINGSTATION);
-		registry.addRecipeClickArea(GUILiquefactor.class, 52, 34, 17, 55, LIQUEFACTION);
-		registry.addRecipeClickArea(GUISolidifier.class, 52, 34, 17, 55, SOLIDIFCATION);
+		registry.addRecipeClickArea(GUILiquefactor.class, 52, 34, 18, 55, LIQUEFACTION);
+		registry.addRecipeClickArea(GUISolidifier.class, 52, 34, 18, 55, SOLIDIFCATION);
 		registry.addRecipeClickArea(GUIMachineCentrifuge.class, 35, 9, 106, 40, CENTRIFUGE);
 		registry.addRecipeClickArea(GUIMachineGasCent.class, 88, 33, 35, 17, GAS_CENT);
 		registry.addRecipeClickArea(GUIMachineReactor.class, 80, 35, 21, 14, REACTOR);
-        registry.addRecipeClickArea(GUIITER.class, 43, 17, 17, 45, REACTOR);
 		registry.addRecipeClickArea(GUIMachineRefinery.class, 79, 71, 71, 17, REFINERY);
 		registry.addRecipeClickArea(GUIMachineHydrotreater.class, 80, 70, 33, 53, HYDROTREATER);
 		registry.addRecipeClickArea(GUIMachineCatalyticReformer.class, 62, 70, 33, 53, REFORMER);
@@ -260,13 +236,8 @@ public class JEIConfig implements IModPlugin {
 		registry.addRecipeClickArea(GUIFWatzCore.class, 52, 64, 72, 19, SAFE_REACTOR);
 		registry.addRecipeClickArea(GUIRBMKOutgasser.class, 64, 53, 48, 16, RBMKOUTGASSER);
 		registry.addRecipeClickArea(GUIMachineSchrabidiumTransmutator.class, 64, 56, 66, 31, TRANSMUTATION);
-        registry.addRecipeClickArea(GUINukeFurnace.class, 73, 30, 37, 25, VanillaRecipeCategoryUid.SMELTING);
-        registry.addRecipeClickArea(GUIMicrowave.class, 97, 30, 37, 25, VanillaRecipeCategoryUid.SMELTING);
-        registry.addRecipeClickArea(GUIRtgFurnace.class, 73, 30, 37, 21, VanillaRecipeCategoryUid.SMELTING);
-        registry.addRecipeClickArea(GUIMachineElectricFurnace.class, 73, 30, 37, 25, VanillaRecipeCategoryUid.SMELTING);
-        registry.addRecipeClickArea(GUIMachineArcFurnace.class, 73, 30, 37, 21, VanillaRecipeCategoryUid.SMELTING);
 
-        IIngredientBlacklist blacklist = registry.getJeiHelpers().getIngredientBlacklist();
+		IIngredientBlacklist blacklist = registry.getJeiHelpers().getIngredientBlacklist();
 
 		// Some things are even beyond my control...or are they?
 		blacklist.addIngredientToBlacklist(new ItemStack(ModItems.memory));
@@ -413,7 +384,7 @@ public class JEIConfig implements IModPlugin {
 			return ModItems.canister_generic.getTranslationKey() + (fluid == null ? "empty" : fluid.getFluid().getUnlocalizedName() + fluid.amount);
 		});
 		subtypeRegistry.registerSubtypeInterpreter(ModItems.missile_custom, (ItemStack stack) -> {
-			return ModItems.missile_custom.getTranslationKey() + "w" + ItemCustomMissile.readFromNBT(stack, "warhead") + "f" + ItemCustomMissile.readFromNBT(stack, "fuselage") + "s" + ItemCustomMissile.readFromNBT(stack, "stability") + "t" + ItemCustomMissile.readFromNBT(stack, "thruster");
+			return ModItems.missile_custom.getTranslationKey() + "w" + Integer.toString(ItemCustomMissile.readFromNBT(stack, "warhead")) + "f" + Integer.toString(ItemCustomMissile.readFromNBT(stack, "fuselage")) + "s" + Integer.toString(ItemCustomMissile.readFromNBT(stack, "stability")) + "t" + Integer.toString(ItemCustomMissile.readFromNBT(stack, "thruster"));
 		});
 		subtypeRegistry.registerSubtypeInterpreter(ModItems.fluid_icon, (ItemStack stack) -> {
 			if(stack.hasTagCompound()) {

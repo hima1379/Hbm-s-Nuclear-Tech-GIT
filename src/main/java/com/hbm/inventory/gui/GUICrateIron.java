@@ -8,7 +8,7 @@ import vazkii.quark.api.IChestButtonCallback;
 
 import com.hbm.inventory.container.ContainerCrateIron;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityCrateIron;
+import com.hbm.main.tileentity.machine.TileEntityCrateIron;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;

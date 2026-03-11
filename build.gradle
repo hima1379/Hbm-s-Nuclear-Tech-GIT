@@ -278,6 +278,7 @@ if (usesShadowedDependencies.toBoolean()) {
 }
 
 
+
 // Configure Java
 
 java {
@@ -759,6 +760,15 @@ if (separateRunDirectories.toBoolean()) {
     runServer {
         workingDir = file('run/server')
     }
+}
+
+// Configure JVM memory settings for run tasks (15GB)
+runClient {
+    jvmArgs = jvmArgs + ['-Xms15G', '-Xmx15G']
+}
+
+runServer {
+    jvmArgs = jvmArgs + ['-Xms15G', '-Xmx15G']
 }
 
 // Create API library jar
@@ -1441,15 +1451,20 @@ boolean performBuildScriptUpdate() {
 }
 
 boolean isNewBuildScriptVersionAvailable() {
-    Map parameters = ["connectTimeout": 10000, "readTimeout": 10000]
+    try {
+        Map parameters = ["connectTimeout": 10000, "readTimeout": 10000]
 
-    String currentBuildScript = getFile("build.gradle").getText()
-    String currentBuildScriptHash = getVersionHash(currentBuildScript)
-    String availableBuildScript = availableBuildScriptUrl().newInputStream(parameters).getText()
-    String availableBuildScriptHash = getVersionHash(availableBuildScript)
+        String currentBuildScript = getFile("build.gradle").getText()
+        String currentBuildScriptHash = getVersionHash(currentBuildScript)
+        String availableBuildScript = availableBuildScriptUrl().newInputStream(parameters).getText()
+        String availableBuildScriptHash = getVersionHash(availableBuildScript)
 
-    boolean isUpToDate = currentBuildScriptHash.empty || availableBuildScriptHash.empty || currentBuildScriptHash == availableBuildScriptHash
-    return !isUpToDate
+        boolean isUpToDate = currentBuildScriptHash.empty || availableBuildScriptHash.empty || currentBuildScriptHash == availableBuildScriptHash
+        return !isUpToDate
+    } catch (Exception e) {
+        // Network unavailable — skip version check and proceed with build
+        return false
+    }
 }
 
 static String getVersionHash(String buildScriptContent) {

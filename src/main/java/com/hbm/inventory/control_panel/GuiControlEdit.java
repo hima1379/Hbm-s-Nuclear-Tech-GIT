@@ -10,7 +10,7 @@ import org.lwjgl.input.Mouse;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityControlPanel;
+import com.hbm.main.tileentity.machine.TileEntityControlPanel;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;

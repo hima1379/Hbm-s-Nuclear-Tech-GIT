@@ -7,9 +7,9 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.main.MainRegistry;
 import com.hbm.render.amlfrom1710.Vec3;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityITER;
-import com.hbm.tileentity.machine.TileEntityITERStruct;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityITER;
+import com.hbm.main.tileentity.machine.TileEntityITERStruct;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

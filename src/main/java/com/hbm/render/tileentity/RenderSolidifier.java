@@ -4,7 +4,7 @@ import com.hbm.blocks.BlockDummyable;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.oil.TileEntityMachineSolidifier;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineSolidifier;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;

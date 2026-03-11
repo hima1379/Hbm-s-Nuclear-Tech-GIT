@@ -11,7 +11,7 @@ import com.hbm.lib.RefStrings;
 import com.hbm.lib.Library;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityMachineUUCreator;
+import com.hbm.main.tileentity.machine.TileEntityMachineUUCreator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

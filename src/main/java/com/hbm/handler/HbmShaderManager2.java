@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -466,7 +465,9 @@ public class HbmShaderManager2 {
 		}
 		
 		public Shader withUniforms(Uniform... uniforms){
-            this.uniforms.addAll(Arrays.asList(uniforms));
+			for(Uniform u : uniforms){
+				this.uniforms.add(u);
+			}
 			return this;
 		}
 		
@@ -525,8 +526,8 @@ public class HbmShaderManager2 {
 			GLCompat.uniformMatrix4(GLCompat.getUniformLocation(shader, name), transpose, matrix);
 		}
 		
-		public interface Uniform {
-			void apply(Shader shader);
+		public static interface Uniform {
+			public void apply(Shader shader);
 		}
 	}
 }

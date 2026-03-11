@@ -6,7 +6,7 @@ import com.hbm.forgefluid.FFUtils;
 import com.hbm.lib.Library;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.turret.TileEntityTurretBaseNT;
+import com.hbm.main.tileentity.turret.TileEntityTurretBaseNT;
 
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.math.BlockPos;

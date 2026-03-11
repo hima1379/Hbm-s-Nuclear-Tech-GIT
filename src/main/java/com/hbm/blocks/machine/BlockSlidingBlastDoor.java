@@ -11,8 +11,8 @@ import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.interfaces.IKeypadHandler;
 import com.hbm.lib.ForgeDirection;
-import com.hbm.tileentity.TileEntitySlidingBlastDoorKeypad;
-import com.hbm.tileentity.machine.TileEntitySlidingBlastDoor;
+import com.hbm.main.tileentity.TileEntitySlidingBlastDoorKeypad;
+import com.hbm.main.tileentity.machine.TileEntitySlidingBlastDoor;
 import com.hbm.util.KeypadClient;
 
 import micdoodle8.mods.galacticraft.api.block.IPartialSealableBlock;
@@ -70,6 +70,11 @@ public class BlockSlidingBlastDoor extends BlockDummyable implements IRadResista
 
 	@Override
 	public void addInformation(ItemStack stack, World player, List<String> tooltip, ITooltipFlag advanced) {
+		float hardness = this.getExplosionResistance(null);
+		tooltip.add("§2[" + I18nUtil.resolveKey("trait.radshield") + "]");
+		if(hardness > 50){
+			tooltip.add("§6" + I18nUtil.resolveKey("trait.blastres", hardness));
+		}
 		if(this == ModBlocks.sliding_blast_door){
 			tooltip.add(I18nUtil.resolveKey("desc.varwin"));
 		} else if(this == ModBlocks.sliding_blast_door_2){
@@ -164,7 +169,12 @@ public class BlockSlidingBlastDoor extends BlockDummyable implements IRadResista
 		return 0;
 	}
 
-    @Override
+	@Override
+	public boolean isOpaqueCube(IBlockState state) {
+		return false;
+	}
+
+	@Override
 	protected void fillSpace(World world, int x, int y, int z, ForgeDirection dir, int o) {
 		super.fillSpace(world, x, y, z, dir, o);
 		if(world.getBlockState(new BlockPos(x, y, z)).getBlock() == ModBlocks.sliding_blast_door_2) {

@@ -10,7 +10,7 @@ import com.hbm.inventory.container.ContainerNukeFstbmb;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.bomb.TileEntityNukeBalefire;
+import com.hbm.main.tileentity.bomb.TileEntityNukeBalefire;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;

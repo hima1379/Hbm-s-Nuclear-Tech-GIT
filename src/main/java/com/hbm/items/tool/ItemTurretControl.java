@@ -10,9 +10,9 @@ import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.Library;
 import com.hbm.main.MainRegistry;
 import com.hbm.render.amlfrom1710.Vec3;
-import com.hbm.tileentity.turret.TileEntityTurretBase;
-import com.hbm.tileentity.turret.TileEntityTurretBaseNT;
-import com.hbm.tileentity.turret.TileEntityTurretCheapo;
+import com.hbm.main.tileentity.turret.TileEntityTurretBase;
+import com.hbm.main.tileentity.turret.TileEntityTurretBaseNT;
+import com.hbm.main.tileentity.turret.TileEntityTurretCheapo;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -88,9 +88,9 @@ public class ItemTurretControl extends Item {
 	public void addInformation(ItemStack stack, World worldIn, List<String> list, ITooltipFlag flagIn) {
 		if (stack.getTagCompound() != null) {
 			list.add(I18nUtil.resolveKey("desc.turrectcontrol"));
-			list.add("X: " + stack.getTagCompound().getInteger("xCoord"));
-			list.add("Y: " + stack.getTagCompound().getInteger("yCoord"));
-			list.add("Z: " + stack.getTagCompound().getInteger("zCoord"));
+			list.add("X: " + String.valueOf(stack.getTagCompound().getInteger("xCoord")));
+			list.add("Y: " + String.valueOf(stack.getTagCompound().getInteger("yCoord")));
+			list.add("Z: " + String.valueOf(stack.getTagCompound().getInteger("zCoord")));
 		} else {
 			list.add(I18nUtil.resolveKey("desc.turrectcontrol.noconnect"));
 		}

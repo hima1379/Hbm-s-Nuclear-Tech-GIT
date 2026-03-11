@@ -2,8 +2,8 @@ package com.hbm.blocks.machine;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.lib.ForgeDirection;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityMachineChemfac;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityMachineChemfac;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -46,7 +46,7 @@ public class MachineChemfac extends BlockDummyable {
 		z += dir.offsetZ * o;
 		ForgeDirection rot = dir.getRotation(ForgeDirection.DOWN);
 
-		safeRem = true;
+		this.safeRem = true;
 
 		for (int i = -3; i < 3; i++) {
 			this.makeExtra(world, x + rot.offsetX * 2 + dir.offsetX * i, y + 3, z + rot.offsetZ * 2 + dir.offsetZ * i);
@@ -59,7 +59,7 @@ public class MachineChemfac extends BlockDummyable {
 			this.makeExtra(world, x - rot.offsetX * 4 + dir.offsetX * i, y + 2, z - rot.offsetZ * 4 + dir.offsetZ * i);
 		}
 
-		safeRem = false;
+		this.safeRem = false;
 	}
 
 	@Override

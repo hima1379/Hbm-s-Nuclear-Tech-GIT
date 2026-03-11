@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.inventory.container.ContainerNukeN2;
 import com.hbm.items.ModItems;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.bomb.TileEntityNukeN2;
+import com.hbm.main.tileentity.bomb.TileEntityNukeN2;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

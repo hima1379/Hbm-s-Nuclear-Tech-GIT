@@ -1,0 +1,46 @@
+package com.hbm.blocks.machine.fusion;
+
+import javax.annotation.Nullable;
+import java.util.List;
+
+import com.hbm.blocks.BlockDummyable;
+import com.hbm.blocks.ITooltipProvider;
+import com.hbm.main.tileentity.machine.fusion.TileEntityFusionMHDT;
+
+import net.minecraft.block.material.Material;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+
+/**
+ * Fusion MHDT Block - 7x4x7 structure.
+ * @author Adapted for 1.12.2
+ */
+public class MachineFusionMHDT extends BlockDummyable implements ITooltipProvider {
+
+	public MachineFusionMHDT(String s) {
+		super(Material.IRON, s);
+	}
+
+	@Override
+	public TileEntity createNewTileEntity(World world, int meta) {
+		if(meta >= 12) return new TileEntityFusionMHDT();
+		return null;
+	}
+
+	@Override
+	public int[] getDimensions() {
+		return new int[] { 3, 0, 3, 3, 2, 3 };
+	}
+
+	@Override
+	public int getOffset() {
+		return 7;
+	}
+
+	@Override
+	public void addInformation(ItemStack stack, @Nullable World player, List<String> tooltip, ITooltipFlag advanced) {
+		this.addStandardInfo(tooltip);
+	}
+}

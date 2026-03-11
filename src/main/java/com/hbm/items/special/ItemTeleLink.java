@@ -5,7 +5,7 @@ import java.util.List;
 import com.hbm.util.I18nUtil;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.machine.TileEntityMachineTeleporter;
+import com.hbm.main.tileentity.machine.TileEntityMachineTeleporter;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,8 +40,9 @@ public class ItemTeleLink extends Item {
 				int x1 = stack.getTagCompound().getInteger("x");
 				int y1 = stack.getTagCompound().getInteger("y");
 				int z1 = stack.getTagCompound().getInteger("z");
+				BlockPos pos1 = new BlockPos(x1, y1, z1);
 
-                ((TileEntityMachineTeleporter) te).target = new BlockPos(x1, y1, z1);
+				((TileEntityMachineTeleporter) te).target = pos1;
 				((TileEntityMachineTeleporter) te).linked = true;
 				te.markDirty();
 

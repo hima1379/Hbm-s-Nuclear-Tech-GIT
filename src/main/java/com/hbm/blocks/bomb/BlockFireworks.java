@@ -5,7 +5,7 @@ import java.util.List;
 import com.hbm.util.I18nUtil;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.bomb.TileEntityFireworks;
+import com.hbm.main.tileentity.bomb.TileEntityFireworks;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

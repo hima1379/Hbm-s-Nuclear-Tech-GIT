@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntityHeaterFirebox;
+import com.hbm.main.tileentity.machine.TileEntityHeaterFirebox;
 
 
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -29,19 +29,21 @@ public class RenderFirebox extends TileEntitySpecialRenderer<TileEntityHeaterFir
 		case 4: GL11.glRotatef(270, 0F, 1F, 0F); break;
 		}
 		GL11.glRotatef(-90, 0F, 1F, 0F);
-
-        bindTexture(ResourceManager.heater_firebox_tex);
+		
+		TileEntityHeaterFirebox firebox = (TileEntityHeaterFirebox) tile;
+		
+		bindTexture(ResourceManager.heater_firebox_tex);
 		ResourceManager.heater_firebox.renderPart("Main");
 		
 		GL11.glPushMatrix();
-		float door = ((TileEntityHeaterFirebox) tile).prevDoorAngle + (((TileEntityHeaterFirebox) tile).doorAngle - ((TileEntityHeaterFirebox) tile).prevDoorAngle) * partialTicks;
+		float door = firebox.prevDoorAngle + (firebox.doorAngle - firebox.prevDoorAngle) * partialTicks;
 		GL11.glTranslated(1.375, 0, 0.375);
 		GL11.glRotatef(door, 0F, -1F, 0F);
 		GL11.glTranslated(-1.375, 0, -0.375);
 		ResourceManager.heater_firebox.renderPart("Door");
 		GL11.glPopMatrix();
 		
-		if(((TileEntityHeaterFirebox) tile).wasOn) {
+		if(firebox.wasOn) {
 			GL11.glPushMatrix();
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			

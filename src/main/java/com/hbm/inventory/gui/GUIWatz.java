@@ -8,7 +8,7 @@ import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.render.util.GaugeUtil;
 import com.hbm.render.util.GaugeUtil.Gauge;
-import com.hbm.tileentity.machine.TileEntityWatz;
+import com.hbm.main.tileentity.machine.TileEntityWatz;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;

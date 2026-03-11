@@ -9,7 +9,7 @@ import com.hbm.inventory.container.ContainerFWatzCore;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityFWatzCore;
+import com.hbm.main.tileentity.machine.TileEntityFWatzCore;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.SoundEvents;
@@ -71,7 +71,7 @@ public class GUIFWatzCore extends GuiInfoContainer {
 		int k = (int)fwatz.getPowerScaled(116);
 		drawTexturedModalRect(guiLeft + 30, guiTop + 108, 0, 222, k, 16);
 		
-		if(fwatz.isDoingSomething)
+		if(fwatz.isRunning())
 			drawTexturedModalRect(guiLeft + 64, guiTop + 29, 176, 24, 48, 48);
 
 		if(fwatz.isOn)

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.hbm.lib.ForgeDirection;
 import com.hbm.inventory.material.Mats.MaterialStack;
-import com.hbm.tileentity.machine.TileEntityFoundryBasin;
+import com.hbm.main.tileentity.machine.TileEntityFoundryBasin;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;

@@ -2,7 +2,7 @@ package com.hbm.inventory.container;
 
 import com.hbm.inventory.SlotMachineOutput;
 import com.hbm.items.machine.ItemAssemblyTemplate;
-import com.hbm.tileentity.machine.TileEntityMachineAssembler;
+import com.hbm.main.tileentity.machine.TileEntityMachineAssembler;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -29,8 +29,8 @@ public class ContainerMachineAssembler extends Container {
 			@Override
 			public boolean isItemValid(ItemStack stack) {
 				return stack != null && stack.getItem() instanceof ItemAssemblyTemplate;
-			}
-        });
+			};
+		});
 		//Output
 		this.addSlotToContainer(new SlotMachineOutput(te.inventory, 5, 134, 90));
 		//Input

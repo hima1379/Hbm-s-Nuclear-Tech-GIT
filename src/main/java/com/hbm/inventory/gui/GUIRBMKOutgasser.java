@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.inventory.container.ContainerRBMKOutgasser;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKOutgasser;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKOutgasser;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

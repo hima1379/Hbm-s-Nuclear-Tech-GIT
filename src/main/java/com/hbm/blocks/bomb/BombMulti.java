@@ -7,7 +7,7 @@ import com.hbm.explosion.ExplosionNukeGeneric;
 import com.hbm.interfaces.IBomb;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.bomb.TileEntityBombMulti;
+import com.hbm.main.tileentity.bomb.TileEntityBombMulti;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;

@@ -518,8 +518,10 @@ public class EntityBullet extends Entity implements IProjectile {
 										((EntityLivingBase) movingobjectposition.entityHit).setHealth(0.0F);
 									}
 								}
-                                this.getIsCritical();// this.setDead();
-                            }
+								if (!this.getIsCritical())
+									// this.setDead();
+									;
+							}
 						} else {
 
 							if (movingobjectposition.entityHit instanceof EntityLivingBase) {
@@ -590,7 +592,8 @@ public class EntityBullet extends Entity implements IProjectile {
 			// this.prevRotationPitch < -180.0F; this.prevRotationPitch -=
 			// 360.0F)
 			{
-            }
+				;
+			}
 
 			/*
 			 * while (this.rotationPitch - this.prevRotationPitch >= 180.0F) {

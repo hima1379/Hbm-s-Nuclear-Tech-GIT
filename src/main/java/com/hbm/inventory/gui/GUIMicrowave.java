@@ -8,7 +8,7 @@ import com.hbm.inventory.container.ContainerMicrowave;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityMicrowave;
+import com.hbm.main.tileentity.machine.TileEntityMicrowave;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

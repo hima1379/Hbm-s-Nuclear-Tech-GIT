@@ -6,7 +6,7 @@ import com.hbm.inventory.SlotMachineOutput;
 import com.hbm.inventory.SlotUpgrade;
 import com.hbm.inventory.SolderingRecipes;
 import com.hbm.items.machine.ItemMachineUpgrade;
-import com.hbm.tileentity.machine.TileEntityMachineSolderingStation;
+import com.hbm.main.tileentity.machine.TileEntityMachineSolderingStation;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

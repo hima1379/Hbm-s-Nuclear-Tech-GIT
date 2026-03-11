@@ -39,13 +39,14 @@ public class HbmJeiRegistryPlugin implements IRecipeRegistryPlugin {
 					if(stack.getItem() == Item.getItemFromBlock(ModBlocks.machine_assembler)){
 						return getRecipeWrappers(recipeCategory);
 					}
-                    return (List<T>) AssemblerRecipes.recipes.entrySet().stream().filter(recipe -> {
-                        for(AStack input : recipe.getValue()) {
-                            if(input.copy().singulize().isApplicable(stack))
-                                return true;
-                        }
-                        return false;
-                    }).map(recipe -> new AssemblerRecipeWrapper(recipe.getKey().toStack(), recipe.getValue(), AssemblerRecipes.time.get(recipe.getKey()))).collect(Collectors.toList());
+					List<T> list = (List<T>) AssemblerRecipes.recipes.entrySet().stream().filter(recipe -> {
+						for(AStack input : recipe.getValue()) {
+							if(input.copy().singulize().isApplicable(stack))
+								return true;
+						}
+						return false;
+					}).map(recipe -> new AssemblerRecipeWrapper(recipe.getKey().toStack(), recipe.getValue(), AssemblerRecipes.time.get(recipe.getKey()))).collect(Collectors.toList());
+					return list;
 				} else if(focus.getMode() == Mode.OUTPUT) {
 					return (List<T>) AssemblerRecipes.recipes.entrySet().stream().filter(recipe -> (new ComparableStack(recipe.getKey().toStack()).matchesRecipe(stack, true))).map(recipe -> new AssemblerRecipeWrapper(recipe.getKey().toStack(), recipe.getValue(), AssemblerRecipes.time.get(recipe.getKey()))).collect(Collectors.toList());
 				}

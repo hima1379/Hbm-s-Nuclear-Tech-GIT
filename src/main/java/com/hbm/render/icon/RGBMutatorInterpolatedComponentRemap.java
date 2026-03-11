@@ -53,13 +53,17 @@ public class RGBMutatorInterpolatedComponentRemap implements RGBMutator {
     }
 
     private static double getCompFromFunc(int lower, int upper, double interp) {
+        double d0 = (double) lower;
+        double d1 = (double) upper;
 
-        return (double) lower + interp * ((double) upper - (double) lower);
+        return d0 + interp * (d1 - d0);
     }
 
     private static double getPosFromComp(int lower, int upper, double val) {
+        double d0 = (double) lower;
+        double d1 = (double) upper;
 
-        return (val - (double) lower) / ((double) upper - (double) lower);
+        return (val - d0) / (d1 - d0);
     }
 
     private static int compR(int col) { return (col & 0xff0000) >> 16; }

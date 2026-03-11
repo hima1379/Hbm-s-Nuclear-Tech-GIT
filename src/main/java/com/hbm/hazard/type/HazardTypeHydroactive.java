@@ -3,7 +3,6 @@ package com.hbm.hazard.type;
 import java.util.List;
 
 import com.hbm.hazard.modifier.HazardModifier;
-import com.hbm.lib.Library;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.block.material.Material;
@@ -17,7 +16,7 @@ public class HazardTypeHydroactive extends HazardTypeBase {
 
 	@Override
 	public void onUpdate(EntityLivingBase target, float level, ItemStack stack) {
-		if(!target.world.isRemote && target.isWet()) {
+		if(target.isWet()) {
 			stack.setCount(0);
 			target.world.newExplosion(null, target.posX, target.posY + target.getEyeHeight() - target.getYOffset(), target.posZ, level, false, true);
 		}
@@ -33,6 +32,6 @@ public class HazardTypeHydroactive extends HazardTypeBase {
 
 	@Override
 	public void addHazardInformation(EntityPlayer player, List<String> list, float level, ItemStack stack, List<HazardModifier> modifiers) {
-		list.add("§c[" + I18nUtil.resolveKey("trait.hydro") + "] "+ Library.roundFloat(level, 3));
+		list.add("§c[" + I18nUtil.resolveKey("trait.hydro") + "]");
 	}
 }

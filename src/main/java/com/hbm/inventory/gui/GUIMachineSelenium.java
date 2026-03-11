@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.inventory.container.ContainerMachineSelenium;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineSeleniumEngine;
+import com.hbm.main.tileentity.machine.TileEntityMachineSeleniumEngine;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

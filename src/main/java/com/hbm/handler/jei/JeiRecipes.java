@@ -20,6 +20,8 @@ import com.hbm.inventory.RecipesCommon.AStack;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.RecipesCommon.OreDictStack;
 import com.hbm.inventory.RecipesCommon.NbtComparableStack;
+import com.hbm.inventory.CrucibleRecipes;
+import com.hbm.inventory.ChemplantRecipes;
 import com.hbm.inventory.material.Mats;
 import com.hbm.inventory.material.NTMMaterial;
 import com.hbm.items.ModItems;
@@ -43,10 +45,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraft.util.text.TextFormatting;
 
 public class JeiRecipes {
@@ -1347,8 +1350,7 @@ public class JeiRecipes {
 			return crackingRecipes;
 		crackingRecipes = new ArrayList<CrackingRecipe>();
 
-		for(String f : CrackRecipes.recipeFluids.keySet()){
-            Fluid fluid = FluidRegistry.getFluid(f);
+		for(Fluid fluid : CrackRecipes.recipeFluids.keySet()){
 			FluidStack[] outputFluids = CrackRecipes.getOutputsFromFluid(fluid);
 			List<ItemStack> outputIcons = new ArrayList<ItemStack>();
 			for(FluidStack fluidStacks : outputFluids){
@@ -1368,11 +1370,11 @@ public class JeiRecipes {
 			return fractioningRecipes;
 		fractioningRecipes = new ArrayList<FractioningRecipe>();
 
-		for(String f : FractionRecipes.fractions.keySet()){
-			Quartet<Fluid, Fluid, Integer, Integer> recipe = FractionRecipes.getFractions(f);
+		for(Fluid fluid : FractionRecipes.fractions.keySet()){
+			Quartet<Fluid, Fluid, Integer, Integer> recipe = FractionRecipes.getFractions(fluid);
 			
 			fractioningRecipes.add(new FractioningRecipe(
-					ItemFluidIcon.getStackWithQuantity(FluidRegistry.getFluid(f), 1000),
+					ItemFluidIcon.getStackWithQuantity(fluid, 1000),
 					Arrays.asList(
 						ItemFluidIcon.getStackWithQuantity(recipe.getW(), recipe.getY() * 10),
 						ItemFluidIcon.getStackWithQuantity(recipe.getX(), recipe.getZ() * 10)
@@ -1475,11 +1477,6 @@ public class JeiRecipes {
 		blades.add(new ItemStack(ModItems.blades_schrabidium));
 		return blades;
 	}
-
-    public static void addFluidTankRecipe(List<FluidRecipe> eq, Fluid f, ItemStack stack){
-        eq.add(new FluidRecipe(ItemFluidIcon.getStack(f), stack));
-        eq.add(new FluidRecipeInverse(ItemFluidIcon.getStack(f), stack));
-    }
 	
 	public static List<FluidRecipe> getFluidEquivalences(){
 		if(fluidEquivalences != null)
@@ -1487,35 +1484,30 @@ public class JeiRecipes {
 		fluidEquivalences = new ArrayList<FluidRecipe>();
 		
 		for(Fluid f : FluidRegistry.getRegisteredFluids().values()){
+			if(f == ModForgeFluids.HYDROGEN){
+				fluidEquivalences.add(new FluidRecipe(ItemFluidIcon.getStack(f), new ItemStack(ModItems.particle_hydrogen)));
+				fluidEquivalences.add(new FluidRecipeInverse(ItemFluidIcon.getStack(f), new ItemStack(ModItems.particle_hydrogen)));
+			}
+			fluidEquivalences.add(new FluidRecipe(ItemFluidIcon.getStack(f), ItemFluidTank.getFullTank(f)));
+			fluidEquivalences.add(new FluidRecipeInverse(ItemFluidIcon.getStack(f), ItemFluidTank.getFullTank(f)));
+			
+			fluidEquivalences.add(new FluidRecipe(ItemFluidIcon.getStack(f), ItemFluidTank.getFullTankLead(f)));
+			fluidEquivalences.add(new FluidRecipeInverse(ItemFluidIcon.getStack(f), ItemFluidTank.getFullTankLead(f)));
 
-			if(f == ModForgeFluids.EXPERIENCE){
-                addFluidTankRecipe(fluidEquivalences, f, new ItemStack(ModItems.iv_xp));
-            } else if(f == FluidRegistry.WATER){
-                addFluidTankRecipe(fluidEquivalences, f, new ItemStack(Items.WATER_BUCKET));
-            } else if(f == FluidRegistry.LAVA){
-                addFluidTankRecipe(fluidEquivalences, f, new ItemStack(Items.LAVA_BUCKET));
-            } else if(f == ModForgeFluids.HYDROGEN){
-                addFluidTankRecipe(fluidEquivalences, f, new ItemStack(ModItems.particle_hydrogen));
-            } else if(f == ModForgeFluids.AMAT){
-                addFluidTankRecipe(fluidEquivalences, f, new ItemStack(ModItems.particle_amat));
-            } else if(f == ModForgeFluids.ASCHRAB){
-                addFluidTankRecipe(fluidEquivalences, f, new ItemStack(ModItems.particle_aschrab));
-            }
-            if(FluidRegistry.isUniversalBucketEnabled() && FluidRegistry.hasBucket(f)){
-                addFluidTankRecipe(fluidEquivalences, f, FluidUtil.getFilledBucket(new FluidStack(f, 1000)));
-            }
-            addFluidTankRecipe(fluidEquivalences, f, ItemFluidTank.getFullTank(f));
-            addFluidTankRecipe(fluidEquivalences, f, ItemFluidTank.getFullTankLead(f));
-            addFluidTankRecipe(fluidEquivalences, f, ItemFluidTank.getFullBarrel(f));
+			fluidEquivalences.add(new FluidRecipe(ItemFluidIcon.getStack(f), ItemFluidTank.getFullBarrel(f)));
+			fluidEquivalences.add(new FluidRecipeInverse(ItemFluidIcon.getStack(f), ItemFluidTank.getFullBarrel(f)));
 
 			if(EnumCanister.contains(f)){
-                addFluidTankRecipe(fluidEquivalences, f, ItemFluidCanister.getFullCanister(f));
+				fluidEquivalences.add(new FluidRecipe(ItemFluidIcon.getStack(f), ItemFluidCanister.getFullCanister(f)));
+				fluidEquivalences.add(new FluidRecipeInverse(ItemFluidIcon.getStack(f), ItemFluidCanister.getFullCanister(f)));
 			}
 			if(EnumGasCanister.contains(f)){
-                addFluidTankRecipe(fluidEquivalences, f, ItemGasCanister.getFullCanister(f));
+				fluidEquivalences.add(new FluidRecipe(ItemFluidIcon.getStack(f), ItemGasCanister.getFullCanister(f)));
+				fluidEquivalences.add(new FluidRecipeInverse(ItemFluidIcon.getStack(f), ItemGasCanister.getFullCanister(f)));
 			}
 			if(EnumCell.contains(f)){
-                addFluidTankRecipe(fluidEquivalences, f, ItemCell.getFullCell(f));
+				fluidEquivalences.add(new FluidRecipe(ItemFluidIcon.getStack(f), ItemCell.getFullCell(f)));
+				fluidEquivalences.add(new FluidRecipeInverse(ItemFluidIcon.getStack(f), ItemCell.getFullCell(f)));
 			}
 		}
 		

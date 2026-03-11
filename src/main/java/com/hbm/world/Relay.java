@@ -8,7 +8,7 @@ import com.hbm.handler.WeightedRandomChestContentFrom1710;
 import com.hbm.items.ModItems;
 import com.hbm.lib.HbmChestContents;
 import com.hbm.lib.Library;
-import com.hbm.tileentity.machine.TileEntityCrateIron;
+import com.hbm.main.tileentity.machine.TileEntityCrateIron;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;

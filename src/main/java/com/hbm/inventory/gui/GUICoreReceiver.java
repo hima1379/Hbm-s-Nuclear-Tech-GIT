@@ -8,7 +8,7 @@ import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.inventory.container.ContainerCoreReceiver;
 import com.hbm.lib.Library;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityCoreReceiver;
+import com.hbm.main.tileentity.machine.TileEntityCoreReceiver;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

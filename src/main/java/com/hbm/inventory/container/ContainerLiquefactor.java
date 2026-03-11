@@ -1,7 +1,7 @@
 package com.hbm.inventory.container;
 
 import com.hbm.inventory.SlotUpgrade;
-import com.hbm.tileentity.machine.oil.TileEntityMachineLiquefactor;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineLiquefactor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -57,7 +57,7 @@ public class ContainerLiquefactor extends Container {
                 return ItemStack.EMPTY;
             }
 
-            if(var5.isEmpty()) {
+            if(var5.getCount() == 0) {
                 var4.putStack(ItemStack.EMPTY);
             } else {
                 var4.onSlotChanged();

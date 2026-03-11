@@ -183,7 +183,8 @@ public class ArmorModHandler {
 		NBTTagCompound mods = nbt.getCompoundTag(MOD_COMPOUND_KEY);
 		
 		NBTTagCompound cmp = mods.getCompoundTag(MOD_SLOT_KEY + slot);
-
-        return new ItemStack(cmp);
+		ItemStack stack = new ItemStack(cmp);
+		
+		return stack;
 	}
 }

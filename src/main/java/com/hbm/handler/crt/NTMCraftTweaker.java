@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import com.hbm.inventory.RecipesCommon;
 import com.hbm.inventory.RecipesCommon.AStack;
 import com.hbm.main.MainRegistry;
+import com.hbm.inventory.RBMKOutgasserRecipes;
 
 import crafttweaker.IAction;
 import crafttweaker.CraftTweakerAPI;

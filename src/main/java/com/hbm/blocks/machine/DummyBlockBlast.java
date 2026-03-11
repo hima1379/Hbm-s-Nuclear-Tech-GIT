@@ -10,8 +10,8 @@ import com.hbm.interfaces.IRadResistantBlock;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
 import com.hbm.items.tool.ItemLock;
-import com.hbm.tileentity.machine.TileEntityBlastDoor;
-import com.hbm.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityBlastDoor;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
 
 import micdoodle8.mods.galacticraft.api.block.IPartialSealableBlock;
 import net.minecraft.block.BlockContainer;
@@ -120,7 +120,12 @@ public class DummyBlockBlast extends BlockContainer implements IDummy, IBomb, IR
 		}
 	}
 
-    @Override
+	@Override
+	public EnumBlockRenderType getRenderType(IBlockState state) {
+		return EnumBlockRenderType.INVISIBLE;
+	}
+	
+	@Override
 	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
 		return Items.AIR;
 	}

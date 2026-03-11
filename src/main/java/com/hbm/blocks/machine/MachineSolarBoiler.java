@@ -10,8 +10,8 @@ import com.hbm.inventory.HeatRecipes;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.util.I18nUtil;
 import com.hbm.items.machine.ItemForgeFluidIdentifier;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntitySolarBoiler;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntitySolarBoiler;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.material.Material;
@@ -67,9 +67,10 @@ public class MachineSolarBoiler extends BlockDummyable implements ITooltipProvid
 
                 TileEntity te = world.getTileEntity(new BlockPos(pos[0], pos[1], pos[2]));
 
-                if(!(te instanceof TileEntitySolarBoiler boiler))
+                if(!(te instanceof TileEntitySolarBoiler))
                     return false;
 
+                TileEntitySolarBoiler boiler = (TileEntitySolarBoiler) te;
                 Fluid type = ItemForgeFluidIdentifier.getType(player.getHeldItem(hand));
                 if(!HeatRecipes.hasBoilRecipe(type)){
                     player.sendMessage(new TextComponentString("§cNo recipe found for §e"+type.getLocalizedName(new FluidStack(type, 1))));

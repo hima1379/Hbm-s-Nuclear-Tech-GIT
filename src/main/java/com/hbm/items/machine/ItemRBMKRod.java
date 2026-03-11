@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.hbm.items.ModItems;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.rbmk.IRBMKFluxReceiver.NType;
-import com.hbm.tileentity.machine.rbmk.RBMKDials;
+import com.hbm.main.tileentity.machine.rbmk.IRBMKFluxReceiver.NType;
+import com.hbm.main.tileentity.machine.rbmk.RBMKDials;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.client.util.ITooltipFlag;
@@ -262,7 +262,7 @@ public class ItemRBMKRod extends Item {
 		return ret;
 	}
 	
-	public enum EnumBurnFunc {
+	public static enum EnumBurnFunc {
 		PASSIVE("trait.rbmx.flux.passive"),				//const, no reactivity
 		PLATEU("trait.rbmx.flux.euler"),				//(1 - e^(-x/25)) * reactivity * 100
 		SIGMOID("trait.rbmx.flux.sigmoid"),				//100 / (1 + e^(-(x - 50) / 10)) <- tiny amount of reactivity at x=0 !
@@ -275,7 +275,7 @@ public class ItemRBMKRod extends Item {
 		
 		public String title = "";
 		
-		EnumBurnFunc(String title) {
+		private EnumBurnFunc(String title) {
 			this.title = title;
 		}
 	}
@@ -331,12 +331,12 @@ public class ItemRBMKRod extends Item {
 		return String.format(function, selfRate > 0 ? "(x" + TextFormatting.RED + " + " + selfRate + TextFormatting.WHITE + ")" : "x", reactivity);
 	}
 
-	public enum EnumDepleteFunc {
+	public static enum EnumDepleteFunc {
 		LINEAR,			//old function
 		RAISING_SLOPE,	//for breeding fuels such as MEU, maximum of 110% at 28% depletion
 		BOOSTED_SLOPE,	//for strong breeding fuels such Th232, maximum of 132% at 64% depletion
 		GENTLE_SLOPE,	//recommended for most fuels, maximum barely over the start, near the beginning
-		STATIC            //for arcade-style neutron sources
+		STATIC;			//for arcade-style neutron sources
 	}
 
 	public double reactivityModByEnrichment(double enrichment) {

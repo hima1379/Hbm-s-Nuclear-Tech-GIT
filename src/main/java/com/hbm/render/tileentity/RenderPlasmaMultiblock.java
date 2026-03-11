@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.render.RenderHelper;
 import com.hbm.render.util.SmallBlockPronter;
-import com.hbm.tileentity.machine.TileEntityPlasmaStruct;
+import com.hbm.main.tileentity.machine.TileEntityPlasmaStruct;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;

@@ -2,7 +2,7 @@ package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
-import com.hbm.tileentity.machine.TileEntityMachineReactorLarge;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactorLarge;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

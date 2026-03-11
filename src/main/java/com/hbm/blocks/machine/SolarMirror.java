@@ -1,7 +1,7 @@
 package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntitySolarMirror;
+import com.hbm.main.tileentity.machine.TileEntitySolarMirror;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

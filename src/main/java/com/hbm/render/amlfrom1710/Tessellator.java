@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -120,7 +121,10 @@ public class Tessellator
         {
             int j = ((Integer)priorityqueue.remove()).intValue();
 
-            System.arraycopy(this.rawBuffer, j + 0, aint, i + 0, b0);
+            for (int k = 0; k < b0; ++k)
+            {
+                aint[i + k] = this.rawBuffer[j + k];
+            }
         }
 
         System.arraycopy(aint, 0, this.rawBuffer, 0, aint.length);
@@ -152,7 +156,7 @@ public class Tessellator
     private void reset()
     {
         this.vertexCount = 0;
-        byteBuffer.clear();
+        this.byteBuffer.clear();
         this.rawBufferIndex = 0;
         this.addedVertices = 0;
     }

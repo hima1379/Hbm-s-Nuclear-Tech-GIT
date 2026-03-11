@@ -6,7 +6,7 @@ import java.util.List;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.util.I18nUtil;
-import com.hbm.tileentity.machine.TileEntityMachineTeleporter;
+import com.hbm.main.tileentity.machine.TileEntityMachineTeleporter;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -43,7 +43,7 @@ public class MachineTeleporter extends BlockContainer implements ILookOverlay {
 		
 		List<String> text = new ArrayList();
 		
-		text.add((tele.power >= TileEntityMachineTeleporter.consumption ? "§a" : "§c") + String.format("%,d", tele.power) + " / " + String.format("%,d", TileEntityMachineTeleporter.maxPower));
+		text.add((tele.power >= tele.consumption ? "§a" : "§c") + String.format("%,d", tele.power) + " / " + String.format("%,d", tele.maxPower));
 		if(tele.target == null) {
 			text.add("§cNo destination set!");
 		} else {

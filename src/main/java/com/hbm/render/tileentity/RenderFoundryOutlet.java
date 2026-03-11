@@ -1,6 +1,8 @@
 package com.hbm.render.tileentity;
 
-import com.hbm.tileentity.machine.TileEntityFoundryOutlet;
+import org.lwjgl.opengl.GL11;
+
+import com.hbm.main.tileentity.machine.TileEntityFoundryOutlet;
 
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 

@@ -293,8 +293,11 @@ public class ItemEnergy extends Item {
 		ItemStack stackR = player.getHeldItemMainhand();
 		ItemStack stackL = player.getHeldItemOffhand();
 		if(stackR == null || stackL == null) return false;
-        return stackR.getItem() == ModItems.bottle_opener || stackL.getItem() == ModItems.bottle_opener;
-    }
+		if(stackR.getItem() == ModItems.bottle_opener || stackL.getItem() == ModItems.bottle_opener){
+			return true;
+		}
+		return false;
+	}	
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer player, EnumHand hand) {

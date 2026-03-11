@@ -1,7 +1,7 @@
 package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntityPlasmaStruct;
+import com.hbm.main.tileentity.machine.TileEntityPlasmaStruct;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;

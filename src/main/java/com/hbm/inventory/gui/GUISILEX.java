@@ -12,7 +12,7 @@ import com.hbm.items.machine.ItemFELCrystal.EnumWavelengths;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntitySILEX;
+import com.hbm.main.tileentity.machine.TileEntitySILEX;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.client.Minecraft;

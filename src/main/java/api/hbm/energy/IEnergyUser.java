@@ -1,10 +1,14 @@
 package api.hbm.energy;
 
+import com.hbm.packet.AuxParticlePacketNT;
+import com.hbm.packet.PacketDispatcher;
 import com.hbm.lib.ForgeDirection;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 /**
  * For machines and things that have an energy buffer and are affected by EMPs
@@ -15,7 +19,7 @@ public interface IEnergyUser extends IEnergyConnector {
 	/**
 	 * Not to be used for actual energy transfer, rather special external things like EMPs and sync packets
 	 */
-    void setPower(long power);
+	public void setPower(long power);
 	
 	/**
 	 * Standard implementation for power transfer.
@@ -23,19 +27,51 @@ public interface IEnergyUser extends IEnergyConnector {
 	 * @param long power
 	 */
 	@Override
-    default long transferPower(long power) {
+	public default long transferPower(long power) {
 		long ownMaxPower = this.getMaxPower();
 		long ownPower = this.getPower();
 		if(power > ownMaxPower - ownPower) {
-			
+
 			long overshoot = power-(ownMaxPower-ownPower);
 			this.setPower(ownMaxPower);
 			return overshoot;
 		}
 
 		this.setPower(ownPower + power);
-		
+
 		return 0;
+	}
+
+	// EnergyValue-based methods (for BigInteger support)
+
+	/**
+	 * Set power using EnergyValue (supports values beyond long range)
+	 * Default implementation converts to long for compatibility
+	 * @param power The power value to set
+	 */
+	public default void setPowerEV(EnergyValue power) {
+		this.setPower(power.toLongClamped());
+	}
+
+	/**
+	 * Transfer power using EnergyValue with proper overflow handling
+	 * This is the EnergyValue version of the standard power transfer implementation
+	 * @param power The amount of power to transfer
+	 * @return The amount of power that could not be transferred (overshoot)
+	 */
+	@Override
+	public default EnergyValue transferPowerEV(EnergyValue power) {
+		EnergyValue ownMaxPower = this.getMaxPowerEV();
+		EnergyValue ownPower = this.getPowerEV();
+
+		if(power.isGreaterThan(ownMaxPower.subtract(ownPower))) {
+			EnergyValue overshoot = power.subtract(ownMaxPower.subtract(ownPower));
+			this.setPowerEV(ownMaxPower);
+			return overshoot;
+		}
+
+		this.setPowerEV(ownPower.add(power));
+		return EnergyValue.ZERO;
 	}
 	
 	/**
@@ -46,7 +82,7 @@ public interface IEnergyUser extends IEnergyConnector {
 	 * @param z
 	 * @param dir
 	 */
-	default void sendPower(World world, BlockPos pos, ForgeDirection dir) {
+	public default void sendPower(World world, BlockPos pos, ForgeDirection dir) {
 		
 		TileEntity te = world.getTileEntity(pos);
 		boolean wasSubscribed = false;
@@ -95,5 +131,61 @@ public interface IEnergyUser extends IEnergyConnector {
 		// 	data.setDouble("mZ", dir.offsetZ * (red ? 0.025 : 0.1));
 		// 	PacketDispatcher.wrapper.sendToAllAround(new AuxParticlePacketNT(data, posX, posY, posZ), new TargetPoint(world.provider.getDimension(), posX, posY, posZ, 25));
 		// }
+	}
+
+	/**
+	 * EnergyValue version of sendPower - supports values beyond long range
+	 * Standard implementation of sending power using EnergyValue
+	 * @param world The world
+	 * @param pos The position to send power to
+	 * @param dir The direction (from the receiving block's perspective)
+	 */
+	public default void sendPowerEV(World world, BlockPos pos, ForgeDirection dir) {
+
+		TileEntity te = world.getTileEntity(pos);
+		boolean wasSubscribed = false;
+		boolean red = false;
+
+		// first we make sure we're not subscribed to the network that we'll be supplying
+		if(te instanceof IEnergyConductor) {
+			IEnergyConductor con = (IEnergyConductor) te;
+
+			if(con.canConnect(dir.getOpposite()) && con.getPowerNet() != null && con.getPowerNet().isSubscribed(this)) {
+				con.getPowerNet().unsubscribe(this);
+				wasSubscribed = true;
+			}
+		}
+
+		//then we add energy
+		if(te instanceof IEnergyConnector) {
+			IEnergyConnector con = (IEnergyConnector) te;
+
+			if(con.canConnect(dir.getOpposite())) {
+				EnergyValue oldPower = this.getPowerEV();
+				EnergyValue transfer = oldPower.subtract(con.transferPowerEV(oldPower));
+				this.setPowerEV(oldPower.subtract(transfer));
+				red = true;
+			}
+		}
+
+		//then we subscribe if possible
+		if(wasSubscribed && te instanceof IEnergyConductor) {
+			IEnergyConductor con = (IEnergyConductor) te;
+
+			if(con.getPowerNet() != null && !con.getPowerNet().isSubscribed(this)) {
+				con.getPowerNet().subscribe(this);
+			}
+		}
+	}
+
+	/**
+	 * Send power in all valid directions using EnergyValue
+	 * @param world The world
+	 * @param pos The position of this block
+	 */
+	public default void sendPowerToAllDirectionsEV(World world, BlockPos pos) {
+		for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
+			this.sendPowerEV(world, pos.add(dir.offsetX, dir.offsetY, dir.offsetZ), dir);
+		}
 	}
 }

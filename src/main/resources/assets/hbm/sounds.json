@@ -9,6 +9,7 @@
 	"block.shutdown": {"category": "block", "sounds": [{"name": "hbm:block/shutdown", "stream": false}]},
     "block.assembleroperate": {"category": "block", "sounds": [{"name": "hbm:block/assemblerOperate", "stream": false}]},
     "block.fel": {"category": "block", "sounds": [{"name": "hbm:block/fel", "stream": false}]},
+    "block.fusionReactorRunning": {"category": "block", "sounds": [{"name": "hbm:block/fusionReactorSpin", "stream": false}]},
     "block.chemplantOperate": {"category": "block", "sounds": [{"name": "hbm:block/chemplantOperate", "stream": false}]},
     "block.dieselOperate": {"category": "block", "sounds": [{"name": "hbm:block/dieselOperate", "stream": false}]},
     "block.igeneratorOperate": {"category": "block", "sounds": [{"name": "hbm:block/igeneratorOperate", "stream": false}]},

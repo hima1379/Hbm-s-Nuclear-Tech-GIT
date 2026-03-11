@@ -6,8 +6,8 @@ import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.main.ResourceManager;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.conductor.TileEntityFFDuctBaseMk2;
-import com.hbm.tileentity.conductor.TileEntityFFFluidSuccMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFDuctBaseMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFFluidSuccMk2;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;

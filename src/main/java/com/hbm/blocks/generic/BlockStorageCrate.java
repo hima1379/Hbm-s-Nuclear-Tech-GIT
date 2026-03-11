@@ -10,12 +10,12 @@ import com.hbm.lib.InventoryHelper;
 import com.hbm.lib.Library;
 import com.hbm.main.MainRegistry;
 import com.hbm.config.MachineConfig;
-import com.hbm.tileentity.machine.TileEntityLockableBase;
-import com.hbm.tileentity.machine.TileEntityCrateIron;
-import com.hbm.tileentity.machine.TileEntityCrateSteel;
-import com.hbm.tileentity.machine.TileEntityCrateTungsten;
-import com.hbm.tileentity.machine.TileEntityCrateDesh;
-import com.hbm.tileentity.machine.TileEntitySafe;
+import com.hbm.main.tileentity.machine.TileEntityLockableBase;
+import com.hbm.main.tileentity.machine.TileEntityCrateIron;
+import com.hbm.main.tileentity.machine.TileEntityCrateSteel;
+import com.hbm.main.tileentity.machine.TileEntityCrateTungsten;
+import com.hbm.main.tileentity.machine.TileEntityCrateDesh;
+import com.hbm.main.tileentity.machine.TileEntitySafe;
 import com.hbm.hazard.HazardSystem;
 
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -156,9 +156,9 @@ public class BlockStorageCrate extends BlockContainer {
 			InventoryHelper.spawnItemStack(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
 		}
 
-		dropInv = false;
+		this.dropInv = false;
 		boolean flag = world.setBlockToAir(pos);
-		dropInv = true;
+		this.dropInv = true;
 		
 		return flag;
 	}
@@ -170,7 +170,7 @@ public class BlockStorageCrate extends BlockContainer {
 	
 	@Override
 	public void breakBlock(World worldIn, BlockPos pos, IBlockState state){
-		if(dropInv){
+		if(this.dropInv){
 			InventoryHelper.dropInventoryItems(worldIn, pos, worldIn.getTileEntity(pos));
 		}
 		super.breakBlock(worldIn, pos, state);

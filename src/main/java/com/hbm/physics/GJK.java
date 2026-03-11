@@ -379,7 +379,8 @@ public class GJK {
 		}
 		
 		public Mkv copy(){
-            return new Mkv(v.copy(), r.copy());
+			Mkv vert = new Mkv(v.copy(), r.copy());
+			return vert;
 		}
 	}
 	
@@ -391,10 +392,10 @@ public class GJK {
 		public Vec3 contactPointB;
 	}
 	
-	public enum Result {
+	public static enum Result {
 		COLLIDING,
 		SEPARATED,
 		GJK_FAILED,
-		EPA_FAILED
-    }
+		EPA_FAILED;
+	}
 }

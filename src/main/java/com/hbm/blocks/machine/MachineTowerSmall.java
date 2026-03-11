@@ -8,8 +8,8 @@ import com.hbm.util.I18nUtil;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.lib.ForgeDirection;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityTowerSmall;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityTowerSmall;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.block.material.Material;

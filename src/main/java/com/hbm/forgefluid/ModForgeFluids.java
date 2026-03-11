@@ -41,10 +41,17 @@ public class ModForgeFluids {
 	public static Fluid COOLANT = 				createFluid("coolant").setTemperature(203);
 	public static Fluid HOTCOOLANT = 			createFluid("hotcoolant").setTemperature(400 + 273);
 	public static Fluid PERFLUOROMETHYL =		createFluid("perfluoromethyl").setTemperature(15 + 273);
+	public static Fluid PERFLUOROMETHYL_COLD =	createFluid("perfluoromethyl_cold").setTemperature(-150 + 273);
+	public static Fluid PERFLUOROMETHYL_HOT =	createFluid("perfluoromethyl_hot").setTemperature(250 + 273);
+	public static Fluid AIR = 					createFluid("air");
 
 	public static Fluid HEAVYWATER = 			createFluid("heavywater");
 	public static Fluid DEUTERIUM = 			createFluid("deuterium");
 	public static Fluid TRITIUM = 				createFluid("tritium");
+	public static Fluid HELIUM3 = 				createFluid("helium3");
+	public static Fluid HELIUM4 = 				createFluid("helium4");
+	public static Fluid DHC = 					createFluid("dhc");
+	public static Fluid STELLAR_FLUX = 			createFluid("stellar_flux");
 
 	public static Fluid OIL = 					createFluid("oil");
 	public static Fluid HOTOIL = 				createFluid("hotoil").setTemperature(350+273);
@@ -181,10 +188,17 @@ public class ModForgeFluids {
 		COOLANT = 					registerOrGet(COOLANT,"coolant");
 		HOTCOOLANT = 				registerOrGet(HOTCOOLANT,"hotcoolant");
 		PERFLUOROMETHYL = 			registerOrGet(PERFLUOROMETHYL,"perfluoromethyl");
+		PERFLUOROMETHYL_COLD = 		registerOrGet(PERFLUOROMETHYL_COLD,"perfluoromethyl_cold");
+		PERFLUOROMETHYL_HOT = 		registerOrGet(PERFLUOROMETHYL_HOT,"perfluoromethyl_hot");
+		AIR = 						registerOrGet(AIR,"air").setGaseous(true);
 
 		HEAVYWATER = 				registerOrGet(HEAVYWATER,"heavywater");
 		DEUTERIUM = 				registerOrGet(DEUTERIUM,"deuterium").setGaseous(true);
 		TRITIUM = 					registerOrGet(TRITIUM,"tritium").setGaseous(true);
+		HELIUM3 = 					registerOrGet(HELIUM3,"helium3").setGaseous(true);
+		HELIUM4 = 					registerOrGet(HELIUM4,"helium4").setGaseous(true);
+		DHC = 						registerOrGet(DHC,"dhc").setGaseous(true);
+		STELLAR_FLUX = 				registerOrGet(STELLAR_FLUX,"stellar_flux").setGaseous(true);
 
 		OIL = 						registerOrGet(OIL,"oil");
 		HOTOIL = 					registerOrGet(HOTOIL,"hotoil");
@@ -343,10 +357,16 @@ public class ModForgeFluids {
 		COOLANT = 				loadFluid("coolant");
 		HOTCOOLANT = 			loadFluid("hotcoolant");
 		PERFLUOROMETHYL = 		loadFluid("perfluoromethyl");
+		PERFLUOROMETHYL_COLD = 	loadFluid("perfluoromethyl_cold");
+		PERFLUOROMETHYL_HOT = 	loadFluid("perfluoromethyl_hot");
 
 		HEAVYWATER = 			loadFluid("heavywater");
 		DEUTERIUM = 			loadFluid("deuterium");
 		TRITIUM = 				loadFluid("tritium");
+		HELIUM3 = 				loadFluid("helium3");
+		HELIUM4 = 				loadFluid("helium4");
+		DHC = 					loadFluid("dhc");
+		STELLAR_FLUX = 			loadFluid("stellar_flux");
 
 		OIL = 					loadFluid("oil");
 		HOTOIL = 				loadFluid("hotoil");

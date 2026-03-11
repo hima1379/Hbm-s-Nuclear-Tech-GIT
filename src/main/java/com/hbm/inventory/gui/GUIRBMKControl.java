@@ -8,7 +8,7 @@ import com.hbm.inventory.container.ContainerRBMKControl;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKControlManual;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKControlManual;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;

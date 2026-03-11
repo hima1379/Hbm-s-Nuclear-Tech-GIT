@@ -2,7 +2,7 @@ package com.hbm.entity.missile;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.machine.TileEntitySoyuzCapsule;
+import com.hbm.main.tileentity.machine.TileEntitySoyuzCapsule;
 
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;

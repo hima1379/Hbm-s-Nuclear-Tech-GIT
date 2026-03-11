@@ -323,10 +323,11 @@ public class Vec3
 
     //https://en.wikipedia.org/wiki/Outer_product
 	public Matrix3f outerProduct(Vec3 other) {
-        return new Matrix3f(
-                (float)(xCoord*other.xCoord), (float)(xCoord*other.yCoord), (float)(xCoord*other.zCoord),
-                (float)(yCoord*other.xCoord), (float)(yCoord*other.yCoord), (float)(yCoord*other.zCoord),
-                (float)(zCoord*other.xCoord), (float)(zCoord*other.yCoord), (float)(zCoord*other.zCoord));
+		Matrix3f mat = new Matrix3f(
+				(float)(xCoord*other.xCoord), (float)(xCoord*other.yCoord), (float)(xCoord*other.zCoord),
+				(float)(yCoord*other.xCoord), (float)(yCoord*other.yCoord), (float)(yCoord*other.zCoord),
+				(float)(zCoord*other.xCoord), (float)(zCoord*other.yCoord), (float)(zCoord*other.zCoord));
+		return mat;
 	}
 	
 	 public Vec3 matTransform(Matrix3f mat) {

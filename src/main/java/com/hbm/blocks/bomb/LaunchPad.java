@@ -7,6 +7,7 @@ import com.hbm.config.GeneralConfig;
 import com.hbm.entity.missile.EntityCarrier;
 import com.hbm.entity.missile.EntityMissileAntiBallistic;
 import com.hbm.entity.missile.EntityMissileBHole;
+import com.hbm.entity.missile.EntityMissileSM6;
 import com.hbm.entity.missile.EntityMissileBunkerBuster;
 import com.hbm.entity.missile.EntityMissileBurst;
 import com.hbm.entity.missile.EntityMissileBusterStrong;
@@ -36,7 +37,7 @@ import com.hbm.items.ModItems;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.bomb.TileEntityLaunchPad;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchPad;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
@@ -137,9 +138,9 @@ public class LaunchPad extends BlockContainer implements IBomb {
 		int z = pos.getZ();
 
 		{
-			if (entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_anti_ballistic || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_carrier || ((entity.inventory.getStackInSlot(1).getItem() == ModItems.designator || entity.inventory.getStackInSlot(1).getItem() == ModItems.designator_range || entity.inventory.getStackInSlot(1).getItem() == ModItems.designator_manual) && entity.inventory.getStackInSlot(1).getTagCompound() != null)) {
-				int xCoord = entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_anti_ballistic || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_carrier ? 0 : entity.inventory.getStackInSlot(1).getTagCompound().getInteger("xCoord");
-				int zCoord = entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_anti_ballistic || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_carrier ? 0 : entity.inventory.getStackInSlot(1).getTagCompound().getInteger("zCoord");
+			if (entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_anti_ballistic || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_sm6 || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_carrier || ((entity.inventory.getStackInSlot(1).getItem() == ModItems.designator || entity.inventory.getStackInSlot(1).getItem() == ModItems.designator_range || entity.inventory.getStackInSlot(1).getItem() == ModItems.designator_manual) && entity.inventory.getStackInSlot(1).getTagCompound() != null)) {
+				int xCoord = entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_anti_ballistic || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_sm6 || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_carrier ? 0 : entity.inventory.getStackInSlot(1).getTagCompound().getInteger("xCoord");
+				int zCoord = entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_anti_ballistic || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_sm6 || entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_carrier ? 0 : entity.inventory.getStackInSlot(1).getTagCompound().getInteger("zCoord");
 
 				if (xCoord == entity.getPos().getX() && zCoord == entity.getPos().getZ()) {
 					xCoord += 1;
@@ -429,7 +430,7 @@ public class LaunchPad extends BlockContainer implements IBomb {
 					missile.posY = y + 1.5F;
 					missile.posZ = z + 0.5F;
 
-					if (!entity.inventory.getStackInSlot(1).isEmpty())
+					if (entity.inventory.getStackInSlot(1) != null)
 						missile.setPayload(entity.inventory.getStackInSlot(1));
 
 					entity.inventory.setStackInSlot(1, ItemStack.EMPTY);
@@ -445,6 +446,22 @@ public class LaunchPad extends BlockContainer implements IBomb {
 
 				if (entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_anti_ballistic && entity.power >= 75000) {
 					EntityMissileAntiBallistic missile = new EntityMissileAntiBallistic(world);
+					missile.posX = x + 0.5F;
+					missile.posY = y + 1.5F;
+					missile.posZ = z + 0.5F;
+
+					if (!world.isRemote)
+						world.spawnEntity(missile);
+
+					entity.power -= 75000;
+
+					entity.inventory.setStackInSlot(0, ItemStack.EMPTY);
+					world.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, HBMSoundHandler.missileTakeoff, SoundCategory.BLOCKS, 2.0F, 1.0F);
+					entity.clearingTimer = TileEntityLaunchPad.clearingDuraction;
+				}
+
+				if (entity.inventory.getStackInSlot(0).getItem() == ModItems.missile_sm6 && entity.power >= 75000) {
+					EntityMissileSM6 missile = new EntityMissileSM6(world);
 					missile.posX = x + 0.5F;
 					missile.posY = y + 1.5F;
 					missile.posZ = z + 0.5F;

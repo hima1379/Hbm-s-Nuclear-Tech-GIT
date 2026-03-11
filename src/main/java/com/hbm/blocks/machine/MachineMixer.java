@@ -1,7 +1,7 @@
 package com.hbm.blocks.machine;
 
 import com.hbm.blocks.BlockDummyable;
-import com.hbm.tileentity.machine.TileEntityMachineMixer;
+import com.hbm.main.tileentity.machine.TileEntityMachineMixer;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

@@ -56,6 +56,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -77,7 +78,7 @@ public class EntityBulletBase extends Entity implements IProjectile {
 	public BulletConfiguration getConfig() {
 		return config;
 	}
-	
+
 	public EntityBulletBase(World world) {
 		super(world);
 		this.setSize(0.5F, 0.5F);
@@ -123,7 +124,7 @@ public class EntityBulletBase extends Entity implements IProjectile {
 		this.getDataManager().set(STYLE, this.config.style);
 		this.getDataManager().set(TRAIL, this.config.trail);
 	}
-	
+
 	public EntityBulletBase(World world, int config, EntityLivingBase entity, EnumHand hand) {
 		super(world);
 		this.config = BulletConfigSyncingUtil.pullConfig(config);
@@ -149,7 +150,7 @@ public class EntityBulletBase extends Entity implements IProjectile {
 		this.setSize(0.5F, 0.5F);
 
 		this.shoot(this.motionX, this.motionY, this.motionZ, 2.0F, this.config.spread);
-		
+
 		this.getDataManager().set(STYLE, this.config.style);
 		this.getDataManager().set(TRAIL, this.config.trail);
 	}
@@ -161,12 +162,12 @@ public class EntityBulletBase extends Entity implements IProjectile {
 		shooter = entity;
 
 		this.setLocationAndAngles(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ, entity.rotationYaw, entity.rotationPitch);
-		
+
 		this.posX -= MathHelper.cos(this.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
 		this.posY -= 0.10000000149011612D;
 		this.posZ -= MathHelper.sin(this.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
 		this.setPosition(this.posX, this.posY, this.posZ);
-		
+
 		this.motionX = -MathHelper.sin(this.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float) Math.PI);
 		this.motionZ = MathHelper.cos(this.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float) Math.PI);
 		this.motionY = (-MathHelper.sin(this.rotationPitch / 180.0F * (float) Math.PI));
@@ -174,15 +175,15 @@ public class EntityBulletBase extends Entity implements IProjectile {
 		this.setSize(0.5F, 0.5F);
 
 		this.shoot(this.motionX, this.motionY, this.motionZ, 1.0F, this.config.spread);
-		
+
 		this.getDataManager().set(STYLE, this.config.style);
 		this.getDataManager().set(TRAIL, this.config.trail);
 	}
-	
+
 	public void overrideStyle(int style){
 		this.getDataManager().set(STYLE, style);
 	}
-	
+
 	@Override
 	public void shoot(double moX, double moY, double moZ, float mult1, float mult2) {
 
@@ -243,12 +244,12 @@ public class EntityBulletBase extends Entity implements IProjectile {
 
 		if (config == null)
 			config = BulletConfigSyncingUtil.pullConfig(this.getDataManager().get(BULLETCONFIG));
-		
+
 		if(config == null){
 			this.setDead();
 			return;
 		}
-		
+
 		if(config.maxAge == 0) {
 			this.setDead();
 			return;
@@ -313,6 +314,23 @@ public class EntityBulletBase extends Entity implements IProjectile {
 			// handle entity collision
 			if (movement.entityHit != null && CompatibilityConfig.isWarDim(world)) {
 
+				// ★★★ ZOMGの弾丸かチェック ★★★
+				int bulletConfigId = this.getDataManager().get(BULLETCONFIG);
+				boolean isZOMGBullet = (bulletConfigId == BulletConfigSyncingUtil.ZOMG_BOLT);
+
+				// ZOMGの弾丸の場合、装甲貫通ダメージを先に与える
+				if (isZOMGBullet && victim instanceof EntityLivingBase && !world.isRemote) {
+					float penetrationDamage = rand.nextFloat() * (config.dmgMax - config.dmgMin) + config.dmgMin;
+
+					// 装甲貫通システムで直接ダメージを与える
+					com.hbm.items.armor.ArmorPenetrationSystem.dealAbsoluteDamageBypassAll(
+							(EntityLivingBase) victim,
+							penetrationDamage,
+							100  // レベル100貫通
+					);
+				}
+
+				// 通常の処理も実行（エフェクトや弾丸削除のため）
 				DamageSource damagesource = null;
 
 				if (this.shooter == null) {
@@ -328,23 +346,25 @@ public class EntityBulletBase extends Entity implements IProjectile {
 						onEntityHurt(victim, movement, true);
 				}
 
-				float damage = rand.nextFloat() * (config.dmgMax - config.dmgMin) + config.dmgMin;
-				
-				if(overrideDamage != 0)
-					damage = overrideDamage;
-				if (!victim.attackEntityFrom(damagesource, damage)) {
+				// ZOMG以外の弾丸は通常のダメージも与える
+				if (!isZOMGBullet) {
+					float damage = rand.nextFloat() * (config.dmgMax - config.dmgMin) + config.dmgMin;
 
-					try {
-						if (lastDamage == null)
-							lastDamage = ReflectionHelper.findField(EntityLivingBase.class, "lastDamage", "field_110153_bc");
+					if(overrideDamage != 0)
+						damage = overrideDamage;
+					if (!victim.attackEntityFrom(damagesource, damage)) {
 
-						float dmg = (float) damage + lastDamage.getFloat(victim);
+						try {
+							if (lastDamage == null)
+								lastDamage = ReflectionHelper.findField(EntityLivingBase.class, "lastDamage", "field_110153_bc");
 
-						victim.attackEntityFrom(damagesource, dmg);
-					} catch (Exception x) {
+							float dmg = (float) damage + lastDamage.getFloat(victim);
+
+							victim.attackEntityFrom(damagesource, dmg);
+						} catch (Exception x) {
+						}
 					}
 				}
-				
 
 				// handle block collision
 			} else if (world.getBlockState(movement.getBlockPos()).getMaterial() != Material.AIR) {
@@ -360,24 +380,24 @@ public class EntityBulletBase extends Entity implements IProjectile {
 					Vec3d face = null;
 
 					switch (movement.sideHit) {
-					case DOWN:
-						face = new Vec3d(0, -1, 0);
-						break;
-					case UP:
-						face = new Vec3d(0, 1, 0);
-						break;
-					case SOUTH:
-						face = new Vec3d(0, 0, 1);
-						break;
-					case NORTH:
-						face = new Vec3d(0, 0, -1);
-						break;
-					case WEST:
-						face = new Vec3d(-1, 0, 0);
-						break;
-					case EAST:
-						face = new Vec3d(1, 0, 0);
-						break;
+						case DOWN:
+							face = new Vec3d(0, -1, 0);
+							break;
+						case UP:
+							face = new Vec3d(0, 1, 0);
+							break;
+						case SOUTH:
+							face = new Vec3d(0, 0, 1);
+							break;
+						case NORTH:
+							face = new Vec3d(0, 0, -1);
+							break;
+						case WEST:
+							face = new Vec3d(-1, 0, 0);
+							break;
+						case EAST:
+							face = new Vec3d(1, 0, 0);
+							break;
 					}
 
 					if (face != null) {
@@ -390,15 +410,15 @@ public class EntityBulletBase extends Entity implements IProjectile {
 
 						if (hRic || (angle <= config.ricochetAngle && lRic)) {
 							switch (movement.sideHit.getAxis()) {
-							case Y:
-								motionY *= -1;
-								break;
-							case Z:
-								motionZ *= -1;
-								break;
-							case X:
-								motionX *= -1;
-								break;
+								case Y:
+									motionY *= -1;
+									break;
+								case Z:
+									motionZ *= -1;
+									break;
+								case X:
+									motionX *= -1;
+									break;
 							}
 
 							if (config.plink == 1)
@@ -437,10 +457,10 @@ public class EntityBulletBase extends Entity implements IProjectile {
 			this.posZ += this.motionZ * this.config.velocity;
 			this.setPosition(this.posX, this.posY, this.posZ);
 		}
-		
+
 		/// SPECIAL UPDATE BEHAVIOR ///
-        if(this.config.bUpdate != null)
-        	this.config.bUpdate.behaveUpdate(this);
+		if(this.config.bUpdate != null)
+			this.config.bUpdate.behaveUpdate(this);
 
 		if (this.config.style == BulletConfiguration.STYLE_ROCKET && !world.isRemote)
 			this.world.spawnEntity(new EntityTSmokeFX(world, this.posX, this.posY, this.posZ, 0, 0, 0));
@@ -449,7 +469,8 @@ public class EntityBulletBase extends Entity implements IProjectile {
 		this.rotationYaw = (float) (Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
 		f2 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
 		for (this.rotationPitch = (float) (Math.atan2(this.motionY, (double) f2) * 180.0D / Math.PI); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
-        }
+			;
+		}
 
 		while (this.rotationPitch - this.prevRotationPitch >= 180.0F) {
 			this.prevRotationPitch += 360.0F;
@@ -481,7 +502,7 @@ public class EntityBulletBase extends Entity implements IProjectile {
 			}
 		}
 	}
-	
+
 	private void doHitVFX(@Nullable BlockPos pos, RayTraceResult hit){
 		if(getDataManager().get(STYLE) == BulletConfiguration.STYLE_TRACER){
 			NBTTagCompound tag = new NBTTagCompound();
@@ -514,10 +535,10 @@ public class EntityBulletBase extends Entity implements IProjectile {
 		if(!world.isRemote){
 			this.setDead();
 		}
-		
+
 		IBlockState blockstate = world.getBlockState(pos);
 		Block block = blockstate.getBlock();
-		
+
 		doHitVFX(pos, hit);
 
 		if(!CompatibilityConfig.isWarDim(world)){
@@ -592,7 +613,7 @@ public class EntityBulletBase extends Entity implements IProjectile {
 
 		if (config.nuke > 0 && !world.isRemote) {
 			world.spawnEntity(EntityNukeExplosionMK5.statFac(world, config.nuke, posX, posY, posZ).mute());
-			
+
 			if(BombConfig.enableNukeClouds) {
 				if(MainRegistry.polaroidID == 11 || rand.nextInt(100) == 0){
 					EntityNukeTorex.statFacBale(world, pos.getX() + 0.5, pos.getY() + 5, pos.getZ() + 0.5, config.nuke);
@@ -610,7 +631,7 @@ public class EntityBulletBase extends Entity implements IProjectile {
 		} else if (config.doesBreakGlass && !world.isRemote) {
 			if (block == Blocks.GLASS || block == Blocks.GLASS_PANE || block == Blocks.STAINED_GLASS || block == Blocks.STAINED_GLASS_PANE)
 				world.destroyBlock(pos, false);
-			 if(block == ModBlocks.red_barrel) ((RedBarrel) ModBlocks.red_barrel).explode(world, pos.getX(), pos.getY(), pos.getZ());
+			if(block == ModBlocks.red_barrel) ((RedBarrel) ModBlocks.red_barrel).explode(world, pos.getX(), pos.getY(), pos.getZ());
 		}
 	}
 
@@ -641,7 +662,7 @@ public class EntityBulletBase extends Entity implements IProjectile {
 		}
 		if(config.bHurt != null)
 			config.bHurt.behaveEntityHurt(this, e);
-		
+
 		if (config.incendiary > 0 && !world.isRemote) {
 			e.setFire(config.incendiary);
 		}
@@ -670,7 +691,7 @@ public class EntityBulletBase extends Entity implements IProjectile {
 			ArmorUtil.damageSuit((EntityPlayer) e, 3, config.caustic);
 		}
 	}
-	
+
 	@Override
 	public float getEyeHeight() {
 		return 0;
@@ -681,17 +702,17 @@ public class EntityBulletBase extends Entity implements IProjectile {
 
 		int cfg = nbt.getInteger("config");
 		this.config = BulletConfigSyncingUtil.pullConfig(cfg);
-		
+
 		if(this.config == null) {
 			this.setDead();
 			return;
 		}
-		
+
 		this.getDataManager().set(BULLETCONFIG, cfg);
 
 		this.getDataManager().set(STYLE, nbt.getInteger("overrideStyle"));
 		this.getDataManager().set(TRAIL, this.config.trail);
-		
+
 		this.overrideDamage = nbt.getFloat("damage");
 	}
 

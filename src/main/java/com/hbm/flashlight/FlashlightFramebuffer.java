@@ -80,7 +80,31 @@ public class FlashlightFramebuffer extends Framebuffer {
 		}
 	}
 
-    public void postProcess(){
+	@Override
+	public void deleteFramebuffer() {
+		if(OpenGlHelper.isFramebufferEnabled()) {
+			this.unbindFramebufferTexture();
+			this.unbindFramebuffer();
+
+			if(this.depthBuffer > -1) {
+				OpenGlHelper.glDeleteRenderbuffers(this.depthBuffer);
+				this.depthBuffer = -1;
+			}
+
+			if(this.framebufferTexture > -1) {
+				TextureUtil.deleteTexture(this.framebufferTexture);
+				this.framebufferTexture = -1;
+			}
+
+			if(this.framebufferObject > -1) {
+				OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, 0);
+				OpenGlHelper.glDeleteFramebuffers(this.framebufferObject);
+				this.framebufferObject = -1;
+			}
+		}
+	}
+	
+	public void postProcess(){
 		int prevTexture0;
 		int prevTexture6;
 		int prevTexture7;

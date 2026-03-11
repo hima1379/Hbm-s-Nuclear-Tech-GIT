@@ -1,6 +1,6 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.conductor.TileEntityFFDuctBaseMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFDuctBaseMk2;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;

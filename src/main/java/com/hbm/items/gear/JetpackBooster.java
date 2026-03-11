@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.hbm.capability.HbmCapability;
 import com.hbm.capability.HbmCapability.IHBMData;
+import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.items.armor.JetpackBase;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.packet.AuxParticlePacketNT;
@@ -45,7 +46,12 @@ public class JetpackBooster extends JetpackBase {
 	}
 
 
-    @Override
+	@Override
+	public boolean isValidArmor(ItemStack stack, EntityEquipmentSlot armorType, Entity entity) {
+		return armorType == EntityEquipmentSlot.CHEST;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public ModelBiped getArmorModel(EntityLivingBase entityLiving, ItemStack itemStack, EntityEquipmentSlot armorSlot, ModelBiped _default) {
 		if (armorSlot == EntityEquipmentSlot.CHEST) {

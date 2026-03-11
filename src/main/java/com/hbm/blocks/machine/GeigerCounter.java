@@ -2,7 +2,7 @@ package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.tileentity.machine.TileEntityGeiger;
+import com.hbm.main.tileentity.machine.TileEntityGeiger;
 import com.hbm.util.ContaminationUtil;
 
 import net.minecraft.block.BlockContainer;

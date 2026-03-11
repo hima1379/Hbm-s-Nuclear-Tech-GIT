@@ -5,8 +5,8 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.lib.RefStrings;
 import com.hbm.render.amlfrom1710.Vec3;
 import com.hbm.render.model.ModelPylon;
-import com.hbm.tileentity.network.energy.TileEntityPylon;
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.network.energy.TileEntityPylon;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -45,7 +45,7 @@ public class RenderPylon extends TileEntitySpecialRenderer<TileEntityPylon> {
 			this.pylon.renderAll(0.0625F);
 		GL11.glPopMatrix();
 
-		renderPowerLines(pyl, x, y, z);
+		this.renderPowerLines(pyl, x, y, z);
 	}
 
 	public static void renderPowerLines(TileEntityPylonBase pyl, double x, double y, double z) {

@@ -4,6 +4,6 @@ import net.minecraft.util.EnumFacing;
 
 public interface ILaserable {
 	
-	void addEnergy(long energy, EnumFacing dir);
+	public void addEnergy(long energy, EnumFacing dir);
 
 }

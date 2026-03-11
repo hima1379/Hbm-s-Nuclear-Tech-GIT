@@ -1,7 +1,7 @@
 package com.hbm.blocks.machine.rbmk;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKOutlet;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKOutlet;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

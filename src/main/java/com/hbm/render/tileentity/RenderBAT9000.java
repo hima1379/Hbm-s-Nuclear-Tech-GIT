@@ -8,7 +8,7 @@ import com.hbm.forgefluid.FluidTypeHandler.FluidProperties;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.misc.DiamondPronter;
 import com.hbm.render.misc.EnumSymbol;
-import com.hbm.tileentity.machine.TileEntityMachineBAT9000;
+import com.hbm.main.tileentity.machine.TileEntityMachineBAT9000;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;

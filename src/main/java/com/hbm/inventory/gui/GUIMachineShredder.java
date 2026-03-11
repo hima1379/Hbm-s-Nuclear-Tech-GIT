@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.inventory.container.ContainerMachineShredder;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineShredder;
+import com.hbm.main.tileentity.machine.TileEntityMachineShredder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -30,9 +30,12 @@ public class GUIMachineShredder extends GuiInfoContainer {
 
 		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 8, guiTop + 106 - 88, 16, 88, diFurnace.power, TileEntityMachineShredder.maxPower);
 		
-		boolean flag = diFurnace.getGearLeft() == 0 || diFurnace.getGearLeft() == 3;
+		boolean flag = false;
 
-        if(diFurnace.getGearRight() == 0 || diFurnace.getGearRight() == 3)
+		if(diFurnace.getGearLeft() == 0 || diFurnace.getGearLeft() == 3)
+			flag = true;
+		
+		if(diFurnace.getGearRight() == 0 || diFurnace.getGearRight() == 3)
 			flag = true;
 		
 		if(flag) {

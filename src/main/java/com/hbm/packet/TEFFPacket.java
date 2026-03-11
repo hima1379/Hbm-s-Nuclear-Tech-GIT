@@ -1,6 +1,6 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.machine.TileEntityForceField;
+import com.hbm.main.tileentity.machine.TileEntityForceField;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -75,15 +75,15 @@ public class TEFFPacket implements IMessage {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public IMessage onMessage(TEFFPacket m, MessageContext ctx) {
-            if(m == null) return null;
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				TileEntity te = Minecraft.getMinecraft().world.getTileEntity(new BlockPos(m.x, m.y, m.z));
 
 				try {
 					
-					if(te instanceof TileEntityForceField ff) {
+					if(te instanceof TileEntityForceField) {
+						TileEntityForceField ff = (TileEntityForceField)te;
 
-                        ff.radius = m.rad;
+						ff.radius = m.rad;
 						ff.health = m.health;
 						ff.maxHealth = m.maxHealth;
 						ff.power = m.power;

@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.inventory.container.ContainerLaunchPadTier1;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.bomb.TileEntityLaunchPad;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchPad;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

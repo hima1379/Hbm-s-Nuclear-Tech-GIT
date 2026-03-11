@@ -10,7 +10,7 @@ import com.hbm.interfaces.IRadResistantBlock;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
 import com.hbm.items.tool.ItemLock;
-import com.hbm.tileentity.machine.TileEntitySiloHatch;
+import com.hbm.main.tileentity.machine.TileEntitySiloHatch;
 
 import com.hbm.util.I18nUtil;
 import micdoodle8.mods.galacticraft.api.block.IPartialSealableBlock;
@@ -199,5 +199,14 @@ public class BlockSiloHatch extends BlockContainer implements IBomb, IMultiBlock
 		}
 
 		return true;
+	}
+
+	@Override
+	public void addInformation(ItemStack stack, World player, List<String> tooltip, ITooltipFlag advanced) {
+		float hardness = this.getExplosionResistance(null);
+		tooltip.add("§2[" + I18nUtil.resolveKey("trait.radshield") + "]");
+		if(hardness > 50){
+			tooltip.add("§6" + I18nUtil.resolveKey("trait.blastres", hardness));
+		}
 	}
 }

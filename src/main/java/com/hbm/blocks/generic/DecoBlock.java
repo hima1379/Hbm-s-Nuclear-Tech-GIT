@@ -4,7 +4,7 @@ import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.deco.TileEntityDecoBlock;
+import com.hbm.main.tileentity.deco.TileEntityDecoBlock;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
@@ -66,8 +66,10 @@ public class DecoBlock extends BlockContainer {
 	
 	@Override
 	public boolean hasTileEntity(IBlockState state) {
-        return this != ModBlocks.steel_scaffold && this != ModBlocks.steel_beam;
-    }
+		if(this == ModBlocks.steel_scaffold || this == ModBlocks.steel_beam)
+			return false;
+		return true;
+	}
 	
 	@Override
 	public EnumBlockRenderType getRenderType(IBlockState state) {

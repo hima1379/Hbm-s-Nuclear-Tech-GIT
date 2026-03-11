@@ -237,10 +237,11 @@ public class GunB92 extends Item implements IHasCustomModel {
 
 	@Override
 	public Multimap<String, AttributeModifier> getItemAttributeModifiers(EntityEquipmentSlot equipmentSlot) {
-        // multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new
+		Multimap<String, AttributeModifier> multimap = super.getItemAttributeModifiers(equipmentSlot);
+		// multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new
 		// AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", 3.5,
 		// 0));
-		return super.getItemAttributeModifiers(equipmentSlot);
+		return multimap;
 	}
 
 	private static int getAnim(ItemStack stack) {

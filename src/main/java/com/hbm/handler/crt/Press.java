@@ -13,6 +13,7 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 @ZenRegister
 @ZenClass("mods.ntm.Press")

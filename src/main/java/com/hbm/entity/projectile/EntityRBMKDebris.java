@@ -5,7 +5,7 @@ import java.util.List;
 import com.hbm.items.ModItems;
 import com.hbm.util.ContaminationUtil;
 import com.hbm.render.amlfrom1710.Vec3;
-import com.hbm.tileentity.machine.rbmk.RBMKDials;
+import com.hbm.main.tileentity.machine.rbmk.RBMKDials;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
@@ -364,12 +364,12 @@ public class EntityRBMKDebris extends Entity {
 		return dist < range * range;
 	}
 
-	public enum DebrisType {
+	public static enum DebrisType {
 		BLANK, //just a metal beam
 		ELEMENT, //the entire casing of a fuel assembly because fuck you
 		FUEL, //spicy
 		ROD, //solid boron rod
 		GRAPHITE, //spicy rock
-		LID //the all destroying harbinger of annihilation
+		LID; //the all destroying harbinger of annihilation
 	}
 }

@@ -5,7 +5,7 @@ import java.util.Random;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityMachineArcFurnace;
+import com.hbm.main.tileentity.machine.TileEntityMachineArcFurnace;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
@@ -224,7 +224,7 @@ public class MachineArcFurnace extends BlockContainer {
 
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		boolean rods = (meta & 1) == 1;
+		boolean rods = (meta & 1) == 1 ? true : false;
 		meta = meta >> 1;
 		EnumFacing enumfacing = EnumFacing.byIndex(meta);
 

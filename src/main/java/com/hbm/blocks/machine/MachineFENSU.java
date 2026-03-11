@@ -1,17 +1,20 @@
 package com.hbm.blocks.machine;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.hbm.lib.Library;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.blocks.ILookOverlay;
-import com.hbm.lib.Library;
 import com.hbm.blocks.BlockDummyableMBB;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityMachineFENSU;
+import com.hbm.main.tileentity.machine.TileEntityMachineFENSU;
 
+import api.hbm.energy.EnergyValue;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -112,7 +115,8 @@ public class MachineFENSU extends BlockDummyableMBB implements ILookOverlay {
 							name = "dyeSilver";
 						if(name.length() > 3 && name.startsWith("dye")){
 							try {
-                                entity.color = EnumDyeColor.valueOf(name.substring(3, name.length()).toUpperCase());
+								EnumDyeColor color = EnumDyeColor.valueOf(name.substring(3, name.length()).toUpperCase());
+								entity.color = color;
 								entity.markDirty();
 								world.notifyBlockUpdate(corePos, state, state, 2 | 4);
 								if(!player.isCreative())
@@ -191,20 +195,31 @@ public class MachineFENSU extends BlockDummyableMBB implements ILookOverlay {
 	public void addInformation(ItemStack stack, World worldIn, List<String> list, ITooltipFlag flagIn) {
 		super.addInformation(stack, worldIn, list, flagIn);
 		list.add("Change color using dyes");
-		long charge = 0L;
+
+		// Read power as EnergyValue to support BigInteger (beyond Long.MAX_VALUE)
+		EnergyValue charge = EnergyValue.ZERO;
 		if(stack.hasTagCompound()){
 			NBTTagCompound nbt = stack.getTagCompound();
 			if(nbt.hasKey("NBT_PERSISTENT_KEY")){
-				charge = nbt.getCompoundTag("NBT_PERSISTENT_KEY").getLong("power");
+				charge = EnergyValue.readFromNBT(nbt.getCompoundTag("NBT_PERSISTENT_KEY"), "power");
 			}
 		}
 
-		if(charge == 0L){
-			list.add("§c0§4/9.22EHE §c(0.0%)§r");
-		}else {
-			double percent = Math.round(1000D*((double)charge/(double)Long.MAX_VALUE))*0.1D;
+		// Max capacity: 10^100 HE
+		EnergyValue maxCapacity = EnergyValue.of(new BigInteger("10").pow(100));
+
+		if(charge.isZero()){
+			list.add("§c0§4/10^100HE §c(0.0%)§r");
+		} else {
+			// Calculate percentage using BigDecimal for precision
+			BigDecimal chargeDecimal = charge.toBigDecimal();
+			BigDecimal maxDecimal = maxCapacity.toBigDecimal();
+			double percent = chargeDecimal.divide(maxDecimal, 10, BigDecimal.ROUND_HALF_UP)
+			                            .multiply(new BigDecimal("100"))
+			                            .doubleValue();
+
 			String color = "§e";
-			String color2 = "§6"; 
+			String color2 = "§6";
 			if(percent < 25){
 				color = "§c";
 				color2 = "§4";
@@ -212,7 +227,9 @@ public class MachineFENSU extends BlockDummyableMBB implements ILookOverlay {
 				color = "§a";
 				color2 = "§2";
 			}
-			list.add(color+Library.getShortNumber(charge)+color2+"/9.22EHE "+color+"("+percent+"%)§r");
+
+			list.add(color + Library.getShortNumber(chargeDecimal) + color2 + "/10^100HE " +
+			         color + "(" + String.format("%.1f", percent) + "%)§r");
 		}
 	}
 
@@ -226,14 +243,14 @@ public class MachineFENSU extends BlockDummyableMBB implements ILookOverlay {
 
 		TileEntityMachineFENSU battery = (TileEntityMachineFENSU) te;
 		List<String> text = new ArrayList();
-		text.add("§6<> §rStored Energy: " + Library.getShortNumber(battery.power) + "/9.22EHE");
-		if(battery.powerDelta == 0)
+		text.add("§6<> §rStored Energy: " + Library.getShortNumber(battery.getPowerEV().toBigDecimal()) + "/" + Library.getShortNumber(battery.getMaxPowerEV().toBigDecimal()) + "HE");
+		if(battery.getPowerDelta() == 0)
 			text.add("§e-- §r0HE/s");
-		else if(battery.powerDelta > 0)
-			text.add("§a-> §r" + Library.getShortNumber(battery.powerDelta) + "HE/s");
+		else if(battery.getPowerDelta() > 0)
+			text.add("§a-> §r" + Library.getShortNumber(battery.getPowerDelta()) + "HE/s");
 		else
-			text.add("§c<- §r" + Library.getShortNumber(-battery.powerDelta) + "HE/s");
-		text.add("&["+Library.getColorProgress((double)battery.power/(double)Long.MAX_VALUE)+"&]    "+Library.getPercentage((double)battery.power/(double)Long.MAX_VALUE)+"%");
+			text.add("§c<- §r" + Library.getShortNumber(-battery.getPowerDelta()) + "HE/s");
+		text.add("&["+Library.getColorProgress(battery.getPowerEV().toBigDecimal().doubleValue()/battery.getMaxPowerEV().toBigDecimal().doubleValue())+"&]    "+Library.getPercentage(battery.getPowerEV().toBigDecimal().doubleValue()/battery.getMaxPowerEV().toBigDecimal().doubleValue())+"%");
 		ILookOverlay.printGeneric(event, getLocalizedName(), 0xffff00, 0x404000, text);
 	}
 }

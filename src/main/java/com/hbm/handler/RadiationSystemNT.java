@@ -12,8 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.BooleanSupplier;
 
 import com.hbm.capability.HbmLivingProps;
+import com.hbm.physics.radiation.FalloutDecayModel;
 import com.hbm.config.GeneralConfig;
 import com.hbm.config.RadiationConfig;
 import com.hbm.entity.mob.EntityDuck;
@@ -34,6 +38,7 @@ import com.hbm.saveddata.RadiationSavedData;
 import com.hbm.util.ContaminationUtil;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -64,6 +69,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 @Mod.EventBusSubscriber(modid = RefStrings.MODID)
@@ -89,6 +95,13 @@ public class RadiationSystemNT {
 		RadPocket p = getPocket(world, pos);
 		if(p.radiation < max){
 			p.radiation += amount;
+			// Accumulate the H+1 reference dose rate for Way-Wigner decay (§9.147).
+			// Each increment of fallout contributes its amount as an H+1 value.
+			p.r1Reference += amount;
+			// Record deposition time on first deposit so t is measured from this instant.
+			if(p.depositionTimeMs == 0L) {
+				p.depositionTimeMs = System.currentTimeMillis();
+			}
 		}
 		//Mark this pocket as active so it gets updated
 		if(amount > 0){
@@ -123,6 +136,10 @@ public class RadiationSystemNT {
 	public static void setRadForCoord(World world, BlockPos pos, float amount){
 		RadPocket p = getPocket(world, pos);
 		p.radiation = Math.max(amount, 0);
+		// Set the H+1 reference and reset deposition time for Way-Wigner decay (§9.147).
+		// Treating the assigned value as the H+1 dose rate means decay starts from t=1 h.
+		p.r1Reference     = p.radiation;
+		p.depositionTimeMs = System.currentTimeMillis() - FalloutDecayModel.hoursToMs(1.0);
 		//If the amount is greater than 0, make sure to mark it as dirty so it gets updated
 		if(amount > 0){
 			WorldRadiationData data = getWorldRadData(world);
@@ -199,8 +216,11 @@ public class RadiationSystemNT {
 		}
 		//Finally, check if the chunk has a sub chunk at the specified y level
 		SubChunkRadiationStorage sc = st.getForYLevel(pos.getY());
-        return sc != null;
-    }
+		if(sc == null){
+			return false;
+		}
+		return true;
+	}
 	
 	/**
 	 * Gets the sub chunk from the specified pos. Loads it if it doesn't exist
@@ -292,14 +312,17 @@ public class RadiationSystemNT {
 					updateRadSaveData(world);
 				}
 
-                List<Object> oList = new ArrayList<Object>(world.loadedEntityList);
+				List<Object> oList = new ArrayList<Object>();
+				oList.addAll(world.loadedEntityList);
 
 				for(Object e : oList) {
-					if(e instanceof EntityLivingBase entity) {
+					if(e instanceof EntityLivingBase) {
 
 						// effect for radiation
+						EntityLivingBase entity = (EntityLivingBase) e;
 
-						if(entity instanceof EntityPlayer player){
+						if(entity instanceof EntityPlayer){
+							EntityPlayer player = (EntityPlayer) entity;
 							if(RadiationConfig.neutronActivation){
 								double recievedRadiation = ContaminationUtil.getNoNeutronPlayerRads(player)*0.00004D-(0.00004D * RadiationConfig.neutronActivationThreshold); //20Rad/s threshold
 								float neutronRads = ContaminationUtil.getPlayerNeutronRads(player);
@@ -319,7 +342,7 @@ public class RadiationSystemNT {
 							}
 						}
 
-						float eRad = HbmLivingProps.getRadiation(entity);
+						float eRad = (float)HbmLivingProps.getRadiation(entity);
 
 						if(eRad >= 200 && entity.getHealth() > 0 && entity instanceof EntityCreeper) {
 
@@ -328,7 +351,8 @@ public class RadiationSystemNT {
 								creep.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
 
 								if(!entity.isDead)
-                                    world.spawnEntity(creep);
+									if(!world.isRemote)
+										world.spawnEntity(creep);
 								entity.setDead();
 							} else {
 								entity.attackEntityFrom(ModDamageSource.radiation, 100F);
@@ -340,11 +364,13 @@ public class RadiationSystemNT {
 							creep.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
 
 							if(!entity.isDead)
-                                world.spawnEntity(creep);
+								if(!world.isRemote)
+									world.spawnEntity(creep);
 							entity.setDead();
 							continue;
 
-						} else if(eRad >= 600 && entity instanceof EntityVillager vil) {
+						} else if(eRad >= 600 && entity instanceof EntityVillager) {
+							EntityVillager vil = (EntityVillager)entity;
 							EntityZombieVillager creep = new EntityZombieVillager(world);
 							creep.setProfession(vil.getProfession());
 							creep.setForgeProfession(vil.getProfessionForge());
@@ -352,7 +378,8 @@ public class RadiationSystemNT {
 							creep.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
 
 							if(!entity.isDead)
-                                world.spawnEntity(creep);
+								if(!world.isRemote)
+									world.spawnEntity(creep);
 							entity.setDead();
 							continue;
 						} else if(eRad >= 700 && entity instanceof EntityBlaze) {
@@ -360,10 +387,12 @@ public class RadiationSystemNT {
 							creep.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
 
 							if(!entity.isDead)
-                                world.spawnEntity(creep);
+								if(!world.isRemote)
+									world.spawnEntity(creep);
 							entity.setDead();
 							continue;
-						} else if(eRad >= 800 && entity instanceof EntityHorse horsie) {
+						} else if(eRad >= 800 && entity instanceof EntityHorse) {
+							EntityHorse horsie = (EntityHorse)entity;
 							EntityZombieHorse zomhorsie = new EntityZombieHorse(world);
 							zomhorsie.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
 							zomhorsie.setGrowingAge(horsie.getGrowingAge());
@@ -373,7 +402,8 @@ public class RadiationSystemNT {
 							zomhorsie.setOwnerUniqueId(horsie.getOwnerUniqueId());
 							zomhorsie.makeMad();
 							if(!entity.isDead)
-                                world.spawnEntity(zomhorsie);
+								if(!world.isRemote)
+									world.spawnEntity(zomhorsie);
 							entity.setDead();
 							continue;
 						} else if(eRad >= 900 && entity.getClass().equals(EntityDuck.class)) {
@@ -381,7 +411,7 @@ public class RadiationSystemNT {
 							EntityQuackos quacc = new EntityQuackos(world);
 							quacc.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
 
-							if(!entity.isDead)
+							if(!entity.isDead && !world.isRemote)
 								world.spawnEntity(quacc);
 
 							entity.setDead();
@@ -570,6 +600,11 @@ public class RadiationSystemNT {
 				//Every second, do a full system update, which will spread around radiation and all that
 				updateRadiation();
 
+				// Advance the Gaussian plume atmospheric dispersion engine for all worlds.
+				for(net.minecraft.world.World wld : worldMap.keySet()) {
+					AtmosphericDispersionSystem.get(wld).tick();
+				}
+
 				//System.out.println("rad tick took: " + (System.nanoTime()-mil));
 			}
 		}
@@ -604,6 +639,9 @@ public class RadiationSystemNT {
 				cData.readFromNBT(e.getData().getCompoundTag("hbmRadDataNT"));
 				data.data.put(e.getChunk().getPos(), cData);
 			}
+			// Apply offline atmospheric deposition accumulated since this chunk was last loaded.
+			// Covers server-downtime and chunk-unloaded-while-server-running scenarios.
+			AtmosphericDispersionSystem.get(e.getWorld()).depositionForChunkLoad(e.getChunk().getPos());
 		}
 	}
 	
@@ -639,6 +677,7 @@ public class RadiationSystemNT {
 		if(!e.getWorld().isRemote){
 			//Remove the world data on unload
 			worldMap.remove(e.getWorld());
+			AtmosphericDispersionSystem.evict(e.getWorld());
 		}
 	}
 	
@@ -669,9 +708,19 @@ public class RadiationSystemNT {
 					//In any case, marking it for unload myself shouldn't cause any problems
 					((WorldServer) w.world).getChunkProvider().queueUnload(p.parent.parent.chunk);
 				}
-				//Lower the radiation a bit, and mark the parent chunk as dirty so the radiation gets saved
-				p.radiation *= 0.999F;
-				p.radiation -= 0.05F;
+				//Decay radiation using the Way-Wigner approximation (§9.147, Effects of Nuclear Weapons 1977).
+			// R(t) = R1 * t^(-1.2), where t is real elapsed wall-clock time in hours.
+			// Per-second multiplier: [(t + 1/3600) / t]^(-1.2)
+				if(p.r1Reference > 0F && p.depositionTimeMs > 0L) {
+					double tHours = FalloutDecayModel.computeElapsedHours(p.depositionTimeMs);
+					double mult   = FalloutDecayModel.getPerSecondDecayMultiplier(tHours);
+					p.radiation   = (float)(p.radiation * mult);
+				} else {
+					// No direct fallout deposition recorded in this pocket (radiation
+					// arrived through spreading). Use the legacy formula as a fallback.
+					p.radiation *= 0.999F;
+					p.radiation -= 0.05F;
+				}
 				p.parent.parent.chunk.markDirty();
 				if (p.radiation <= 0) {
 					//If there's no more radiation and is unsealed, set it to 0 and remove
@@ -703,57 +752,6 @@ public class RadiationSystemNT {
 					}
 				}
 
-				//Count the number of connections to other pockets we have
-				float count = 0;
-				for (EnumFacing e : EnumFacing.VALUES) {
-					count += p.connectionIndices[e.ordinal()].size();
-				}
-				float amountPer = 0.7F / count;
-				if (count == 0 || p.radiation < 1) {
-					//Don't update if we have no connections or our own radiation is less than 1. Prevents micro radiation bleeding.
-					amountPer = 0;
-				}
-
-				if(GeneralConfig.enableDebugMode) {
-					BlockPos chunkPos = new BlockPos(p.getSubChunkPos().getX() / 16, p.getSubChunkPos().getY() / 16, p.getSubChunkPos().getZ() / 16);
-					MainRegistry.logger.info("[Debug] Pocket " + p.index + " has " + count + " connections to other pockets at chunk " + chunkPos);
-					if (amountPer > 0) {
-						MainRegistry.logger.info("[Debug] Pocket " + p.index + " will spread " + amountPer + " rads to each adjacent pocket");
-					}
-				}
-
-				// TODO: This might also cause leaks from sealed pockets to unsealed
-				if (p.radiation > 0 && amountPer > 0) {
-					//Only update other values if this one has radiation to update with
-					for (EnumFacing e : EnumFacing.VALUES) {
-						//For every direction, get the block pos for the next sub chunk in that direction.
-						BlockPos nPos = pos.offset(e, 16);
-
-						//If it's not loaded or it's out of bounds, do nothhing
-						if (!p.parent.parent.chunk.getWorld().isBlockLoaded(nPos) || nPos.getY() < 0 || nPos.getY() > 255)
-							continue;
-
-						if (p.connectionIndices[e.ordinal()].size() == 1 && p.connectionIndices[e.ordinal()].get(0) == -1) {
-							//If the chunk in this direction isn't loaded, load it
-							rebuildChunkPockets(p.parent.parent.chunk.getWorld().getChunk(nPos), nPos.getY() >> 4);
-						} else {
-							// Otherwise, for every pocket this chunk is connected to in this direction, add radiation to it;
-							// also add those pockets to the active pockets set
-							SubChunkRadiationStorage sc2 = getSubChunkStorage(p.parent.parent.chunk.getWorld(), nPos);
-							for (int idx : p.connectionIndices[e.ordinal()]) {
-								// Don't spread to sealed pockets
-								if (!sc2.pockets[idx].isSealed()) {
-									// Only accumulated rads get updated so the system doesn't interfere with itself while working
-									sc2.pockets[idx].accumulatedRads += p.radiation * amountPer;
-									w.addActivePocket(sc2.pockets[idx]);
-								}
-							}
-						}
-					}
-				}
-				if (amountPer != 0) {
-					p.accumulatedRads += p.radiation * 0.3F;
-				}
 				//Make sure we only use around 20 ms max per tick, to help reduce lag.
 				//The lag should die down by itself after a few minutes when all radioactive chunks get built.
 				if (System.currentTimeMillis() - time > 20) {
@@ -761,15 +759,15 @@ public class RadiationSystemNT {
 				}
 			}
 
-			// Remove the ones that reached 0, and set the actual radiation values to the accumulated values
-			// We don't remove sealed pockets so that dimensions with background rads can be shielded against
+			// Remove pockets that have fully decayed (Way-Wigner law applied above).
+			// Gaussian plume handles spatial distribution; accumulatedRads no longer used.
 			List<RadPocket> itrActiveCheck = new ArrayList<>(w.getActivePockets());
 			itr = itrActiveCheck.iterator();
 			while(itr.hasNext()){
 				RadPocket act = itr.next();
-				act.radiation = act.accumulatedRads;
 				act.accumulatedRads = 0;
 				if(act.radiation <= 0) {
+					act.radiation = 0;
 					w.removeActivePocket(act);
 					itr.remove();
 				}
@@ -790,12 +788,6 @@ public class RadiationSystemNT {
 	
 	//Reduces array reallocations
 	private static RadPocket[] pocketsByBlock = null;
-
-    public static boolean isRadResistant(World world, Block block, BlockPos pos){
-        if(block instanceof IRadResistantBlock radBlock)
-            return radBlock.isRadResistant(world, pos);
-        return block.getExplosionResistance(null) >=  2_160_000;
-    }
 	
 	/**
 	 * Divides a 16x16x16 sub chunk into pockets that are separated by radiation resistant blocks.
@@ -837,7 +829,7 @@ public class RadiationSystemNT {
 
 						// If it's not a radiation resistant block, and there isn't currently a pocket here,
 						// do a flood fill pocket build
-						if (!isRadResistant(chunk.getWorld(), block, new BlockPos(x, y, z).add(subChunkPos))) {
+						if (!(block instanceof IRadResistantBlock && ((IRadResistantBlock) block).isRadResistant(chunk.getWorld(), new BlockPos(x, y, z).add(subChunkPos)))) {
 							if (GeneralConfig.enableDebugMode) {
 								MainRegistry.logger.info("[Debug] Block " + block + " at " + new BlockPos(x, y, z).add(subChunkPos) + " was not rad resistant; add pocket");
 							}
@@ -906,7 +898,7 @@ public class RadiationSystemNT {
 
 		if(subChunk.pocketsByBlock != null)
 			pocketsByBlock = null;
-		subChunk.pockets = pockets.toArray(new RadPocket[0]);
+		subChunk.pockets = pockets.toArray(new RadPocket[pockets.size()]);
 
 		//Finally, put the newly built sub chunk into the chunk
 		st.setForYLevel(yIndex << 4, subChunk);
@@ -925,7 +917,7 @@ public class RadiationSystemNT {
 		BlockPos outPos = newPos.add(subChunkPos);
 		Block block = chunk.getWorld().getBlockState(outPos).getBlock();
 		//If the block isn't radiation resistant...
-		if(!isRadResistant(chunk.getWorld(), block, outPos)){
+		if(!(block instanceof IRadResistantBlock && ((IRadResistantBlock) block).isRadResistant(chunk.getWorld(), outPos))){
 			if(!isSubChunkLoaded(chunk.getWorld(), outPos)){
 				//if it's not loaded, mark it with a single -1 value. This will tell the update method that the
 				//Chunk still needs to be loaded to propagate radiation into it
@@ -974,7 +966,7 @@ public class RadiationSystemNT {
 		while(!stack.isEmpty()){
 			BlockPos pos = stack.poll();
 			Block block = chunk.get(pos.getX(), pos.getY(), pos.getZ()).getBlock();
-			if(pocketsByBlock[pos.getX()*16*16+pos.getY()*16+pos.getZ()] != null || isRadResistant(world, block, pos.add(subChunkWorldPos))){
+			if(pocketsByBlock[pos.getX()*16*16+pos.getY()*16+pos.getZ()] != null || (block instanceof IRadResistantBlock && ((IRadResistantBlock) block).isRadResistant(world, pos.add(subChunkWorldPos)))){
 				//If the block is radiation resistant or we've already flood filled here, continue
 				continue;
 			}
@@ -992,7 +984,7 @@ public class RadiationSystemNT {
 					//Will also attempt to load the chunk, which will cause neighbor data to be updated correctly if it's unloaded.
 					block = world.getBlockState(outPos).getBlock();
 					//If the block isn't radiation resistant...
-					if(!isRadResistant(world, block, outPos)){
+					if(!(block instanceof IRadResistantBlock && ((IRadResistantBlock) block).isRadResistant(world, outPos))){
 						if(!isSubChunkLoaded(world, outPos)){
 							//if it's not loaded, mark it with a single -1 value. This will tell the update method that the
 							//Chunk still needs to be loaded to propagate radiation into it
@@ -1041,7 +1033,15 @@ public class RadiationSystemNT {
 		//If an array contains -1, that means the chunk on that side hasn't been initialized, so it's an implicit connection
 		@SuppressWarnings("unchecked")
 		public List<Integer>[] connectionIndices = new List[EnumFacing.VALUES.length];
-		
+
+		// Way-Wigner decay fields (Effects of Nuclear Weapons 1977, §9.147)
+		// r1Reference: cumulative H+1 dose rate for all fallout deposited directly
+		//   in this pocket [rads/hr]. Decay: R(t) = r1Reference * t^(-1.2)
+		// depositionTimeMs: wall-clock ms (System.currentTimeMillis()) of first
+		//   deposition. 0L = no fallout directly deposited in this pocket.
+		public float r1Reference     = 0F;
+		public long  depositionTimeMs = 0L;
+
 		public RadPocket(SubChunkRadiationStorage parent, int index) {
 			this.parent = parent;
 			this.index = index;
@@ -1140,17 +1140,28 @@ public class RadiationSystemNT {
 		 */
 		public void setRad(SubChunkRadiationStorage other){
 			//Accumulate a total, and divide that evenly among our pockets
-			float total = 0;
+			float total      = 0;
+			float totalR1    = 0;
+			long  earliestMs = Long.MAX_VALUE;
 			for(RadPocket p : other.pockets) {
 				// Sealed pockets should not attribute to total rad count
 				if (!p.isSealed()) {
-					total += p.radiation;
+					total   += p.radiation;
+					totalR1 += p.r1Reference;
+					if(p.depositionTimeMs > 0L && p.depositionTimeMs < earliestMs) {
+						earliestMs = p.depositionTimeMs;
+					}
 				}
 			}
 
 			float radPer = total / pockets.length;
+			float r1Per  = totalR1 / pockets.length;
+			long  depoMs = (earliestMs == Long.MAX_VALUE) ? 0L : earliestMs;
 			for(RadPocket p : pockets){
-				p.radiation = radPer;
+				p.radiation       = radPer;
+				// Propagate Way-Wigner fields so the redistributed pocket decays correctly.
+				p.r1Reference     = r1Per;
+				p.depositionTimeMs = depoMs;
 				if(radPer > 0) {
 					//If the pocket now has radiation or is sealed, mark it as active
 					p.parent.parent.parent.addActivePocket(p);
@@ -1210,9 +1221,9 @@ public class RadiationSystemNT {
 	
 	//for a whole 16*256*16 chunk
 	public static class ChunkRadiationStorage {
-		//Half a megabyte is good enough isn't it? Right?
-		//This is going to come back to bite me later, isn't it.
-		private static ByteBuffer buf = ByteBuffer.allocate(524288);
+		// Buffer for NBT serialization. Extended to 2MB to accommodate the additional
+		// Way-Wigner fields (r1Reference: 4 bytes + depositionTimeMs: 8 bytes per pocket).
+		private static ByteBuffer buf = ByteBuffer.allocate(2097152);
 		
 		public WorldRadiationData parent;
 		private Chunk chunk;
@@ -1315,7 +1326,9 @@ public class RadiationSystemNT {
 			buf.flip();
 			byte[] data = new byte[buf.limit()];
 			buf.get(data);
-			tag.setByteArray("chunkRadData", data);
+			// Write to "chunkRadDataV2" to distinguish from the legacy format that lacks
+			// Way-Wigner fields (r1Reference, depositionTimeMs).
+			tag.setByteArray("chunkRadDataV2", data);
 			buf.clear();
 			return tag;
 		}
@@ -1344,6 +1357,9 @@ public class RadiationSystemNT {
 			//Serialize index and radiation
 			buf.putInt(p.index);
 			buf.putFloat(p.radiation);
+			// Way-Wigner fields: r1Reference [float] and depositionTimeMs [long]
+			buf.putFloat(p.r1Reference);
+			buf.putLong(p.depositionTimeMs);
 			//For each facing, serialize the indices in that direction
 			for(EnumFacing e : EnumFacing.VALUES){
 				List<Integer> indc = p.connectionIndices[e.ordinal()];
@@ -1359,10 +1375,15 @@ public class RadiationSystemNT {
 		 * @param tag - the tag to deserialize from
 		 */
 		public void readFromNBT(NBTTagCompound tag){
-			ByteBuffer data = ByteBuffer.wrap(tag.getByteArray("chunkRadData"));
+			// Prefer the V2 format (includes Way-Wigner fields).
+			// Fall back to the legacy "chunkRadData" format and migrate on the fly.
+			final boolean isV2 = tag.hasKey("chunkRadDataV2");
+			final String  key  = isV2 ? "chunkRadDataV2" : "chunkRadData";
+			if(!tag.hasKey(key)) return;
+			ByteBuffer data = ByteBuffer.wrap(tag.getByteArray(key));
 			//For each chunk, try to deserialize it
 			for(int i = 0; i < chunks.length; i ++){
-				boolean subChunkExists = data.get() == 1;
+				boolean subChunkExists = data.get() == 1 ? true : false;
 				if(subChunkExists){
 					//Y level could be implicitly defined with i, but this works too
 					int yLevel = data.getShort();
@@ -1372,13 +1393,14 @@ public class RadiationSystemNT {
 					st.pockets = new RadPocket[pocketsLength];
 					//Deserialize each pocket into the pockets array
 					for(int j = 0; j < pocketsLength; j ++){
-						st.pockets[j] = readPocket(data, st);
+						// Use the appropriate reader depending on whether Way-Wigner fields are present
+						st.pockets[j] = isV2 ? readPocket(data, st) : readPocketLegacy(data, st);
 						if(st.pockets[j].radiation > 0){
 							//If it has active radiation, add it to the active set to be updated
 							parent.addActivePocket(st.pockets[j]);
 						}
 					}
-					boolean perBlockDataExists = data.get() == 1;
+					boolean perBlockDataExists = data.get() == 1 ? true : false;
 					if(perBlockDataExists){
 						//If the per block data exists, read indices sequentially and set each array slot to the rad pocket at that index
 						st.pocketsByBlock = new RadPocket[16*16*16];
@@ -1406,7 +1428,36 @@ public class RadiationSystemNT {
 			int index = buf.getInt();
 			RadPocket p = new RadPocket(parent, index);
 			p.radiation = buf.getFloat();
+			// Read Way-Wigner fields: r1Reference [float] and depositionTimeMs [long]
+			p.r1Reference     = buf.getFloat();
+			p.depositionTimeMs = buf.getLong();
 			//Read each connection index list
+			for(EnumFacing e : EnumFacing.VALUES){
+				List<Integer> indc = p.connectionIndices[e.ordinal()];
+				int size = buf.getShort();
+				for(int i = 0; i < size; i ++){
+					indc.add((int) buf.getShort());
+				}
+			}
+			return p;
+		}
+
+		/**
+		 * Reads a single pocket from a byte buffer written in the legacy format (before Way-Wigner).
+		 * r1Reference and depositionTimeMs are inferred from the pocket's radiation value so
+		 * that decay continues correctly after migration.
+		 */
+		public RadPocket readPocketLegacy(ByteBuffer buf, SubChunkRadiationStorage parent){
+			int index = buf.getInt();
+			RadPocket p = new RadPocket(parent, index);
+			p.radiation = buf.getFloat();
+			// Migrate: treat existing radiation as H+1 value, elapsed time inferred as 1 h.
+			// R(1) = r1Reference * 1^(-1.2) = r1Reference, so r1Reference = radiation.
+			// depositionTimeMs is set 1 hour in the past so the formula yields the current value.
+			if(p.radiation > 0F) {
+				p.r1Reference     = p.radiation;
+				p.depositionTimeMs = System.currentTimeMillis() - FalloutDecayModel.hoursToMs(1.0);
+			}
 			for(EnumFacing e : EnumFacing.VALUES){
 				List<Integer> indc = p.connectionIndices[e.ordinal()];
 				int size = buf.getShort();

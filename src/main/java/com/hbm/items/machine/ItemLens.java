@@ -3,6 +3,7 @@ package com.hbm.items.machine;
 import java.util.List;
 
 import com.hbm.items.ModItems;
+import com.hbm.util.BobMathUtil;
 
 import com.hbm.util.I18nUtil;
 import net.minecraft.client.util.ITooltipFlag;

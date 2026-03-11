@@ -2,7 +2,7 @@ package com.hbm.blocks.network;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.interfaces.IDummy;
-import com.hbm.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -47,7 +47,12 @@ public class DummyBlockCraneSplitter extends BlockContainer implements IDummy {
             world.removeTileEntity(pos);
         }
 
-    @Override
+        @Override
+        public EnumBlockRenderType getRenderType(IBlockState state) {
+            return EnumBlockRenderType.INVISIBLE;
+        }
+
+        @Override
         public Item getItemDropped(IBlockState state, Random rand, int fortune) {
             return Items.AIR;
         }

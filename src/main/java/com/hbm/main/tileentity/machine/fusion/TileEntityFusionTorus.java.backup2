@@ -1,0 +1,408 @@
+package com.hbm.main.tileentity.machine.fusion;
+
+import java.util.Map.Entry;
+
+import com.hbm.interfaces.IControlReceiver;
+import com.hbm.inventory.recipes.FusionRecipe;
+import com.hbm.lib.Library;
+import com.hbm.main.MainRegistry;
+import com.hbm.main.tileentity.TileEntityLoadedBase;
+import com.hbm.main.tileentity.TileEntityMachineBase;
+import com.hbm.module.machine.ModuleMachineFusion;
+import com.hbm.sound.AudioWrapper;
+import com.hbm.uninos.DirPos;
+import com.hbm.uninos.GenNode;
+import com.hbm.uninos.INetworkProvider;
+import com.hbm.uninos.UniNodespace;
+import com.hbm.uninos.networkproviders.KlystronNetwork;
+import com.hbm.uninos.networkproviders.KlystronNetworkProvider;
+import com.hbm.uninos.networkproviders.PlasmaNetwork;
+import com.hbm.uninos.networkproviders.PlasmaNetworkProvider;
+
+import api.hbm.energy.IEnergyUser;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+/**
+ * Fusion Torus - The heart of the fusion reactor (simplified for 1.12.2).
+ *
+ * Features:
+ * - Receives klystron energy from Klystrons
+ * - Processes fusion recipes
+ * - Distributes plasma power to receivers
+ * - Simplified cooling system (no TileEntityCooledBase dependency)
+ *
+ * @author Adapted for 1.12.2
+ */
+public class TileEntityFusionTorus extends TileEntityMachineBase implements IEnergyUser, IControlReceiver, ITickable {
+
+	public boolean didProcess = false;
+
+	public FluidTank[] tanks;
+	public ModuleMachineFusion fusionModule;
+
+	protected GenNode<KlystronNetwork>[] klystronNodes;
+	protected GenNode<PlasmaNetwork>[] plasmaNodes;
+	public boolean[] connections;
+
+	public long klystronEnergy;
+	public long plasmaEnergy;
+	public double fuelConsumption;
+
+	public long power;
+	public static final long MAX_POWER = 10_000_000;
+
+	public float magnet;
+	public float prevMagnet;
+	public float magnetSpeed;
+	public static final float MAGNET_ACCELERATION = 0.25F;
+
+	private AudioWrapper audio;
+	public int timeOffset = -1;
+
+	@SuppressWarnings("unchecked")
+	public TileEntityFusionTorus() {
+		super(3);
+
+		klystronNodes = new GenNode[4];
+		plasmaNodes = new GenNode[4];
+		connections = new boolean[4];
+
+		this.tanks = new FluidTank[4];
+		this.tanks[0] = new FluidTank(4_000);
+		this.tanks[1] = new FluidTank(4_000);
+		this.tanks[2] = new FluidTank(4_000);
+		this.tanks[3] = new FluidTank(4_000);
+
+		this.fusionModule = new ModuleMachineFusion(0, this, new net.minecraft.item.ItemStack[3])
+				.fluidInput(tanks[0], tanks[1], tanks[2])
+				.fluidOutput(tanks[3])
+				.itemOutput(2);
+	}
+
+	@Override
+	public String getName() {
+		return "container.fusionTorus";
+	}
+
+	@Override
+	public void update() {
+		if(!world.isRemote) {
+			// Server-side logic
+
+			// Create/update network nodes
+			for(int i = 0; i < 4; i++) {
+				if(klystronNodes[i] == null || klystronNodes[i].expired) {
+					klystronNodes[i] = createNode(KlystronNetworkProvider.THE_PROVIDER, EnumFacing.byIndex(i + 2));
+				}
+				if(plasmaNodes[i] == null || plasmaNodes[i].expired) {
+					plasmaNodes[i] = createNode(PlasmaNetworkProvider.THE_PROVIDER, EnumFacing.byIndex(i + 2));
+				}
+
+				if(klystronNodes[i].net != null) klystronNodes[i].net.addReceiver(this);
+				if(plasmaNodes[i].net != null) plasmaNodes[i].net.addProvider(this);
+			}
+
+			// Charge from battery
+			this.power = Library.chargeTEFromItems(inventory, 0, power, MAX_POWER);
+
+			// Count plasma receivers and collectors
+			int receiverCount = 0;
+			int collectors = 0;
+
+			for(int i = 0; i < 4; i++) {
+				connections[i] = false;
+				if(klystronNodes[i] != null && klystronNodes[i].hasValidNet() && !klystronNodes[i].net.providerEntries.isEmpty()) {
+					connections[i] = true;
+				}
+				if(!connections[i] && plasmaNodes[i] != null && plasmaNodes[i].hasValidNet() && !plasmaNodes[i].net.receiverEntries.isEmpty()) {
+					connections[i] = true;
+				}
+
+				if(plasmaNodes[i] != null && plasmaNodes[i].hasValidNet() && !plasmaNodes[i].net.receiverEntries.isEmpty()) {
+					for(Object o : plasmaNodes[i].net.receiverEntries.entrySet()) {
+						Entry<Object, Long> entry = (Entry<Object, Long>) o;
+						Object thing = entry.getKey();
+						if(thing instanceof TileEntityLoadedBase && !((TileEntityLoadedBase) thing).isLoaded()) continue;
+						if(thing instanceof IFusionPowerReceiver && ((IFusionPowerReceiver) thing).receivesFusionPower()) receiverCount++;
+						if(thing instanceof TileEntityFusionCollector) collectors++;
+						break;
+					}
+				}
+			}
+
+			FusionRecipe recipe = fusionModule.getRecipe();
+
+			// Calculate processing factors
+			double powerFactor = getSpeedScaled(MAX_POWER, power);
+			double factor = powerFactor; // Simplified - no fuel checking yet
+
+			boolean ignition = recipe != null ? recipe.ignitionTemp <= this.klystronEnergy : true;
+
+			this.plasmaEnergy = 0;
+			this.fuelConsumption = 0;
+			this.fusionModule.preUpdate(factor, collectors * 0.5D);
+			this.fusionModule.update(1D, 1D, ignition, inventory.getStackInSlot(1));
+			this.didProcess = this.fusionModule.didProcess;
+			if(this.fusionModule.markDirty) this.markDirty();
+
+			if(didProcess && recipe != null) {
+				this.plasmaEnergy = (long) Math.ceil(recipe.outputTemp * factor);
+				this.fuelConsumption = factor;
+			}
+
+			double outputIntensity = getOutputIntensity(receiverCount);
+			double outputFlux = recipe != null ? recipe.neutronFlux * factor : 0D;
+
+			// Distribute plasma power
+			if(this.plasmaEnergy > 0) {
+				for(int i = 0; i < 4; i++) {
+					if(plasmaNodes[i] != null && plasmaNodes[i].hasValidNet() && !plasmaNodes[i].net.receiverEntries.isEmpty()) {
+						for(Object o : plasmaNodes[i].net.receiverEntries.entrySet()) {
+							Entry<Object, Long> entry = (Entry<Object, Long>) o;
+							if(entry.getKey() instanceof IFusionPowerReceiver) {
+								long powerReceived = (long) Math.ceil(this.plasmaEnergy * outputIntensity);
+								((IFusionPowerReceiver) entry.getKey()).receiveFusionPower(powerReceived, outputFlux);
+							}
+						}
+					}
+				}
+			}
+
+			// Network sync
+			NBTTagCompound data = new NBTTagCompound();
+			data.setBoolean("didProcess", didProcess);
+			data.setLong("klystronEnergy", klystronEnergy);
+			data.setLong("plasmaEnergy", plasmaEnergy);
+			data.setDouble("fuelConsumption", fuelConsumption);
+			data.setLong("power", power);
+			data.setDouble("progress", fusionModule.progress);
+			data.setDouble("bonus", fusionModule.bonus);
+			for(int i = 0; i < 4; i++) data.setBoolean("conn" + i, connections[i]);
+			this.networkPack(data, 150);
+
+			this.klystronEnergy = 0;
+
+		} else {
+			// Client-side logic
+
+			if(timeOffset == -1) this.timeOffset = world.rand.nextInt(30_000);
+
+			double powerFactor = getSpeedScaled(MAX_POWER, power);
+			if(this.didProcess) {
+				this.magnetSpeed += MAGNET_ACCELERATION;
+			} else {
+				this.magnetSpeed -= MAGNET_ACCELERATION;
+			}
+
+			this.magnetSpeed = MathHelper.clamp(this.magnetSpeed, 0F, 30F * (float) powerFactor);
+
+			this.prevMagnet = this.magnet;
+			this.magnet += this.magnetSpeed;
+
+			if(this.magnet >= 360F) {
+				this.magnet -= 360F;
+				this.prevMagnet -= 360F;
+			}
+
+			// Sound management
+			if(this.magnetSpeed > 0 && MainRegistry.proxy.me().getDistanceSq(pos.getX() + 0.5, pos.getY() + 2.5, pos.getZ() + 0.5) < 50 * 50) {
+				float speed = this.magnetSpeed / 30F;
+
+				if(audio == null) {
+					audio = MainRegistry.proxy.getLoopedSound(com.hbm.lib.HBMSoundHandler.fusionReactorRunning, net.minecraft.util.SoundCategory.BLOCKS,
+						(float)(pos.getX() + 0.5), (float)(pos.getY() + 2.5), (float)(pos.getZ() + 0.5),
+						getVolume((int)speed), speed);
+					audio.startSound();
+				} else {
+					audio.updateVolume(getVolume((int)speed));
+					audio.updatePitch(speed);
+					audio.keepAlive();
+				}
+			} else {
+				if(audio != null) {
+					if(audio.isPlaying()) audio.stopSound();
+					audio = null;
+				}
+			}
+		}
+	}
+
+	public static double getOutputIntensity(int receiverCount) {
+		if(receiverCount == 1) return 1D; // 100%
+		if(receiverCount == 2) return 0.625D; // 125% total
+		if(receiverCount == 3) return 0.5D; // 150% total
+		return 0.4375D; // 175% total
+	}
+
+	@SuppressWarnings("unchecked")
+	public GenNode createNode(INetworkProvider provider, EnumFacing dir) {
+		int nodeX = pos.getX() + dir.getXOffset() * 7;
+		int nodeY = pos.getY() + 2;
+		int nodeZ = pos.getZ() + dir.getZOffset() * 7;
+
+		GenNode node = UniNodespace.getNode(world, nodeX, nodeY, nodeZ, provider);
+		if(node != null) return node;
+
+		BlockPos nodePos = new BlockPos(nodeX, nodeY, nodeZ);
+		BlockPos connectionPos = new BlockPos(
+			nodeX + dir.getXOffset(),
+			nodeY,
+			nodeZ + dir.getZOffset()
+		);
+
+		node = new GenNode(provider, nodePos)
+			.setConnections(new DirPos(connectionPos, dir));
+
+		UniNodespace.createNode(world, node);
+
+		return node;
+	}
+
+	/** Linearly scales up from 0% to 100% from 0 to 0.5, then stays at 100% */
+	public static double getSpeedScaled(double max, double level) {
+		if(max == 0) return 0D;
+		if(level >= max * 0.5) return 1D;
+		return level / max * 2D;
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+
+		if(audio != null) {
+			audio.stopSound();
+			audio = null;
+		}
+	}
+
+	@Override
+	public void invalidate() {
+		super.invalidate();
+
+		if(audio != null) {
+			audio.stopSound();
+			audio = null;
+		}
+
+		if(!world.isRemote) {
+			for(GenNode node : klystronNodes) if(node != null) UniNodespace.destroyNode(world, node);
+			for(GenNode node : plasmaNodes) if(node != null) UniNodespace.destroyNode(world, node);
+		}
+	}
+
+	@Override
+	public void networkUnpack(NBTTagCompound nbt) {
+		super.networkUnpack(nbt);
+
+		this.didProcess = nbt.getBoolean("didProcess");
+		this.klystronEnergy = nbt.getLong("klystronEnergy");
+		this.plasmaEnergy = nbt.getLong("plasmaEnergy");
+		this.fuelConsumption = nbt.getDouble("fuelConsumption");
+		this.power = nbt.getLong("power");
+		this.fusionModule.progress = nbt.getDouble("progress");
+		this.fusionModule.bonus = nbt.getDouble("bonus");
+		for(int i = 0; i < 4; i++) connections[i] = nbt.getBoolean("conn" + i);
+	}
+
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+
+		for(int i = 0; i < 4; i++) {
+			if(tanks[i].getFluid() != null) {
+				nbt.setTag("ft" + i, tanks[i].writeToNBT(new NBTTagCompound()));
+			}
+		}
+
+		nbt.setLong("power", power);
+		this.fusionModule.writeToNBT(nbt);
+
+		return nbt;
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+
+		for(int i = 0; i < 4; i++) {
+			if(nbt.hasKey("ft" + i)) {
+				tanks[i].readFromNBT(nbt.getCompoundTag("ft" + i));
+			}
+		}
+
+		this.power = nbt.getLong("power");
+		this.fusionModule.readFromNBT(nbt);
+	}
+
+	// ===== IEnergyUser Implementation =====
+
+	@Override
+	public long getPower() {
+		return power;
+	}
+
+	@Override
+	public void setPower(long power) {
+		this.power = power;
+	}
+
+	@Override
+	public long getMaxPower() {
+		return MAX_POWER;
+	}
+
+	// ===== IControlReceiver Implementation =====
+
+	@Override
+	public boolean hasPermission(EntityPlayer player) {
+		return this.isUseableByPlayer(player);
+	}
+
+	@Override
+	public void receiveControl(NBTTagCompound data) {
+		if(data.hasKey("index") && data.hasKey("selection")) {
+			int index = data.getInteger("index");
+			String selection = data.getString("selection");
+			if(index == 0) {
+				this.fusionModule.recipe = selection;
+				this.markDirty();
+			}
+		}
+	}
+
+	// ===== Rendering =====
+
+	private AxisAlignedBB bb = null;
+
+	@Override
+	public AxisAlignedBB getRenderBoundingBox() {
+		if(bb == null) {
+			bb = new AxisAlignedBB(
+				pos.getX() - 8,
+				pos.getY(),
+				pos.getZ() - 8,
+				pos.getX() + 9,
+				pos.getY() + 5,
+				pos.getZ() + 9
+			);
+		}
+		return bb;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public double getMaxRenderDistanceSquared() {
+		return 65536.0D;
+	}
+}

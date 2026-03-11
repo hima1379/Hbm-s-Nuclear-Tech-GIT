@@ -4,7 +4,7 @@ import com.hbm.forgefluid.FFUtils;
 import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.inventory.container.ContainerChemfac;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineChemfac;
+import com.hbm.main.tileentity.machine.TileEntityMachineChemfac;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;

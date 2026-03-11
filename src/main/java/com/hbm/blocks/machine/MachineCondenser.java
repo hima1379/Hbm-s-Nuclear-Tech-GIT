@@ -7,7 +7,7 @@ import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.util.I18nUtil;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntityCondenser;
+import com.hbm.main.tileentity.machine.TileEntityCondenser;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.block.BlockContainer;

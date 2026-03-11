@@ -2,7 +2,7 @@ package com.hbm.inventory.gui;
 
 import com.hbm.inventory.container.ContainerCraneInserter;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.network.TileEntityCraneInserter;
+import com.hbm.main.tileentity.network.TileEntityCraneInserter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;

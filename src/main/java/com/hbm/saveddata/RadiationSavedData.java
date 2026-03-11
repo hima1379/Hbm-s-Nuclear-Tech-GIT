@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.hbm.config.GeneralConfig;
+import com.hbm.physics.radiation.FalloutDecayModel;
 import com.hbm.config.RadiationConfig;
 import com.hbm.handler.RadiationSystemNT;
 import com.hbm.packet.AuxParticlePacket;
@@ -66,14 +67,19 @@ public class RadiationSavedData extends WorldSavedData {
     public void setRadForChunkCoord(int x, int y, float radiation){
     	ChunkPos pos = new ChunkPos(x, y);
     	RadiationSaveStructure entry = contamination.get(pos);
-    	
-    	if(entry == null) {
 
+    	if(entry == null) {
     		entry = new RadiationSaveStructure(x, y, radiation);
         	contamination.put(pos, entry);
     	}
-    	
+
     	entry.radiation = radiation;
+    	// Set Way-Wigner fields: treat assigned value as H+1 rate, place deposition 1 h ago.
+    	// R(1) = r1Reference * 1^(-1.2) = r1Reference, so r1Reference = radiation exactly.
+    	if(radiation > 0F) {
+    		entry.r1Reference     = radiation;
+    		entry.depositionTimeMs = System.currentTimeMillis() - FalloutDecayModel.hoursToMs(1.0);
+    	}
         this.markDirty();
     }
     
@@ -128,9 +134,17 @@ public class RadiationSavedData extends WorldSavedData {
     		
     		if(struct.radiation != 0) {
 
-				//struct.radiation *= 0.999F;
-				struct.radiation *= 0.999F;
-				struct.radiation -= 0.05F;
+				// Decay using the Way-Wigner approximation (§9.147, Effects of Nuclear Weapons 1977).
+				// R(t) = R1 * t^(-1.2), per-second multiplier: [(t + 1/3600) / t]^(-1.2)
+				if(struct.r1Reference > 0F && struct.depositionTimeMs > 0L) {
+					double tHours = FalloutDecayModel.computeElapsedHours(struct.depositionTimeMs);
+					double mult   = FalloutDecayModel.getPerSecondDecayMultiplier(tHours);
+					struct.radiation = (float)(struct.radiation * mult);
+				} else {
+					// Fallback for chunks without Way-Wigner deposition data
+					struct.radiation *= 0.999F;
+					struct.radiation -= 0.05F;
+				}
 				
 				if(struct.radiation <= 0) {
 					struct.radiation = 0;
@@ -145,38 +159,9 @@ public class RadiationSavedData extends WorldSavedData {
 					PacketDispatcher.wrapper.sendToAllAround(new AuxParticlePacket(x, y, z, 3), new TargetPoint(worldObj.provider.getDimension(), x, y, z, 100));
 				}
     			
-    			if(struct.radiation > 1) {
-    				
-    				float[] rads = new float[9];
-
-    				rads[0] = getRadNumFromChunkCoord(struct.chunkX + 1, struct.chunkY + 1);
-    				rads[1] = getRadNumFromChunkCoord(struct.chunkX, struct.chunkY + 1);
-    				rads[2] = getRadNumFromChunkCoord(struct.chunkX - 1, struct.chunkY + 1);
-    				rads[3] = getRadNumFromChunkCoord(struct.chunkX - 1, struct.chunkY);
-    				rads[4] = getRadNumFromChunkCoord(struct.chunkX - 1, struct.chunkY - 1);
-    				rads[5] = getRadNumFromChunkCoord(struct.chunkX, struct.chunkY - 1);
-    				rads[6] = getRadNumFromChunkCoord(struct.chunkX + 1, struct.chunkY - 1);
-    				rads[7] = getRadNumFromChunkCoord(struct.chunkX + 1, struct.chunkY);
-    				rads[8] = getRadNumFromChunkCoord(struct.chunkX, struct.chunkY);
-    				
-    				float main = 0.6F;
-    				float side = 0.075F;
-    				float corner = 0.025F;
-    				
-    				setRadForChunkCoord(struct.chunkX + 1, struct.chunkY + 1, rads[0] + struct.radiation * corner);
-    				setRadForChunkCoord(struct.chunkX, struct.chunkY + 1, rads[1] + struct.radiation * side);
-    				setRadForChunkCoord(struct.chunkX - 1, struct.chunkY + 1, rads[2] + struct.radiation * corner);
-    				setRadForChunkCoord(struct.chunkX - 1, struct.chunkY, rads[3] + struct.radiation * side);
-    				setRadForChunkCoord(struct.chunkX - 1, struct.chunkY - 1, rads[4] + struct.radiation * corner);
-    				setRadForChunkCoord(struct.chunkX, struct.chunkY - 1, rads[5] + struct.radiation * side);
-    				setRadForChunkCoord(struct.chunkX + 1, struct.chunkY - 1, rads[6] + struct.radiation * corner);
-    				setRadForChunkCoord(struct.chunkX + 1, struct.chunkY, rads[7] + struct.radiation * side);
-    				setRadForChunkCoord(struct.chunkX, struct.chunkY, rads[8] + struct.radiation * main);
-    				
-    			} else {
-    				
-    				this.setRadForChunkCoord(struct.chunkX, struct.chunkY, getRadNumFromChunkCoord(struct.chunkX, struct.chunkY) + struct.radiation);
-    			}
+				// Gaussian plume dispersion handles spatial distribution.
+				// Restore the Way-Wigner-decayed struct back into the contamination map.
+				contamination.put(new ChunkPos(struct.chunkX, struct.chunkY), struct);
     		}
     	}
         this.markDirty();
@@ -233,14 +218,23 @@ public class RadiationSavedData extends WorldSavedData {
 			return;
 		}
 		RadiationSavedData data = getData(worldObj);
-		
 		Chunk chunk = worldObj.getChunk(pos);
-		
 		float r = data.getRadNumFromChunkCoord(chunk.x, chunk.z);
-		
+
 		if(r < maxRad) {
-			
-			data.setRadForChunkCoord(chunk.x, chunk.z, r + rad);
+			ChunkPos cPos = new ChunkPos(chunk.x, chunk.z);
+			RadiationSaveStructure entry = data.contamination.get(cPos);
+			if(entry == null) {
+				entry = new RadiationSaveStructure(chunk.x, chunk.z, 0F);
+				data.contamination.put(cPos, entry);
+			}
+			entry.radiation += rad;
+			// Accumulate the H+1 reference for Way-Wigner decay (§9.147).
+			entry.r1Reference += rad;
+			if(entry.depositionTimeMs == 0L) {
+				entry.depositionTimeMs = System.currentTimeMillis();
+			}
+			data.markDirty();
 		}
 	}
 	

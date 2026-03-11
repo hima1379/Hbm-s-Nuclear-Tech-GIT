@@ -1,7 +1,7 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.machine.TileEntityMachineReactorLarge;
-import com.hbm.tileentity.machine.TileEntityMachineReactorLarge.ReactorFuelType;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactorLarge;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactorLarge.ReactorFuelType;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;

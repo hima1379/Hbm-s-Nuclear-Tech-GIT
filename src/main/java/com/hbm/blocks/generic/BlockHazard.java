@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.hbm.blocks.BlockBase;
 import com.hbm.blocks.ModBlocks;
+import com.hbm.handler.AtmosphericDispersionSystem;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.main.MainRegistry;
 import com.hbm.saveddata.RadiationSavedData;
@@ -12,11 +13,15 @@ import com.hbm.potion.HbmPotion;
 import com.hbm.hazard.HazardSystem;
 
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.EnumHand;
+import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Item;
 import net.minecraft.init.Items;
 import net.minecraft.nbt.NBTTagCompound;
@@ -156,6 +161,25 @@ public class BlockHazard extends BlockBase {
 		if(this.rad3d > 0){
 			ContaminationUtil.radiate(worldIn, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 32, this.rad3d, 0, 0, 0, 0);
 			worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+
+			// Near-field ground activation from direct radiation field (1/r² isotropic).
+			// Physically: ionising radiation deposits dose in surrounding ground independent
+			// of wind; intensity falls off as inverse-square of distance.
+			if(!worldIn.isRemote) {
+				final int   RAD3D_NF_RADIUS = 8;      // blocks
+				final float RAD3D_NF_SCALE  = 0.001F; // rad3d·blocks²  → rad/tick at 1 m
+				final int   r2max = RAD3D_NF_RADIUS * RAD3D_NF_RADIUS;
+				for(int dx = -RAD3D_NF_RADIUS; dx <= RAD3D_NF_RADIUS; dx++) {
+					for(int dz = -RAD3D_NF_RADIUS; dz <= RAD3D_NF_RADIUS; dz++) {
+						double r2 = dx * dx + dz * dz;
+						if(r2 < 1.0 || r2 > r2max) continue;
+						float groundRad = (float)(this.rad3d * RAD3D_NF_SCALE / r2);
+						RadiationSavedData.incrementRad(worldIn,
+								new BlockPos(pos.getX() + dx, pos.getY(), pos.getZ() + dz),
+								groundRad, groundRad * 10F);
+					}
+				}
+			}
 		}
 		if(this == ModBlocks.block_meteor_molten) {
         	if(!worldIn.isRemote)
@@ -165,6 +189,26 @@ public class BlockHazard extends BlockBase {
         }
 		if(this.radIn > 0) {
 			RadiationSavedData.incrementRad(worldIn, pos, radIn, radIn*10F);
+
+			// Near-field deposition of radioactive material around the source block (1/r²
+			// isotropic).  Physically: dust/particulate settling contaminates surrounding
+			// ground without wind, analogous to close-in fallout deposition.
+			if(!worldIn.isRemote) {
+				final int   RADIN_NF_RADIUS = 6;      // blocks
+				final float RADIN_NF_SCALE  = 0.25F;  // radIn·blocks²  → rad/tick at 1 m
+				final int   r2max = RADIN_NF_RADIUS * RADIN_NF_RADIUS;
+				for(int dx = -RADIN_NF_RADIUS; dx <= RADIN_NF_RADIUS; dx++) {
+					for(int dz = -RADIN_NF_RADIUS; dz <= RADIN_NF_RADIUS; dz++) {
+						if(dx == 0 && dz == 0) continue; // own position already handled above
+						double r2 = dx * dx + dz * dz;
+						if(r2 > r2max) continue;
+						float nearRad = (float)(this.radIn * RADIN_NF_SCALE / r2);
+						RadiationSavedData.incrementRad(worldIn,
+								new BlockPos(pos.getX() + dx, pos.getY(), pos.getZ() + dz),
+								nearRad, nearRad * 10F);
+					}
+				}
+			}
 		}
 	}
 
@@ -185,6 +229,21 @@ public class BlockHazard extends BlockBase {
 			this.setTickRandomly(true);
 			worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
 		}
+		// Register a continuous atmospheric plume source for this block so that
+		// radiation disperses downwind via the Gaussian plume model (wind-direction
+		// aware) in addition to the local RadiationSavedData contamination.
+		if(this.radIn > 0 && !worldIn.isRemote) {
+			AtmosphericDispersionSystem.get(worldIn).registerBlockSource(pos, this.radIn);
+		}
+	}
+
+	@Override
+	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+		super.breakBlock(worldIn, pos, state);
+		// Remove the atmospheric plume source when the block is broken by any means.
+		if(this.radIn > 0 && !worldIn.isRemote) {
+			AtmosphericDispersionSystem.get(worldIn).removeBlockSource(pos);
+		}
 	}
 
 	@Override
@@ -195,7 +254,7 @@ public class BlockHazard extends BlockBase {
         }
 	}
 	
-	public enum ExtDisplayEffect {
+	public static enum ExtDisplayEffect {
 		RADFOG,
 		SPARKS,
 		SCHRAB,
@@ -211,7 +270,8 @@ public class BlockHazard extends BlockBase {
 		
     	if(entity instanceof EntityLivingBase && this == ModBlocks.brick_jungle_mystic) {
     		((EntityLivingBase) entity).addPotionEffect(new PotionEffect(HbmPotion.taint, 15 * 20, 2));
-        }
+    		return;
+    	}
 	}
 
 	@Override

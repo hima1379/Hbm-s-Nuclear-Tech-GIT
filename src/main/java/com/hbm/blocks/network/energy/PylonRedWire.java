@@ -1,6 +1,6 @@
 package com.hbm.blocks.network.energy;
 
-import com.hbm.tileentity.network.energy.TileEntityPylon;
+import com.hbm.main.tileentity.network.energy.TileEntityPylon;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntity;

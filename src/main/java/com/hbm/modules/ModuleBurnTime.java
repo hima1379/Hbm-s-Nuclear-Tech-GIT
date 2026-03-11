@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 import com.hbm.items.ModItems;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.IConfigurableMachine;
+import com.hbm.main.tileentity.IConfigurableMachine;
 import com.hbm.util.ItemStackUtil;
 
 import net.minecraft.item.Item;

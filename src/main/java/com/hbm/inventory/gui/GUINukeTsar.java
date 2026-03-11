@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.config.BombConfig;
 import com.hbm.inventory.container.ContainerNukeTsar;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.bomb.TileEntityNukeTsar;
+import com.hbm.main.tileentity.bomb.TileEntityNukeTsar;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

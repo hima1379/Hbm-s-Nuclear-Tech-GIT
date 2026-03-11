@@ -5,7 +5,7 @@ import java.util.List;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.ModDamageSource;
-import com.hbm.tileentity.deco.TileEntityTrappedBrick;
+import com.hbm.main.tileentity.deco.TileEntityTrappedBrick;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
@@ -164,12 +164,12 @@ public class TrappedBrick extends BlockContainer {
 			}
 	}
 	
-	public enum TrapType {
+	public static enum TrapType {
 		ON_STEP,
 		DETECTOR
 	}
 
-	public enum Trap {
+	public static enum Trap {
 
 		FALLING_ROCKS(TrapType.DETECTOR),
 		FIRE(TrapType.ON_STEP),
@@ -187,9 +187,9 @@ public class TrappedBrick extends BlockContainer {
 		ZOMBIE(TrapType.DETECTOR),
 		SPIDERS(TrapType.DETECTOR);
 
-		public final TrapType type;
+		public TrapType type;
 
-		Trap(TrapType type) {
+		private Trap(TrapType type) {
 			this.type = type;
 		}
 

@@ -3,6 +3,7 @@ package com.hbm.items.special;
 import java.util.List;
 
 import com.hbm.items.ItemBase;
+import com.hbm.main.MainRegistry;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -51,11 +52,11 @@ public class ItemWasteShort extends ItemBase {
 		AMERICIUM242("Americium-242", 750, 1000), //funny fission fragments + californium / np237 + pu241
 		SCHRABIDIUM("Schrabidium-326", 1000, 1000); //funniest fission fragments
 
-		public final String name;
-		public final int liquid;
-		public final int gas;
+		public String name;
+		public int liquid;
+		public int gas;
 
-		WasteClass(String name, int liquid, int gas){
+		private WasteClass(String name, int liquid, int gas){
 			this.name = name;
 			this.liquid = liquid;
 			this.gas = gas;

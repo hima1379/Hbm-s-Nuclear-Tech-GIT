@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.config.BombConfig;
 import com.hbm.inventory.container.ContainerNukeCustom;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.bomb.TileEntityNukeCustom;
+import com.hbm.main.tileentity.bomb.TileEntityNukeCustom;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

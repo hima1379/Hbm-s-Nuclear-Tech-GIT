@@ -1,12 +1,10 @@
 package com.hbm.capability;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import com.hbm.capability.HbmLivingCapability.EntityHbmProps;
 import com.hbm.capability.HbmLivingCapability.IEntityHbmProps;
-import com.hbm.lib.Library;
 import com.hbm.lib.ModDamageSource;
 import com.hbm.main.AdvancementManager;
 import com.hbm.packet.AuxParticlePacketNT;
@@ -94,7 +92,7 @@ public class HbmLivingProps {
 
 		try {
 			attributeinstance.removeModifier(attributeinstance.getModifier(digamma_UUID));
-		} catch(Exception ignored) {
+		} catch(Exception ex) {
 		}
 
 		attributeinstance.applyModifier(new AttributeModifier(digamma_UUID, "digamma", healthMod, 2));
@@ -158,12 +156,6 @@ public class HbmLivingProps {
 		}
 	}
 
-
-
-    public static void incrementAsbestos(EntityLivingBase entity, float asbestos){
-        incrementAsbestos(entity, Library.getStatisticalInt(entity.world.rand, asbestos));
-    }
-
 	public static void incrementAsbestos(EntityLivingBase entity, int asbestos){
 		setAsbestos(entity, getAsbestos(entity) + asbestos);
 	}
@@ -185,10 +177,6 @@ public class HbmLivingProps {
 			entity.attackEntityFrom(ModDamageSource.blacklung, 1000);
 		}
 	}
-
-    public static void incrementBlackLung(EntityLivingBase entity, float blacklung){
-        incrementBlackLung(entity, Library.getStatisticalInt(entity.world.rand, blacklung));
-    }
 
 	public static void incrementBlackLung(EntityLivingBase entity, int blacklung){
 		setBlackLung(entity, getBlackLung(entity) + blacklung);

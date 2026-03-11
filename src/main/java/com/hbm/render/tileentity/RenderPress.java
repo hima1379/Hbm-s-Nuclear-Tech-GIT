@@ -1,9 +1,10 @@
 package com.hbm.render.tileentity;
 
+import org.lwjgl.Sys;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntityMachinePress;
+import com.hbm.main.tileentity.machine.TileEntityMachinePress;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;

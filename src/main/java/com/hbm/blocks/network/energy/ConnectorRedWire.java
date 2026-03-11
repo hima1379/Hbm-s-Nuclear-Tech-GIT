@@ -2,7 +2,7 @@ package com.hbm.blocks.network.energy;
 
 import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.Library;
-import com.hbm.tileentity.network.energy.TileEntityConnector;
+import com.hbm.main.tileentity.network.energy.TileEntityConnector;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;

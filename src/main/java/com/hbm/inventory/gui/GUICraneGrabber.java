@@ -4,7 +4,7 @@ import com.hbm.inventory.container.ContainerCraneGrabber;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.network.TileEntityCraneGrabber;
+import com.hbm.main.tileentity.network.TileEntityCraneGrabber;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.client.Minecraft;
@@ -39,7 +39,7 @@ public class GUICraneGrabber extends GuiInfoContainer {
 
         if(this.mc.player.getHeldItemMainhand().isEmpty()) {
             for(int i = 0; i < 9; ++i) {
-                Slot slot = this.inventorySlots.inventorySlots.get(i);
+                Slot slot = (Slot) this.inventorySlots.inventorySlots.get(i);
 
                 if(this.isMouseOverSlot(slot, x, y) && grabber.matcher.modes[i] != null) {
 

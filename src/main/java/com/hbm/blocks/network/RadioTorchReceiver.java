@@ -2,7 +2,7 @@ package com.hbm.blocks.network;
 
 import com.hbm.main.MainRegistry;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.network.TileEntityRadioTorchReceiver;
+import com.hbm.main.tileentity.network.TileEntityRadioTorchReceiver;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -102,7 +102,12 @@ public class RadioTorchReceiver extends BlockContainer {
 		return true;
 	}
 
-    @Override
+	@Override
+	public boolean getWeakChanges(IBlockAccess world, BlockPos pos){
+		return false;
+	}
+	
+	@Override
 	public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
 		TileEntityRadioTorchReceiver entity = (TileEntityRadioTorchReceiver) blockAccess.getTileEntity(pos);
         return entity.lastState;

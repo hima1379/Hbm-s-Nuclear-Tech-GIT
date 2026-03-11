@@ -10,7 +10,7 @@ import com.hbm.interfaces.IMultiBlock;
 import com.hbm.interfaces.IRadResistantBlock;
 import com.hbm.items.ModItems;
 import com.hbm.items.tool.ItemLock;
-import com.hbm.tileentity.machine.TileEntityBlastDoor;
+import com.hbm.main.tileentity.machine.TileEntityBlastDoor;
 
 import micdoodle8.mods.galacticraft.api.block.IPartialSealableBlock;
 import net.minecraft.client.util.ITooltipFlag;
@@ -178,5 +178,14 @@ public class BlastDoor extends BlockContainer implements IBomb, IMultiBlock, IPa
         }
 
         return this.getDefaultState().withProperty(FACING, enumfacing);
+	}
+
+	@Override
+	public void addInformation(ItemStack stack, World player, List<String> tooltip, ITooltipFlag advanced) {
+		float hardness = this.getExplosionResistance(null);
+		tooltip.add("§2[" + I18nUtil.resolveKey("trait.radshield") + "]");
+		if(hardness > 50){
+			tooltip.add("§6" + I18nUtil.resolveKey("trait.blastres", hardness));
+		}
 	}
 }

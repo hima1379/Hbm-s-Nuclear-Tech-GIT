@@ -3,7 +3,7 @@ package com.hbm.blocks.generic;
 import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.deco.TileEntityGeysir;
+import com.hbm.main.tileentity.deco.TileEntityGeysir;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;

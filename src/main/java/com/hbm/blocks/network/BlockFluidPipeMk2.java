@@ -8,9 +8,9 @@ import com.hbm.blocks.ILookOverlay;
 import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.util.I18nUtil;
 import com.hbm.items.machine.ItemFFFluidDuct;
-import com.hbm.tileentity.conductor.TileEntityFFDuctBaseMk2;
-import com.hbm.tileentity.conductor.TileEntityFFFluidDuctMk2;
-import com.hbm.tileentity.conductor.TileEntityFFFluidSuccMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFDuctBaseMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFFluidDuctMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFFluidSuccMk2;
 
 import api.hbm.block.IToolable;
 import net.minecraft.block.state.BlockFaceShape;

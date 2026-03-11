@@ -30,4 +30,19 @@ public class BlockFluidPipeSolidRadResistant extends BlockFluidPipeSolid impleme
 		RadiationSystemNT.markChunkForRebuild(worldIn, pos);
 		super.breakBlock(worldIn, pos, state);
 	}
+	
+	@Override
+	public boolean isRadResistant(World worldIn, BlockPos blockPos){
+		return true;
+	}
+
+	@Override
+	public void addInformation(ItemStack stack, World player, List<String> tooltip, ITooltipFlag advanced) {
+		super.addInformation(stack, player, tooltip, advanced);
+		tooltip.add("§2[" + I18nUtil.resolveKey("trait.radshield") + "]");
+		float hardness = this.getExplosionResistance(null);
+		if(hardness > 50){
+			tooltip.add("§6" + I18nUtil.resolveKey("trait.blastres", hardness));
+		}
+	}
 }

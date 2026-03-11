@@ -28,6 +28,7 @@ public final class HBMSoundHandler {
 	public static SoundEvent techBoop;
 	public static SoundEvent reactorStart;
 	public static SoundEvent reactorStop;
+	public static SoundEvent fusionReactorRunning;
 	public static SoundEvent chemplantOperate;
 	public static SoundEvent potatOSRandom;
 	public static SoundEvent weaponSpinDown;
@@ -288,6 +289,7 @@ public final class HBMSoundHandler {
 		techBoop = register("item.techBoop");
 		reactorStart = register("block.reactorStart");
 		reactorStop = register("block.reactorStop");
+		fusionReactorRunning = register("block.fusionReactorRunning");
 		chemplantOperate = register("block.chemplantOperate");
 		potatOSRandom = register("potatos.random");
 		weaponSpinDown = register("weapon.spindown");

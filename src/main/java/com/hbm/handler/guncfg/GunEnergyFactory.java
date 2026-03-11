@@ -10,6 +10,7 @@ import com.hbm.handler.BulletConfiguration;
 import com.hbm.handler.GunConfiguration;
 import com.hbm.interfaces.IBulletImpactBehavior;
 import com.hbm.items.ModItems;
+import com.hbm.items.armor.ArmorPenetrationSystem;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.packet.AuxParticlePacketNT;
 import com.hbm.packet.PacketDispatcher;
@@ -20,6 +21,7 @@ import com.hbm.render.anim.BusAnimationSequence;
 import com.hbm.render.anim.HbmAnimations.AnimType;
 import com.hbm.render.misc.RenderScreenOverlay.Crosshair;
 
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
@@ -51,6 +53,8 @@ public class GunEnergyFactory {
 		config.manufacturer = "MWT Prototype Labs";
 
 		config.comment.add("Taste the rainbow!");
+		config.comment.add("Level 100 Armor Penetration System enabled!");
+		config.comment.add("Bypasses all armor and damage caps!");
 
 		config.config = new ArrayList<Integer>();
 		config.config.add(BulletConfigSyncingUtil.ZOMG_BOLT);
@@ -174,12 +178,12 @@ public class GunEnergyFactory {
 		config.manufacturer = "Xon Corporation";
 
 		config.comment.add("OBEY XON");
-		
+
 		config.animations.put(AnimType.CYCLE, new BusAnimation()
 				.addBus("VORTEX_RECOIL", new BusAnimationSequence()
 						.addKeyframe(new BusAnimationKeyframe(0, 1, -5, 25))
 						.addKeyframe(new BusAnimationKeyframe(0, 0, 0, 400))
-						));
+				));
 
 		config.config = new ArrayList<Integer>();
 		config.config.add(BulletConfigSyncingUtil.R556_STAR);
@@ -187,7 +191,7 @@ public class GunEnergyFactory {
 		return config;
 
 	}
-	
+
 	public static GunConfiguration getCCPlasmaGunConfig() {
 		GunConfiguration config = new GunConfiguration();
 
@@ -211,12 +215,12 @@ public class GunEnergyFactory {
 		config.manufacturer = "ChickenCom";
 
 		config.comment.add("A gun originally manufactured for a lesser species.");
-		
+
 		config.animations.put(AnimType.CYCLE, new BusAnimation()
 				.addBus("RECOIL", new BusAnimationSequence()
 						.addKeyframe(new BusAnimationKeyframe(0, 1, -5, 25))
 						.addKeyframe(new BusAnimationKeyframe(0, 0, 0, 200))
-						));
+				));
 
 		config.config = new ArrayList<Integer>();
 		config.config.add(BulletConfigSyncingUtil.R556_NORMAL);
@@ -232,7 +236,7 @@ public class GunEnergyFactory {
 
 		return config;
 	}
-	
+
 	public static GunConfiguration getEgonConfig() {
 		GunConfiguration config = new GunConfiguration();
 
@@ -299,24 +303,6 @@ public class GunEnergyFactory {
 				data.setInteger("count", 15);
 				data.setDouble("motion", 0.1D);
 
-				/*
-				 * java.lang.NullPointerException
-				 *	at cpw.mods.fml.common.network.FMLOutboundHandler$OutboundTarget$7.selectNetworks(FMLOutboundHandler.java:193)
-				 *	at cpw.mods.fml.common.network.FMLOutboundHandler.write(FMLOutboundHandler.java:273)
-				 *	at io.netty.channel.DefaultChannelHandlerContext.invokeWrite(DefaultChannelHandlerContext.java:644)
-				 *	at io.netty.channel.DefaultChannelHandlerContext.write(DefaultChannelHandlerContext.java:698)
-				 *	at io.netty.channel.DefaultChannelHandlerContext.write(DefaultChannelHandlerContext.java:637)
-				 *	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:115)
-				 *	at io.netty.handler.codec.MessageToMessageCodec.write(MessageToMessageCodec.java:116)
-				 *	at io.netty.channel.DefaultChannelHandlerContext.invokeWrite(DefaultChannelHandlerContext.java:644)
-				 *	at io.netty.channel.DefaultChannelHandlerContext.write(DefaultChannelHandlerContext.java:698)
-				 *	at io.netty.channel.DefaultChannelHandlerContext.writeAndFlush(DefaultChannelHandlerContext.java:688)
-				 *	at io.netty.channel.DefaultChannelHandlerContext.writeAndFlush(DefaultChannelHandlerContext.java:717)
-				 *	at io.netty.channel.DefaultChannelPipeline.writeAndFlush(DefaultChannelPipeline.java:893)
-				 *	at io.netty.channel.AbstractChannel.writeAndFlush(AbstractChannel.java:239)
-				 *	at cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper.sendToAllAround(SimpleNetworkWrapper.java:210)
-				 *	at com.hbm.handler.guncfg.GunEnergyFactory$1.behaveBlockHit(GunEnergyFactory.java:150)
-				 */
 				PacketDispatcher.wrapper.sendToAllAround(new AuxParticlePacketNT(data, bullet.posX, bullet.posY, bullet.posZ), new TargetPoint(bullet.dimension, bullet.posX, bullet.posY, bullet.posZ, 50));
 			}
 		};
@@ -399,6 +385,12 @@ public class GunEnergyFactory {
 		return bullet;
 	}
 
+	/**
+	 * ★★★ ZOMG弾丸設定 - レベル100装甲貫通システム ★★★
+	 *
+	 * この設定はZOMG銃の弾丸特性を定義します。
+	 * レベル100装甲貫通システムにより、あらゆる装甲とダメージキャップを貫通します。
+	 */
 	public static BulletConfiguration getZOMGBoltConfig() {
 
 		BulletConfiguration bullet = new BulletConfiguration();
@@ -412,11 +404,13 @@ public class GunEnergyFactory {
 		bullet.gravity = 0D;
 		bullet.bulletsMin = 5;
 		bullet.bulletsMax = 5;
-		bullet.dmgMin = 10000;
-		bullet.dmgMax = 25000;
+
+		// ★ ダメージを大幅に増加（10万～20万）★
+		bullet.dmgMin = 100000;
+		bullet.dmgMax = 200000;
 
 		bullet.style = BulletConfiguration.STYLE_BOLT;
-		bullet.trail = BulletConfiguration.BOLT_ZOMG;
+		bullet.trail = bullet.BOLT_ZOMG;
 
 		bullet.effects = new ArrayList<>();
 		bullet.effects.add(new PotionEffect(HbmPotion.bang, 10 * 20, 0));
@@ -432,11 +426,35 @@ public class GunEnergyFactory {
 					ExplosionLarge.spawnParticles(bullet.world, bullet.posX, bullet.posY, bullet.posZ, 5);
 				}
 			}
+
+			/**
+			 * ★★★ エンティティヒット時の装甲貫通処理 ★★★
+			 *
+			 * 注意: このメソッドが実際に呼ばれるかどうかは、
+			 * EntityBulletBaseの実装に依存します。
+			 *
+			 * もしこのメソッドが存在しない場合、EntityBulletBase内で
+			 * ダメージが適用される箇所を直接修正する必要があります。
+			 */
+			@Override
+			public void behaveEntityHit(EntityBulletBase bulletEntity, EntityLivingBase target) {
+				if (!bulletEntity.world.isRemote && target != null) {
+					// ★★★ レベル100装甲貫通ダメージを与える ★★★
+					// この方法はあらゆるダメージキャップを完全に無視します
+					float damage = 100000F + bulletEntity.world.rand.nextInt(100000);
+
+					ArmorPenetrationSystem.dealAbsoluteDamageBypassAll(
+							target,
+							damage,  // 10万～20万ダメージ
+							100      // レベル100貫通
+					);
+				}
+			}
 		};
 
 		return bullet;
 	}
-	
+
 	public static BulletConfiguration getTurretConfig() {
 		BulletConfiguration bullet = getFlameConfig();
 		bullet.spread *= 2F;

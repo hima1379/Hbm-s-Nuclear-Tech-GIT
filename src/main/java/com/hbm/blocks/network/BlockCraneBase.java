@@ -3,7 +3,7 @@ package com.hbm.blocks.network;
 import com.hbm.blocks.ITooltipProvider;
 import com.hbm.items.tool.ItemTooling;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.network.TileEntityCraneBase;
+import com.hbm.main.tileentity.network.TileEntityCraneBase;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;

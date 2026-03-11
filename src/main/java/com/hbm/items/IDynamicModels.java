@@ -14,29 +14,29 @@ import java.util.List;
  * Will automatically bake once correct methods are supplied
  */
 public interface IDynamicModels {
-    List<IDynamicModels> INSTANCES = new ArrayList<>();
+    public static List<IDynamicModels> INSTANCES = new ArrayList<>();
 
     @SideOnly(Side.CLIENT)
-    static void bakeModels(ModelBakeEvent event) {
+    public static void bakeModels(ModelBakeEvent event) {
             INSTANCES.forEach(blockMeta -> blockMeta.bakeModel(event));
     }
 
 
-    void bakeModel(ModelBakeEvent event);
+    public void bakeModel(ModelBakeEvent event);
 
 
     @SideOnly(Side.CLIENT)
-    static void registerModels(){
+    public static void registerModels(){
         INSTANCES.forEach(IDynamicModels::registerModel);
     }
 
-    void registerModel();
+    public void registerModel();
 
     @SideOnly(Side.CLIENT)
     static void registerSprites(TextureMap map){
         INSTANCES.forEach(dynamicSpirte -> dynamicSpirte.registerSprite(map));
     }
     @SideOnly(Side.CLIENT)
-    void registerSprite(TextureMap map);
+    public void registerSprite(TextureMap map);
 
 }

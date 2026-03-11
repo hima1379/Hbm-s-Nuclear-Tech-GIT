@@ -11,16 +11,14 @@ import java.util.Random;
 
 import com.hbm.blocks.machine.WatzPump;
 import com.hbm.entity.item.EntityMovingPackage;
-import com.hbm.entity.mob.*;
 import com.hbm.items.IAnimatedItem;
+import com.hbm.main.tileentity.machine.*;
+import com.hbm.main.tileentity.machine.oil.*;
+import com.hbm.main.tileentity.network.energy.*;
 import com.hbm.render.entity.item.RenderMovingPackage;
-import com.hbm.render.entity.mob.*;
 import com.hbm.render.item.*;
 import com.hbm.render.util.RenderOverhead;
-import com.hbm.tileentity.machine.*;
-import com.hbm.tileentity.machine.oil.*;
-import com.hbm.tileentity.network.TileEntityCraneSplitter;
-import com.hbm.tileentity.network.energy.*;
+import com.hbm.main.tileentity.network.TileEntityCraneSplitter;
 import net.minecraft.item.ItemStack;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.input.Keyboard;
@@ -134,11 +132,25 @@ import com.hbm.entity.missile.EntityMissileNuclear;
 import com.hbm.entity.missile.EntityMissileN2;
 import com.hbm.entity.missile.EntityMissileRain;
 import com.hbm.entity.missile.EntityMissileSchrabidium;
+import com.hbm.entity.missile.EntityMissileSM6;
 import com.hbm.entity.missile.EntityMissileStrong;
 import com.hbm.entity.missile.EntityMissileTaint;
 import com.hbm.entity.missile.EntityMissileVolcano;
 import com.hbm.entity.missile.EntitySoyuz;
 import com.hbm.entity.missile.EntitySoyuzCapsule;
+import com.hbm.entity.mob.EntityCyberCrab;
+import com.hbm.entity.mob.EntityDuck;
+import com.hbm.entity.mob.EntityGlowingOne;
+import com.hbm.entity.mob.EntityFBI;
+import com.hbm.entity.mob.EntityHunterChopper;
+import com.hbm.entity.mob.EntityMaskMan;
+import com.hbm.entity.mob.EntityNuclearCreeper;
+import com.hbm.entity.mob.EntityQuackos;
+import com.hbm.entity.mob.EntityRADBeast;
+import com.hbm.entity.mob.EntityTaintCrab;
+import com.hbm.entity.mob.EntityTaintedCreeper;
+import com.hbm.entity.mob.EntityTeslaCrab;
+import com.hbm.entity.mob.EntityUFO;
 import com.hbm.entity.mob.botprime.EntityBOTPrimeBody;
 import com.hbm.entity.mob.botprime.EntityBOTPrimeHead;
 import com.hbm.entity.mob.sodtekhnologiyah.EntityBallsOTronSegment;
@@ -168,6 +180,7 @@ import com.hbm.entity.projectile.EntityBoxcar;
 import com.hbm.entity.projectile.EntityBuilding;
 import com.hbm.entity.projectile.EntityBullet;
 import com.hbm.entity.projectile.EntityBulletBase;
+import com.hbm.entity.projectile.EntityBulletGAU8;
 import com.hbm.entity.projectile.EntityBurningFOEQ;
 import com.hbm.entity.projectile.EntityChopperMine;
 import com.hbm.entity.projectile.EntityCombineBall;
@@ -271,6 +284,7 @@ import com.hbm.render.entity.RenderBoxcar;
 import com.hbm.render.entity.RenderBuilding;
 import com.hbm.render.entity.RenderBullet;
 import com.hbm.render.entity.RenderBulletMk2;
+import com.hbm.render.entity.RenderBulletGAU8;
 import com.hbm.render.entity.RenderChopperMine;
 import com.hbm.render.entity.RenderCloudFleija;
 import com.hbm.render.entity.RenderCloudRainbow;
@@ -311,6 +325,7 @@ import com.hbm.render.entity.missile.RenderBoosterMissile;
 import com.hbm.render.entity.missile.RenderCarrierMissile;
 import com.hbm.render.entity.missile.RenderMissileAB;
 import com.hbm.render.entity.missile.RenderMissileBHole;
+import com.hbm.render.entity.missile.RenderMissileSM6;
 import com.hbm.render.entity.missile.RenderMissileBunkerBuster;
 import com.hbm.render.entity.missile.RenderMissileBurst;
 import com.hbm.render.entity.missile.RenderMissileBusterStrong;
@@ -335,6 +350,16 @@ import com.hbm.render.entity.missile.RenderMissileStrong;
 import com.hbm.render.entity.missile.RenderMissileTaint;
 import com.hbm.render.entity.missile.RenderSoyuz;
 import com.hbm.render.entity.missile.RenderSoyuzCapsule;
+import com.hbm.render.entity.mob.RenderBalls;
+import com.hbm.render.entity.mob.RenderGlowingOne;
+import com.hbm.render.entity.mob.RenderDuck;
+import com.hbm.render.entity.mob.RenderFBI;
+import com.hbm.render.entity.mob.RenderMaskMan;
+import com.hbm.render.entity.mob.RenderQuacc;
+import com.hbm.render.entity.mob.RenderRADBeast;
+import com.hbm.render.entity.mob.RenderTaintCrab;
+import com.hbm.render.entity.mob.RenderTeslaCrab;
+import com.hbm.render.entity.mob.RenderUFO;
 import com.hbm.render.entity.projectile.RenderRBMKDebris;
 import com.hbm.render.entity.projectile.RenderVortexBeam;
 import com.hbm.render.factories.MultiCloudRendererFactory;
@@ -404,69 +429,69 @@ import com.hbm.sound.AudioWrapper;
 import com.hbm.sound.AudioWrapperClient;
 import com.hbm.sound.AudioWrapperClientStartStop;
 import com.hbm.sound.SoundLoopCrucible;
-import com.hbm.tileentity.TileEntityDoorGeneric;
-import com.hbm.tileentity.TileEntityKeypadBase;
-import com.hbm.tileentity.TileEntitySlidingBlastDoorKeypad;
-import com.hbm.tileentity.bomb.TileEntityBombMulti;
-import com.hbm.tileentity.bomb.TileEntityCompactLauncher;
-import com.hbm.tileentity.bomb.TileEntityCrashedBomb;
-import com.hbm.tileentity.bomb.TileEntityLandmine;
-import com.hbm.tileentity.bomb.TileEntityLaunchPad;
-import com.hbm.tileentity.bomb.TileEntityLaunchTable;
-import com.hbm.tileentity.bomb.TileEntityNukeBalefire;
-import com.hbm.tileentity.bomb.TileEntityNukeBoy;
-import com.hbm.tileentity.bomb.TileEntityNukeCustom;
-import com.hbm.tileentity.bomb.TileEntityNukeFleija;
-import com.hbm.tileentity.bomb.TileEntityNukeGadget;
-import com.hbm.tileentity.bomb.TileEntityNukeMan;
-import com.hbm.tileentity.bomb.TileEntityNukeMike;
-import com.hbm.tileentity.bomb.TileEntityNukeN2;
-import com.hbm.tileentity.bomb.TileEntityNukePrototype;
-import com.hbm.tileentity.bomb.TileEntityNukeSolinium;
-import com.hbm.tileentity.bomb.TileEntityNukeTsar;
-import com.hbm.tileentity.bomb.TileEntityRailgun;
-import com.hbm.tileentity.conductor.TileEntityFFFluidDuctMk2;
-import com.hbm.tileentity.conductor.TileEntityFFFluidSuccMk2;
-import com.hbm.tileentity.deco.TileEntityDecoBlock;
-import com.hbm.tileentity.deco.TileEntityDecoBlockAlt;
-import com.hbm.tileentity.deco.TileEntityDecoPoleSatelliteReceiver;
-import com.hbm.tileentity.deco.TileEntityDecoPoleTop;
-import com.hbm.tileentity.deco.TileEntityObjTester;
-import com.hbm.tileentity.deco.TileEntitySpinnyLight;
-import com.hbm.tileentity.deco.TileEntityTestRender;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKAbsorber;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKBlank;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKBoiler;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKConsole;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKCraneConsole;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKControlAuto;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKControlManual;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKModerator;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKOutgasser;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKReflector;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKRod;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKRodReaSim;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKStorage;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKCooler;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKHeater;
-import com.hbm.tileentity.turret.TileEntityTurretBrandon;
-import com.hbm.tileentity.turret.TileEntityTurretCIWS;
-import com.hbm.tileentity.turret.TileEntityTurretCheapo;
-import com.hbm.tileentity.turret.TileEntityTurretChekhov;
-import com.hbm.tileentity.turret.TileEntityTurretFlamer;
-import com.hbm.tileentity.turret.TileEntityTurretFriendly;
-import com.hbm.tileentity.turret.TileEntityTurretFritz;
-import com.hbm.tileentity.turret.TileEntityTurretHeavy;
-import com.hbm.tileentity.turret.TileEntityTurretHoward;
-import com.hbm.tileentity.turret.TileEntityTurretHowardDamaged;
-import com.hbm.tileentity.turret.TileEntityTurretJeremy;
-import com.hbm.tileentity.turret.TileEntityTurretLight;
-import com.hbm.tileentity.turret.TileEntityTurretMaxwell;
-import com.hbm.tileentity.turret.TileEntityTurretRichard;
-import com.hbm.tileentity.turret.TileEntityTurretRocket;
-import com.hbm.tileentity.turret.TileEntityTurretSpitfire;
-import com.hbm.tileentity.turret.TileEntityTurretTau;
-import com.hbm.tileentity.turret.TileEntityTurretTauon;
+import com.hbm.main.tileentity.TileEntityDoorGeneric;
+import com.hbm.main.tileentity.TileEntityKeypadBase;
+import com.hbm.main.tileentity.TileEntitySlidingBlastDoorKeypad;
+import com.hbm.main.tileentity.bomb.TileEntityBombMulti;
+import com.hbm.main.tileentity.bomb.TileEntityCompactLauncher;
+import com.hbm.main.tileentity.bomb.TileEntityCrashedBomb;
+import com.hbm.main.tileentity.bomb.TileEntityLandmine;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchPad;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchTable;
+import com.hbm.main.tileentity.bomb.TileEntityNukeBalefire;
+import com.hbm.main.tileentity.bomb.TileEntityNukeBoy;
+import com.hbm.main.tileentity.bomb.TileEntityNukeCustom;
+import com.hbm.main.tileentity.bomb.TileEntityNukeFleija;
+import com.hbm.main.tileentity.bomb.TileEntityNukeGadget;
+import com.hbm.main.tileentity.bomb.TileEntityNukeMan;
+import com.hbm.main.tileentity.bomb.TileEntityNukeMike;
+import com.hbm.main.tileentity.bomb.TileEntityNukeN2;
+import com.hbm.main.tileentity.bomb.TileEntityNukePrototype;
+import com.hbm.main.tileentity.bomb.TileEntityNukeSolinium;
+import com.hbm.main.tileentity.bomb.TileEntityNukeTsar;
+import com.hbm.main.tileentity.bomb.TileEntityRailgun;
+import com.hbm.main.tileentity.conductor.TileEntityFFFluidDuctMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFFluidSuccMk2;
+import com.hbm.main.tileentity.deco.TileEntityDecoBlock;
+import com.hbm.main.tileentity.deco.TileEntityDecoBlockAlt;
+import com.hbm.main.tileentity.deco.TileEntityDecoPoleSatelliteReceiver;
+import com.hbm.main.tileentity.deco.TileEntityDecoPoleTop;
+import com.hbm.main.tileentity.deco.TileEntityObjTester;
+import com.hbm.main.tileentity.deco.TileEntitySpinnyLight;
+import com.hbm.main.tileentity.deco.TileEntityTestRender;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKAbsorber;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKBlank;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKBoiler;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKConsole;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKCraneConsole;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKControlAuto;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKControlManual;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKModerator;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKOutgasser;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKReflector;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKRod;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKRodReaSim;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKStorage;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKCooler;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKHeater;
+import com.hbm.main.tileentity.turret.TileEntityTurretBrandon;
+import com.hbm.main.tileentity.turret.TileEntityTurretCIWS;
+import com.hbm.main.tileentity.turret.TileEntityTurretCheapo;
+import com.hbm.main.tileentity.turret.TileEntityTurretChekhov;
+import com.hbm.main.tileentity.turret.TileEntityTurretFlamer;
+import com.hbm.main.tileentity.turret.TileEntityTurretFriendly;
+import com.hbm.main.tileentity.turret.TileEntityTurretFritz;
+import com.hbm.main.tileentity.turret.TileEntityTurretHeavy;
+import com.hbm.main.tileentity.turret.TileEntityTurretHoward;
+import com.hbm.main.tileentity.turret.TileEntityTurretHowardDamaged;
+import com.hbm.main.tileentity.turret.TileEntityTurretJeremy;
+import com.hbm.main.tileentity.turret.TileEntityTurretLight;
+import com.hbm.main.tileentity.turret.TileEntityTurretMaxwell;
+import com.hbm.main.tileentity.turret.TileEntityTurretRichard;
+import com.hbm.main.tileentity.turret.TileEntityTurretRocket;
+import com.hbm.main.tileentity.turret.TileEntityTurretSpitfire;
+import com.hbm.main.tileentity.turret.TileEntityTurretTau;
+import com.hbm.main.tileentity.turret.TileEntityTurretTauon;
 import com.hbm.util.BobMathUtil;
 import com.hbm.util.I18nUtil;
 
@@ -592,6 +617,11 @@ public class ClientProxy extends ServerProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineReactorSmall.class, new RenderSmallReactor());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCableBaseNT.class, new RenderCable());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCableGauge.class, new RenderCableGauge());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.network.data.TileEntityCableBlue.class, new com.hbm.render.tileentity.RenderCableBlue());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.network.data.TileEntityFCSConsole.class, new com.hbm.render.tileentity.RenderFCSConsole());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.network.data.TileEntitySPY1.class, new com.hbm.render.tileentity.RenderSPY1());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.network.data.TileEntitySPY6.class, new com.hbm.render.tileentity.RenderSPY6());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.network.data.TileEntitySPG62.class, new com.hbm.render.tileentity.RenderSPG62());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTurretCheapo.class, new RenderCheapoTurret());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTurretRocket.class, new RenderRocketTurret());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTurretLight.class, new RenderLightTurret());
@@ -613,14 +643,14 @@ public class ClientProxy extends ServerProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineFluidTank.class, new RenderFluidTank());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineRefinery.class, new RenderRefinery());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineVacuumDistill.class, new RenderVacuumDistill());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineCatalyticReformer.class, new RenderCatalyticReformer());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineCoker.class, new RenderCoker());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineHydrotreater.class, new RenderHydrotreater());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineCatalyticReformer.class, new RenderCatalyticReformer());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineCoker.class, new RenderCoker());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineHydrotreater.class, new RenderHydrotreater());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineLiquefactor.class, new RenderLiquefactor());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineSolidifier.class, new RenderSolidifier());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineSolderingStation.class, new RenderSolderingStation());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineArcWelder.class, new RenderArcWelder());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineCyclotron.class, new RenderCyclotron());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineSolidifier.class, new RenderSolidifier());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineSolderingStation.class, new RenderSolderingStation());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineArcWelder.class, new RenderArcWelder());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineCyclotron.class, new RenderCyclotron());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBroadcaster.class, new RenderBroadcaster());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityGeiger.class, new RenderGeiger());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityDeuteriumTower.class, new RenderDeuteriumTower());
@@ -666,7 +696,7 @@ public class ClientProxy extends ServerProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityObjTester.class, new RenderObjTester());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityDecoBlockAlt.class, new RenderDecoBlockAlt());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFFFluidDuctMk2.class, new RenderFluidDuctMk2<TileEntityFFFluidDuctMk2>());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFFFluidSuccMk2.class, new RenderFluidDuctMk2<TileEntityFFFluidSuccMk2>());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFFFluidSuccMk2.class, new RenderFluidDuctMk2<TileEntityFFFluidSuccMk2>());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCraneSplitter.class, new RenderCraneSplitter());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBarrel.class, new RenderFluidBarrel());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTesla.class, new RenderTesla());
@@ -679,12 +709,23 @@ public class ClientProxy extends ServerProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySoyuzStruct.class, new RenderSoyuzMultiblock());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineMiningLaser.class, new RenderLaserMiner());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityITERStruct.class, new RenderITERMultiblock());
+
+		// Fusion Reactor System
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.machine.fusion.TileEntityFusionCollector.class, new com.hbm.render.tileentity.RenderFusionCollector());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.machine.fusion.TileEntityFusionKlystron.class, new com.hbm.render.tileentity.RenderFusionKlystron());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.machine.fusion.TileEntityFusionKlystronCreative.class, new com.hbm.render.tileentity.RenderFusionKlystronCreative());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.machine.fusion.TileEntityFusionTorus.class, new com.hbm.render.tileentity.RenderFusionTorus());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.machine.fusion.TileEntityFusionCoupler.class, new com.hbm.render.tileentity.RenderFusionCoupler());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.machine.fusion.TileEntityFusionBoiler.class, new com.hbm.render.tileentity.RenderFusionBoiler());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.machine.fusion.TileEntityFusionMHDT.class, new com.hbm.render.tileentity.RenderFusionMHDT());
+		ClientRegistry.bindTileEntitySpecialRenderer(com.hbm.main.tileentity.machine.fusion.TileEntityFusionBreeder.class, new com.hbm.render.tileentity.RenderFusionBreeder());
+
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityNukeBalefire.class, new RenderNukeFstbmb());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineCrystallizer.class, new RenderCrystallizer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMicrowave.class, new RenderMicrowave());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineRTG.class, new RenderRTG());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineMiniRTG.class, new RenderRTG());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFWatzCore.class, new RenderSAFECore());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityITER.class, new RenderITER());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityITER.class, new RenderITER());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineFENSU.class, new RenderFENSU());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachinePlasmaHeater.class, new RenderPlasmaHeater());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPlasmaStruct.class, new RenderPlasmaMultiblock());
@@ -696,7 +737,7 @@ public class ClientProxy extends ServerProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySlidingBlastDoorKeypad.class, new RenderKeypadBase());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBlackBook.class, new RenderBookCrafting());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySolarBoiler.class, new RenderSolarBoiler());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeatBoiler.class, new RenderHeatBoiler());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeatBoiler.class, new RenderHeatBoiler());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySolarMirror.class, new RenderSolarMirror());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineIGenerator.class, new RenderIGenerator());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySiloHatch.class, new RenderSiloHatch());
@@ -749,9 +790,9 @@ public class ClientProxy extends ServerProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFEL.class, new RenderFEL());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterFirebox.class, new RenderFirebox());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterOven.class, new RenderHeatingOven());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterOilburner.class, new RenderOilburner());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterRadioThermal.class, new RenderRadioThermal());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterElectric.class, new RenderHeaterElectric());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterOilburner.class, new RenderOilburner());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterRadioThermal.class, new RenderRadioThermal());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterElectric.class, new RenderHeaterElectric());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityHeaterHeatex.class, new RenderHeaterHeatex());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFurnaceIron.class, new RenderFurnaceIron());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFurnaceSteel.class, new RenderFurnaceSteel());
@@ -760,9 +801,8 @@ public class ClientProxy extends ServerProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFoundryMold.class, new RenderFoundryMold());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFoundryBasin.class, new RenderFoundryBasin());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFoundryChannel.class, new RenderFoundryChannel());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFoundryOutlet.class, new RenderFoundryOutlet());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineStrandCaster.class, new RenderStrandCaster());
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityDoorGeneric.class, new RenderDoorGeneric());
+    ClientRegistry.bindTileEntitySpecialRenderer(TileEntityFoundryOutlet.class, new RenderFoundryOutlet());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityDoorGeneric.class, new RenderDoorGeneric());
 		
 		RenderingRegistry.registerEntityRenderingHandler(EntityDSmokeFX.class, new MultiCloudRendererFactory(new Item[] {ModItems.d_smoke1, ModItems.d_smoke2, ModItems.d_smoke3, ModItems.d_smoke4, ModItems.d_smoke5, ModItems.d_smoke6, ModItems.d_smoke7, ModItems.d_smoke8}));
 		RenderingRegistry.registerEntityRenderingHandler(EntityOrangeFX.class, new MultiCloudRendererFactory(new Item[] {ModItems.orange1, ModItems.orange2, ModItems.orange3, ModItems.orange4, ModItems.orange5, ModItems.orange6, ModItems.orange7, ModItems.orange8}));
@@ -773,6 +813,7 @@ public class ClientProxy extends ServerProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityNuclearCreeper.class, new RenderNuclearCreeperFactory());
 		RenderingRegistry.registerEntityRenderingHandler(EntityFalloutRain.class, new RenderFalloutRainFactory());
 		RenderingRegistry.registerEntityRenderingHandler(EntityNukeTorex.class, RenderTorex.FACTORY);
+		RenderingRegistry.registerEntityRenderingHandler(com.hbm.entity.effect.EntityNukeTorexRealistic.class, com.hbm.render.entity.effect.RenderNukeTorexRealistic.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntitySmokeFX.class, new MultiCloudRendererFactory(new Item[] {ModItems.smoke1, ModItems.smoke2, ModItems.smoke3, ModItems.smoke4, ModItems.smoke5, ModItems.smoke6, ModItems.smoke7, ModItems.smoke8}));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBSmokeFX.class, new MultiCloudRendererFactory(new Item[] {ModItems.b_smoke1, ModItems.b_smoke2, ModItems.b_smoke3, ModItems.b_smoke4, ModItems.b_smoke5, ModItems.b_smoke6, ModItems.b_smoke7, ModItems.b_smoke8}));
 		RenderingRegistry.registerEntityRenderingHandler(EntityShrapnel.class, new ShrapnelRendererFactory());
@@ -822,9 +863,11 @@ public class ClientProxy extends ServerProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityEMPBlast.class, RenderEMPBlast.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntityMissileEMP.class, RenderMissileEMP.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntityMissileAntiBallistic.class, RenderMissileAB.FACTORY);
+		RenderingRegistry.registerEntityRenderingHandler(EntityMissileSM6.class, RenderMissileSM6.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntityBooster.class, RenderBoosterMissile.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntityCarrier.class, RenderCarrierMissile.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntityBulletBase.class, RenderBulletMk2.FACTORY);
+		RenderingRegistry.registerEntityRenderingHandler(EntityBulletGAU8.class, RenderBulletGAU8.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntityDuchessGambit.class, RenderBoat.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntitySparkBeam.class, RenderBeam4.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntityModBeam.class, RenderBeam6.FACTORY);
@@ -921,15 +964,14 @@ public class ClientProxy extends ServerProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityLaser.class, RenderLaser.FACTORY);
 		RenderingRegistry.registerEntityRenderingHandler(EntityMovingItem.class, RenderMovingItem.FACTORY);
     RenderingRegistry.registerEntityRenderingHandler(EntityMovingPackage.class, RenderMovingPackage.FACTORY);
-    RenderingRegistry.registerEntityRenderingHandler(EntityCloudTom.class, RenderCloudTom.FACTORY);
-    RenderingRegistry.registerEntityRenderingHandler(EntityMaskMan.class, RenderMaskMan.FACTORY);
-    RenderingRegistry.registerEntityRenderingHandler(EntityBallsOTronSegment.class, RenderBalls.FACTORY);
-    RenderingRegistry.registerEntityRenderingHandler(EntityBOTPrimeHead.class, RenderWormHead.FACTORY);
+		RenderingRegistry.registerEntityRenderingHandler(EntityCloudTom.class, RenderCloudTom.FACTORY);
+		RenderingRegistry.registerEntityRenderingHandler(EntityMaskMan.class, RenderMaskMan.FACTORY);
+		RenderingRegistry.registerEntityRenderingHandler(EntityBallsOTronSegment.class, RenderBalls.FACTORY);
+		RenderingRegistry.registerEntityRenderingHandler(EntityBOTPrimeHead.class, RenderWormHead.FACTORY);
 	  RenderingRegistry.registerEntityRenderingHandler(EntityBOTPrimeBody.class, RenderWormBody.FACTORY);
 	  RenderingRegistry.registerEntityRenderingHandler(EntityDuck.class, RenderDuck.FACTORY);
 	  RenderingRegistry.registerEntityRenderingHandler(EntityGlowingOne.class, RenderGlowingOne.FACTORY);
-      RenderingRegistry.registerEntityRenderingHandler(EntityThermonuclearCat.class, RenderThermonuclearCat.FACTORY);
-      RenderingRegistry.registerEntityRenderingHandler(EntityBeamVortex.class, RenderVortexBeam.FACTORY);
+	  RenderingRegistry.registerEntityRenderingHandler(EntityBeamVortex.class, RenderVortexBeam.FACTORY);
 	  RenderingRegistry.registerEntityRenderingHandler(EntityQuackos.class, RenderQuacc.FACTORY);
 	  RenderingRegistry.registerEntityRenderingHandler(EntityFBI.class, RenderFBI.FACTORY);
 	  RenderingRegistry.registerEntityRenderingHandler(EntityRADBeast.class, RenderRADBeast.FACTORY);
@@ -1012,7 +1054,11 @@ public class ClientProxy extends ServerProxy {
 		ModEventHandlerClient.swapModels(i, reg);
 	}
 
-    @Override
+	@Override
+	public void registerTileEntitySpecialRenderer() {
+		
+	}
+	@Override
 	public void particleControl(double x, double y, double z, int type) {
 		World world = Minecraft.getMinecraft().world;
 		
@@ -1065,7 +1111,7 @@ public class ClientProxy extends ServerProxy {
 	}
 	//version 2, now with strings!
 	@Override
-	public void spawnParticle(double x, double y, double z, String type, float[] args) {
+	public void spawnParticle(double x, double y, double z, String type, float args[]) {
 		World world = Minecraft.getMinecraft().world;
 		TextureManager man = Minecraft.getMinecraft().renderEngine;
 		
@@ -2024,24 +2070,50 @@ public class ClientProxy extends ServerProxy {
 			int ent = data.getInteger("ent");
 			this.vanish(ent);
 			Entity e = world.getEntityByID(ent);
-			
+
 			if(e == null)
 				return;
-			
+
 			float width = e.width;
 			float height = e.height;
 			int gW = (int)(width / 0.25F);
 			int gH = (int)(height / 0.25F);
-			
-			boolean blowMeIntoTheGodDamnStratosphere = rand.nextInt(15) == 0;
-			double mult = 1D;
-			
-			if(blowMeIntoTheGodDamnStratosphere)
-				mult *= 10;
-			
-			for(int i = -(gW / 2); i <= gW; i++) {
-				for(int j = 0; j <= gH; j++) {
-					Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleGiblet(world, x, y, z, rand.nextGaussian() * 0.25 * mult, rand.nextDouble() * mult, rand.nextGaussian() * 0.25 * mult));
+
+			// ブラックホールの重力に従うパーティクルかどうかをチェック
+			boolean isBlackHoleGiblets = data.hasKey("bhX");
+
+			if(isBlackHoleGiblets) {
+				// ブラックホールの情報を取得
+				double bhX = data.getDouble("bhX");
+				double bhY = data.getDouble("bhY");
+				double bhZ = data.getDouble("bhZ");
+				double bhMass = data.getDouble("bhMass");
+				double schwarzschildRadius = data.getDouble("schwarzschildRadius");
+
+				// ブラックホールの重力に従う肉片パーティクルを生成
+				for(int i = -(gW / 2); i <= gW; i++) {
+					for(int j = 0; j <= gH; j++) {
+						Minecraft.getMinecraft().effectRenderer.addEffect(
+							new com.hbm.particle.ParticleGibletBlackHole(
+								world, x, y, z,
+								rand.nextGaussian() * 0.25, rand.nextDouble() * 0.5, rand.nextGaussian() * 0.25,
+								bhX, bhY, bhZ, bhMass, schwarzschildRadius
+							)
+						);
+					}
+				}
+			} else {
+				// 通常の肉片パーティクル（既存の実装）
+				boolean blowMeIntoTheGodDamnStratosphere = rand.nextInt(15) == 0;
+				double mult = 1D;
+
+				if(blowMeIntoTheGodDamnStratosphere)
+					mult *= 10;
+
+				for(int i = -(gW / 2); i <= gW; i++) {
+					for(int j = 0; j <= gH; j++) {
+						Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleGiblet(world, x, y, z, rand.nextGaussian() * 0.25 * mult, rand.nextDouble() * mult, rand.nextGaussian() * 0.25 * mult));
+					}
 				}
 			}
 			return;
@@ -2366,8 +2438,13 @@ public class ClientProxy extends ServerProxy {
 		BobmazonOfferFactory.reset();
 		BobmazonOfferFactory.init();
 	}
+	
+	@Override
+	public void playSound(String sound, Object data) {
 
-    @Override
+	}
+	
+	@Override
 	public void displayTooltip(String msg) {
 		if(msg.startsWith("chat."))
 			msg = I18nUtil.resolveKey(msg);

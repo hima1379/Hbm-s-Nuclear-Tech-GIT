@@ -14,7 +14,7 @@ import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.render.misc.MissileMultipart;
 import com.hbm.render.misc.MissilePronter;
-import com.hbm.tileentity.bomb.TileEntityLaunchTable;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchTable;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;

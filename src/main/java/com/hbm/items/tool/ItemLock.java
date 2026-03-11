@@ -2,8 +2,8 @@ package com.hbm.items.tool;
 
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.blocks.BlockDummyable;
-import com.hbm.tileentity.machine.TileEntityDummy;
-import com.hbm.tileentity.machine.TileEntityLockableBase;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityLockableBase;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.block.Block;

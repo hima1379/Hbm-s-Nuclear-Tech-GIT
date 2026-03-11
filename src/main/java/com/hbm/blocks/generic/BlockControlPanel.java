@@ -10,7 +10,7 @@ import com.hbm.main.ClientProxy;
 import com.hbm.main.MainRegistry;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityControlPanel;
+import com.hbm.main.tileentity.machine.TileEntityControlPanel;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

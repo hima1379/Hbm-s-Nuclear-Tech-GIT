@@ -1,7 +1,7 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.machine.TileEntityMachineEPress;
-import com.hbm.tileentity.machine.TileEntityMachinePress;
+import com.hbm.main.tileentity.machine.TileEntityMachineEPress;
+import com.hbm.main.tileentity.machine.TileEntityMachinePress;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -77,7 +77,7 @@ public class TEPressPacket implements IMessage {
 		
 		@Override
 		public IMessage onMessage(TEPressPacket m, MessageContext ctx) {
-            if(m == null) return null;
+			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				TileEntity te = Minecraft.getMinecraft().world.getTileEntity(new BlockPos(m.x, m.y, m.z));
 

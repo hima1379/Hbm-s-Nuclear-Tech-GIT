@@ -10,6 +10,8 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
+import java.util.function.Consumer;
+
 public class NodeButton extends NodeElement {
 
     public NodeButton(String name, Node parent, int idx) {
@@ -38,7 +40,10 @@ public class NodeButton extends NodeElement {
 
     @Override
     public boolean onClick(float x, float y) {
-        return RenderHelper.intersects2DBox(x, y, getBox());
+        if (RenderHelper.intersects2DBox(x, y, getBox())) {
+            return true;
+        }
+        return false;
     }
 
     public float[] getBox() {

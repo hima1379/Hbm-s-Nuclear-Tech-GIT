@@ -8,7 +8,7 @@ import com.hbm.main.ResourceManager;
 import com.hbm.render.amlfrom1710.IModelCustom;
 import com.hbm.render.misc.MissileMultipart;
 import com.hbm.render.misc.MissilePronter;
-import com.hbm.tileentity.bomb.TileEntityLaunchTable;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchTable;
 
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.client.Minecraft;

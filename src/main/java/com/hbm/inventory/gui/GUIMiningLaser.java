@@ -9,7 +9,7 @@ import com.hbm.lib.RefStrings;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.render.RenderHelper;
-import com.hbm.tileentity.machine.TileEntityMachineMiningLaser;
+import com.hbm.main.tileentity.machine.TileEntityMachineMiningLaser;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;

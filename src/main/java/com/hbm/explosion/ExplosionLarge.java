@@ -9,26 +9,26 @@ import com.hbm.entity.particle.EntityGasFlameFX;
 import com.hbm.entity.projectile.EntityOilSpill;
 import com.hbm.entity.projectile.EntityRubble;
 import com.hbm.entity.projectile.EntityShrapnel;
-import com.hbm.lib.ModDamageSource;
 import com.hbm.util.ContaminationUtil;
+import com.hbm.explosion.ExplosionNT;
+import com.hbm.explosion.ExplosionNT.ExAttrib;
 import com.hbm.packet.AuxParticlePacketNT;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.render.amlfrom1710.Vec3;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
-import org.lwjgl.Sys;
 
 public class ExplosionLarge {
 
@@ -63,7 +63,7 @@ public class ExplosionLarge {
 			fx.motionZ = vec.z;
 			world.spawnEntity(fx);
 			
-			vec = vec.rotateYaw((float) 360 / count);
+			vec = vec.rotateYaw(360 / count);
 		}
 	}
 	
@@ -198,30 +198,39 @@ public class ExplosionLarge {
 	public static void spawnMissileDebris(World world, double x, double y, double z, double motionX, double motionY, double motionZ, double deviation, List<ItemStack> debris, ItemStack rareDrop) {
 		
 		if(debris != null) {
-            for (ItemStack stack : debris) {
-                if (stack != null) {
-                    int k = rand.nextInt(stack.getCount() + 1);
-                    for (int j = 0; j < k; j++) {
-                        EntityItem item = new EntityItem(world, x, y, z, new ItemStack(stack.getItem()));
-                        item.motionX = (motionX + rand.nextGaussian() * deviation) * 0.85;
-                        item.motionY = (motionY + rand.nextGaussian() * deviation) * 0.85;
-                        item.motionZ = (motionZ + rand.nextGaussian() * deviation) * 0.85;
-                        item.posX = item.posX + item.motionX * 2;
-                        item.posY = item.posY + item.motionY * 2;
-                        item.posZ = item.posZ + item.motionZ * 2;
-
-                        world.spawnEntity(item);
-                    }
-                }
-            }
+			for(int i = 0; i < debris.size(); i++) {
+				if(debris.get(i) != null) {
+					int k = rand.nextInt(debris.get(i).getCount() + 1);
+					for(int j = 0; j < k; j++) {
+						EntityItem item = new EntityItem(world, x, y, z, new ItemStack(debris.get(i).getItem()));
+						item.motionX = (motionX + rand.nextGaussian() * deviation) * 0.85;
+						item.motionY = (motionY + rand.nextGaussian() * deviation) * 0.85;
+						item.motionZ = (motionZ + rand.nextGaussian() * deviation) * 0.85;
+						item.posX = item.posX + item.motionX * 2;
+						item.posY = item.posY + item.motionY * 2;
+						item.posZ = item.posZ + item.motionZ * 2;
+						
+						world.spawnEntity(item);
+					}
+				}
+			}
 		}
 	}
 
 	public static void explode(World world, double x, double y, double z, float strength, boolean cloud, boolean rubble, boolean shrapnel) {
 		if(CompatibilityConfig.isWarDim(world)){
-			world.spawnEntity(EntityNukeExplosionMK5.statFacNoRad(world, (int)strength, x, y, z));
-		
-			ContaminationUtil.radiate(world, x, y, z, strength, 0, 0, 0, strength*30F);
+			// FIXED: Only use nuclear explosion system for large explosions (radius > 100)
+			// Small conventional explosions should NOT trigger nuclear physics calculations
+			// Nuclear threshold: ~100 blocks radius ≈ 0.15 kt equivalent yield
+			if (strength > 100) {
+				// Large explosion: Use nuclear physics system
+				world.spawnEntity(EntityNukeExplosionMK5.statFacNoRad(world, (int)strength, x, y, z));
+				ContaminationUtil.radiate(world, x, y, z, strength, 0, 0, 0, strength*15F);
+			} else {
+				// Small/medium explosion: Use conventional explosion system
+				ExplosionNT explosion = new ExplosionNT(world, null, x, y, z, strength);
+				explosion.explode();
+			}
 		}
 		if (cloud)
 			spawnParticles(world, x, y+2, z, cloudFunction((int) strength));
@@ -230,26 +239,6 @@ public class ExplosionLarge {
 		if (shrapnel)
 			spawnShrapnels(world, x, y+2, z, shrapnelFunction((int) strength));
 	}
-
-    public static void explodeArea(World world, double x, double y, double z, float radius, float strength, boolean cloud, boolean rubble, boolean shrapnel) {
-        if(CompatibilityConfig.isWarDim(world)){
-            List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(x-radius, y-radius, z-radius, x+radius, y+radius, z+radius));
-
-            for(Entity e : entities) {
-                Vec3 vec = Vec3.createVectorHelper(e.posX - x, (e.posY + e.getEyeHeight()) - y, e.posZ - z);
-                double len = vec.length();
-
-                if(len > radius) continue;
-                e.attackEntityFrom(ModDamageSource.blast, (float) (strength / (len/radius)));
-            }
-        }
-        if (cloud)
-            spawnParticles(world, x, y+2, z, cloudFunction((int) strength));
-        if (rubble)
-            spawnRubble(world, x, y+2, z, rubbleFunction((int) strength));
-        if (shrapnel)
-            spawnShrapnels(world, x, y+2, z, shrapnelFunction((int) strength));
-    }
 
 	public static int cloudFunction(int i) {
 		// return (int)(345 * (1 - Math.pow(Math.E, -i/15)) + 15);
@@ -266,9 +255,17 @@ public class ExplosionLarge {
 
 	public static void explodeFire(World world, double x, double y, double z, float strength, boolean cloud, boolean rubble, boolean shrapnel) {
 		if(CompatibilityConfig.isWarDim(world)){
-			world.spawnEntity(EntityNukeExplosionMK5.statFacNoRadFire(world, (int)strength, x, y, z));
-
-			ContaminationUtil.radiate(world, x, y, z, strength, 0, 0, strength*20F, strength*5F);
+			// FIXED: Only use nuclear explosion system for large explosions (radius > 100)
+			if (strength > 100) {
+				// Large explosion: Use nuclear physics system with fire
+				world.spawnEntity(EntityNukeExplosionMK5.statFacNoRadFire(world, (int)strength, x, y, z));
+				ContaminationUtil.radiate(world, x, y, z, strength, 0, 0, strength*20F, strength*5F);
+			} else {
+				// Small/medium explosion: Use conventional explosion system
+				ExplosionNT explosion = new ExplosionNT(world, null, x, y, z, strength);
+				explosion.addAttrib(ExAttrib.FIRE);
+				explosion.explode();
+			}
 		}
 		if(cloud)
 			spawnParticles(world, x, y+2, z, cloudFunction((int)strength));
@@ -293,13 +290,22 @@ public class ExplosionLarge {
 	}
 	
 	public static void buster(World world, double x, double y, double z, Vec3 vector, float strength, float depth) {
-		
+
 		vector = vector.normalize();
 		if(CompatibilityConfig.isWarDim(world)){
-			for(int i = 0; i <= depth; i += 3) {
-				
-				ContaminationUtil.radiate(world, x + vector.xCoord * i, y + vector.yCoord * i, z + vector.zCoord * i, strength, 0, 0, 0, strength*10F);
-				world.spawnEntity(EntityNukeExplosionMK5.statFacNoRad(world, (int)strength, x + vector.xCoord * i, y + vector.yCoord * i, z + vector.zCoord * i));
+			// FIXED: Only use nuclear explosion system for large explosions (radius > 100)
+			if (strength > 100) {
+				// Large bunker buster: Use nuclear physics system
+				for(int i = 0; i <= depth; i += 3) {
+					ContaminationUtil.radiate(world, x + vector.xCoord * i, y + vector.yCoord * i, z + vector.zCoord * i, strength, 0, 0, 0, strength*10F);
+					world.spawnEntity(EntityNukeExplosionMK5.statFacNoRad(world, (int)strength, x + vector.xCoord * i, y + vector.yCoord * i, z + vector.zCoord * i));
+				}
+			} else {
+				// Small/medium bunker buster: Use conventional explosion system
+				for(int i = 0; i <= depth; i += 3) {
+					ExplosionNT explosion = new ExplosionNT(world, null, x + vector.xCoord * i, y + vector.yCoord * i, z + vector.zCoord * i, strength);
+					explosion.explode();
+				}
 			}
 		}
 		spawnParticles(world, x, y+2, z, cloudFunction((int)strength));

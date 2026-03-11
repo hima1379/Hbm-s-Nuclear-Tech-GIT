@@ -9,7 +9,7 @@ import com.hbm.forgefluid.FFUtils;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityMachineExcavator;
+import com.hbm.main.tileentity.machine.TileEntityMachineExcavator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -48,7 +48,7 @@ public class GUIMachineExcavator extends GuiInfoContainer {
 		this.drawCustomInfoStat(mouseX, mouseY, guiLeft + 79, guiTop + 16, 18, 18, mouseX, mouseY, text4);
 		this.drawCustomInfoStat(mouseX, mouseY, guiLeft + 103, guiTop + 16, 18, 18, mouseX, mouseY, text5);
 		
-		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 220, guiTop + 17, 16, 52, drill.getPower(), TileEntityMachineExcavator.maxPower);
+		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 220, guiTop + 17, 16, 52, drill.getPower(), drill.maxPower);
 		FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 202, guiTop + 17, 16, 52, drill.tank, drill.fluidType);
 		super.renderHoveredToolTip(mouseX, mouseY);
 	}

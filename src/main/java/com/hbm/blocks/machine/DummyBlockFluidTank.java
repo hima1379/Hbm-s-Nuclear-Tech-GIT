@@ -5,9 +5,9 @@ import java.util.Random;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.interfaces.IDummy;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityDummy;
-import com.hbm.tileentity.machine.TileEntityDummyFluidPort;
-import com.hbm.tileentity.machine.TileEntityMachineFluidTank;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityDummyFluidPort;
+import com.hbm.main.tileentity.machine.TileEntityMachineFluidTank;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -63,7 +63,12 @@ public class DummyBlockFluidTank extends BlockContainer implements IDummy {
 		return false;
 	}
 
-    @Override
+	@Override
+	public EnumBlockRenderType getRenderType(IBlockState state) {
+		return EnumBlockRenderType.INVISIBLE;
+	}
+	
+	@Override
 	public boolean isBlockNormalCube(IBlockState state) {
 		return false;
 	}

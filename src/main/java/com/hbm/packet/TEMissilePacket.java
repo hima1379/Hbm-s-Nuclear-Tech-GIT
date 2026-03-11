@@ -1,7 +1,7 @@
 package com.hbm.packet;
 
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.bomb.TileEntityLaunchPad;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchPad;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -97,6 +97,7 @@ public class TEMissilePacket implements IMessage {
 		y = buf.readInt();
 		z = buf.readInt();
 		type = buf.readInt();
+		
 	}
 
 	@Override
@@ -105,6 +106,7 @@ public class TEMissilePacket implements IMessage {
 		buf.writeInt(y);
 		buf.writeInt(z);
 		buf.writeInt(type);
+		
 	}
 	
 	public static class Handler implements IMessageHandler<TEMissilePacket, IMessage>{
@@ -112,7 +114,6 @@ public class TEMissilePacket implements IMessage {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public IMessage onMessage(TEMissilePacket message, MessageContext ctx) {
-            if(message == null) return null;
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				World world = Minecraft.getMinecraft().world;
 				BlockPos pos = new BlockPos(message.x, message.y, message.z);

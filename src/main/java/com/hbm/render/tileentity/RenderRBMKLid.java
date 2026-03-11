@@ -8,10 +8,10 @@ import com.hbm.blocks.machine.rbmk.RBMKRod;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.amlfrom1710.WavefrontObject;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKBase;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKBoiler;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKHeater;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKRod;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKBase;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKBoiler;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKHeater;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKRod;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;

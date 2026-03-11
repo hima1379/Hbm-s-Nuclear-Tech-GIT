@@ -3,7 +3,7 @@ package com.hbm.sound;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hbm.tileentity.machine.TileEntityBroadcaster;
+import com.hbm.main.tileentity.machine.TileEntityBroadcaster;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -18,7 +18,7 @@ public class SoundLoopBroadcaster extends SoundLoopMachine {
 	public float intendedVolume = 25.0F;
 
 	public SoundLoopBroadcaster(SoundEvent path, TileEntity te) {
-		super(path, te, 1);
+		super(path, te);
 		list.add(this);
 		this.attenuationType = ISound.AttenuationType.NONE;
 	}
@@ -26,7 +26,7 @@ public class SoundLoopBroadcaster extends SoundLoopMachine {
 	@Override
 	public void update() {
 		super.update();
-        if(this.donePlaying) return;
+		
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		float f = 0;
 		
@@ -41,6 +41,10 @@ public class SoundLoopBroadcaster extends SoundLoopMachine {
 		} else {
 			volume = intendedVolume;
 		}
+	}
+	
+	public TileEntity getTE() {
+		return te;
 	}
 	
 	public float func(float f, float v) {

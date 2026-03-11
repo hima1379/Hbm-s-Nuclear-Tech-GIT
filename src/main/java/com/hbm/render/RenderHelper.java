@@ -23,7 +23,9 @@ import org.lwjgl.util.vector.Vector4f;
 
 import com.hbm.entity.missile.EntityCarrier;
 import com.hbm.entity.missile.EntityMissileCustom;
+import com.hbm.entity.missile.EntityMissileAntiBallistic;
 import com.hbm.entity.missile.EntityMissileBaseAdvanced;
+import com.hbm.entity.missile.EntityMissileBaseRealistic;
 import com.hbm.handler.HbmShaderManager2;
 import com.hbm.lib.Library;
 import com.hbm.main.ClientProxy;
@@ -323,6 +325,17 @@ public class RenderHelper {
 		double d4 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
 		double d5 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
 		
+		return new double[]{d0 - d3, d1 - d4, d2 - d5};
+	}
+
+	public static double[] getRenderPosFromMissile(EntityMissileBaseRealistic missile, float partialTicks){
+		double d0 = missile.prevPosX + (missile.posX - missile.prevPosX) * partialTicks;
+		double d1 = missile.prevPosY + (missile.posY - missile.prevPosY) * partialTicks;
+		double d2 = missile.prevPosZ + (missile.posZ - missile.prevPosZ) * partialTicks;
+		Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+		double d3 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
+		double d4 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
+		double d5 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
 		return new double[]{d0 - d3, d1 - d4, d2 - d5};
 	}
 
@@ -974,7 +987,8 @@ public class RenderHelper {
     		if(r_getRenderChunk == null)
 				r_getRenderChunk = ReflectionHelper.findMethod(ViewFrustum.class, "getRenderChunk", "func_178161_a", BlockPos.class);
 			ViewFrustum v = (ViewFrustum) r_viewFrustum.get(Minecraft.getMinecraft().renderGlobal);
-            return (RenderChunk) r_getRenderChunk.invoke(v, pos);
+			RenderChunk r = (RenderChunk) r_getRenderChunk.invoke(v, pos);
+			return r;
 		} catch(IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 		}

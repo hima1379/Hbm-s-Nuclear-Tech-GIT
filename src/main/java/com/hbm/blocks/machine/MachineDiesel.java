@@ -6,7 +6,7 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
 import com.hbm.inventory.FluidCombustionRecipes.FuelGrade;
-import com.hbm.tileentity.machine.TileEntityMachineDiesel;
+import com.hbm.main.tileentity.machine.TileEntityMachineDiesel;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

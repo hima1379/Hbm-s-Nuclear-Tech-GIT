@@ -3,8 +3,8 @@ package com.hbm.blocks.machine;
 import java.util.Random;
 
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityDummy;
-import com.hbm.tileentity.machine.TileEntityDummyPort;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityDummyPort;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -85,7 +85,12 @@ public class DummyBlockMachine extends DummyOldBase {
 		return false;
 	}
 
-    @Override
+	@Override
+	public EnumBlockRenderType getRenderType(IBlockState state) {
+		return EnumBlockRenderType.INVISIBLE;
+	}
+	
+	@Override
 	public boolean isBlockNormalCube(IBlockState state) {
 		return false;
 	}

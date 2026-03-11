@@ -3,7 +3,7 @@ package com.hbm.render.tileentity;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.render.RenderHelper;
-import com.hbm.tileentity.machine.TileEntitySoyuzStruct;
+import com.hbm.main.tileentity.machine.TileEntitySoyuzStruct;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;

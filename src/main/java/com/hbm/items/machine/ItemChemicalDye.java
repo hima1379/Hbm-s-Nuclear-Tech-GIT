@@ -9,7 +9,7 @@ public class ItemChemicalDye extends ItemEnumMulti {
 	}
 
 	
-	public enum EnumChemDye {
+	public static enum EnumChemDye {
 		BLACK(1973019, "Black"),
 		RED(11743532, "Red"),
 		GREEN(3887386, "Green"),
@@ -27,10 +27,10 @@ public class ItemChemicalDye extends ItemEnumMulti {
 		ORANGE(15435844, "Orange"),
 		WHITE(15790320, "White");
 		
-		public final int color;
-		public final String dictName;
+		public int color;
+		public String dictName;
 
-		EnumChemDye(int color, String name) {
+		private EnumChemDye(int color, String name) {
 			this.color = color;
 			this.dictName = "dye"+name;
 		}

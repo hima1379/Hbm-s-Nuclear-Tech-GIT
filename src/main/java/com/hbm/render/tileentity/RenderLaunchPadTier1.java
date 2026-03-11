@@ -2,11 +2,13 @@ package com.hbm.render.tileentity;
 
 import org.lwjgl.opengl.GL11;
 
+import com.hbm.items.ModItems;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.bomb.TileEntityLaunchPad;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchPad;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.item.Item;
 
 public class RenderLaunchPadTier1 extends TileEntitySpecialRenderer<TileEntityLaunchPad> {
 
@@ -31,9 +33,42 @@ public class RenderLaunchPadTier1 extends TileEntitySpecialRenderer<TileEntityLa
         bindTexture(ResourceManager.missile_pad_tex);
 	    ResourceManager.missile_pad.renderAll();
 
-		if(te.clearingTimer == 0){
+		if(te.clearingTimer == 0 && !te.inventory.getStackInSlot(0).isEmpty()){
+			Item missile = te.inventory.getStackInSlot(0).getItem();
 			int state = te.state;
 			GL11.glTranslated(0, 1, 0);
+
+			// SM-6 Missile (RIM-174 Standard ERAM)
+			if (missile == ModItems.missile_sm6) {
+				GL11.glPushMatrix();
+
+				// Scale to realistic size
+				// SM-6: 6.55m actual length, model is ~197 units tall
+				// Scaled to match other missiles: 12/197 ≈ 0.061
+				GL11.glScalef(0.061F, 0.061F, 0.061F);
+
+				// Lift missile to prevent booster from clipping into ground
+				// Booster extends from Y=-52.3 to Y=0.4
+				// After scaling: -52.3 * 0.061 = -3.19
+				// Lift by 3.2 to bring booster bottom to just above launch pad surface
+				GL11.glTranslated(0.0D, 3.2D, 0.0D);
+
+				// Model is already correctly oriented:
+				// - Y-axis vertical (nose up at Y=197, tail/booster at Y~-52)
+				// - No rotation needed
+
+				// Render main body (Mk 104 dual-thrust sustainer + guidance section)
+				bindTexture(ResourceManager.sm6_main_tex);
+				ResourceManager.sm6_main.renderAll();
+
+				// Render booster (Mk 72 solid rocket booster)
+				// Booster model is already positioned correctly relative to main body
+				bindTexture(ResourceManager.sm6_booster_tex);
+				ResourceManager.sm6_booster.renderAll();
+
+				GL11.glPopMatrix();
+			}
+
 			if (state == 1) {
 				GL11.glScalef(1.0F, h_1, 1.0F);
 				bindTexture(ResourceManager.missileV2_HE_tex);

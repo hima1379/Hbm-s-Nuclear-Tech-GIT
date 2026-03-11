@@ -11,7 +11,7 @@ import com.hbm.entity.logic.EntityNukeExplosionMK3;
 import com.hbm.interfaces.IBomb;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.bomb.TileEntityNukeFleija;
+import com.hbm.main.tileentity.bomb.TileEntityNukeFleija;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.block.Block;
@@ -66,7 +66,7 @@ public class NukeFleija extends BlockContainer implements IBomb {
 		TileEntity tileentity = world.getTileEntity(pos);
 
 		if (tileentity instanceof TileEntityNukeFleija) {
-			InventoryHelper.dropInventoryItems(world, pos, tileentity);
+			InventoryHelper.dropInventoryItems(world, pos, (TileEntityNukeFleija) tileentity);
 
 			world.updateComparatorOutputLevel(pos, this);
 		}

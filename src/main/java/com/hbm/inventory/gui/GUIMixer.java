@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.inventory.container.ContainerMixer;
 import com.hbm.lib.RefStrings;
 import com.hbm.forgefluid.FFUtils;
-import com.hbm.tileentity.machine.TileEntityMachineMixer;
+import com.hbm.main.tileentity.machine.TileEntityMachineMixer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

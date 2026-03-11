@@ -3,7 +3,7 @@ package com.hbm.blocks.turret;
 import com.hbm.entity.particle.EntityGasFlameFX;
 import com.hbm.entity.projectile.EntityAAShell;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.tileentity.turret.TileEntityTurretSpitfire;
+import com.hbm.main.tileentity.turret.TileEntityTurretSpitfire;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntity;

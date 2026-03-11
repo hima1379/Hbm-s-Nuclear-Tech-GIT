@@ -339,8 +339,10 @@ public class SubElementPlacement extends SubElement {
 				return false;
 			}
 		}
-        return RenderHelper.boxContainsOther(gui.control.getBox(), gui.currentEditControl.getBox());
-    }
+		if(!RenderHelper.boxContainsOther(gui.control.getBox(), gui.currentEditControl.getBox()))
+			return false;
+		return true;
+	}
 	
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int button){

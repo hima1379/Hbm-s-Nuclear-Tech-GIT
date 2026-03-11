@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
 import com.hbm.render.RenderHelper;
-import com.hbm.tileentity.machine.TileEntityBlackBook;
+import com.hbm.main.tileentity.machine.TileEntityBlackBook;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;

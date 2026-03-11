@@ -7,7 +7,6 @@ import com.hbm.lib.HBMSoundHandler;
 import com.hbm.handler.ArmorUtil;
 
 import api.hbm.item.IGasMask;
-import com.hbm.lib.Library;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
@@ -54,28 +53,25 @@ public class ItemFilter extends Item {
 	
 	private ItemStack installFilterOn(ItemStack helmet, ItemStack filter, World world, EntityPlayer player) {
 		
-		if(!(helmet.getItem() instanceof IGasMask mask)) {
+		if(!(helmet.getItem() instanceof IGasMask)) {
 			return filter;
 		}
-
-        if(!mask.isFilterApplicable(helmet, filter))
+		
+		IGasMask mask = (IGasMask) helmet.getItem();
+		if(!mask.isFilterApplicable(helmet, filter))
 			return filter;
 		
 		ItemStack copy = filter.copy();
-        copy.setCount(1);
 		ItemStack current = ArmorUtil.getGasMaskFilter(helmet);
-
-        filter.shrink(1);
-
-        ArmorUtil.installGasMaskFilter(helmet, copy);
-
+		
 		if(current != null) {
-            if(filter.isEmpty()) filter = current;
-            else Library.addToInventoryOrDrop(player, current);
-		} else if(filter.isEmpty()){
-            filter = ItemStack.EMPTY;
-        }
-
+			filter = current;
+		} else {
+			filter.shrink(1);
+		}
+		
+		ArmorUtil.installGasMaskFilter(helmet, copy);
+		
 		world.playSound(null, player.posX, player.posY, player.posZ, HBMSoundHandler.gasmaskScrew, SoundCategory.PLAYERS, 1.0F, 1.0F);
 				
 		return filter;

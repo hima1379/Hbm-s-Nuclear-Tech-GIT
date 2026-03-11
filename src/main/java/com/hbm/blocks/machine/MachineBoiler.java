@@ -5,9 +5,9 @@ import java.util.Random;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityMachineBoiler;
-import com.hbm.tileentity.machine.TileEntityMachineBoilerElectric;
-import com.hbm.tileentity.machine.TileEntityMachineBoilerRTG;
+import com.hbm.main.tileentity.machine.TileEntityMachineBoiler;
+import com.hbm.main.tileentity.machine.TileEntityMachineBoilerElectric;
+import com.hbm.main.tileentity.machine.TileEntityMachineBoilerRTG;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;

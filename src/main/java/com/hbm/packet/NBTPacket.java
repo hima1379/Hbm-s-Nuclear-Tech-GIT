@@ -2,7 +2,7 @@ package com.hbm.packet;
 
 import java.io.IOException;
 
-import com.hbm.tileentity.INBTPacketReceiver;
+import com.hbm.main.tileentity.INBTPacketReceiver;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.lib.RefStrings;
 import com.hbm.render.model.ModelBroadcaster;
-import com.hbm.tileentity.machine.TileEntityBroadcaster;
+import com.hbm.main.tileentity.machine.TileEntityBroadcaster;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;

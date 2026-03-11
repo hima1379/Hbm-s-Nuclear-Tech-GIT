@@ -9,7 +9,7 @@ import com.hbm.util.I18nUtil;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.inventory.container.ContainerMachineGasFlare;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.oil.TileEntityMachineGasFlare;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineGasFlare;
 
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.init.SoundEvents;

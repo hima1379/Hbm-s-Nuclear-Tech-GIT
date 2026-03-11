@@ -7,7 +7,7 @@ import com.hbm.forgefluid.FFUtils;
 import com.hbm.inventory.container.ContainerMachineChemplant;
 import com.hbm.items.ModItems;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineChemplant;
+import com.hbm.main.tileentity.machine.TileEntityMachineChemplant;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureMap;

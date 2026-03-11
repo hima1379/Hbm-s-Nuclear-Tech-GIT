@@ -2,8 +2,8 @@ package com.hbm.blocks.turret;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.turret.TileEntityTurretRichard;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.turret.TileEntityTurretRichard;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;

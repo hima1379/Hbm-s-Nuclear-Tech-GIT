@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.blocks.generic.WasteLeaves;
 import com.hbm.config.GeneralConfig;
 import com.hbm.config.RadiationConfig;
 import com.hbm.handler.RadiationSystemNT.RadPocket;
@@ -12,8 +11,14 @@ import com.hbm.main.MainRegistry;
 import com.hbm.saveddata.RadiationSaveStructure;
 import com.hbm.saveddata.RadiationSavedData;
 
-import net.minecraft.block.*;
 import net.minecraft.init.Blocks;
+import net.minecraft.block.BlockSand;
+import net.minecraft.block.BlockBush;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockIce;
+import net.minecraft.block.BlockSnow;
+import net.minecraft.block.BlockSnowBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -40,7 +45,7 @@ public class RadiationWorldHandler {
 			}
 
 			Collection<RadPocket> activePockets = RadiationSystemNT.getActiveCollection(world);
-			if(activePockets.isEmpty())
+			if(activePockets.size() == 0)
 				return;
 			int randIdx = world.rand.nextInt(activePockets.size());
 			int itr = 0;
@@ -101,16 +106,9 @@ public class RadiationWorldHandler {
 											world.setBlockToAir(pos);
 										}
 
-									} else if(bblock instanceof BlockLeaves bLeaf && !(bblock instanceof WasteLeaves)) {
-                                        BlockPlanks.EnumType type = null;
-                                        try {
-                                            type = bLeaf.getWoodType(bLeaf.getMetaFromState(b));
-                                        } catch(UnsupportedOperationException ignored) {
-                                            //TK bag programming catch
-                                        }
-                                        if(type == null) type = BlockPlanks.EnumType.OAK;
-                                        world.setBlockState(pos, ModBlocks.waste_leaves.getDefaultState().withProperty(WasteLeaves.VARIANT, type));
-                                    }
+									} else if(bblock instanceof BlockLeaves) {
+										world.setBlockState(pos, ModBlocks.waste_leaves.getDefaultState());
+									}
 								}
 							}
 						}
@@ -201,15 +199,8 @@ public class RadiationWorldHandler {
 								world.setBlockToAir(pos);
 							}
 
-						} else if(bblock instanceof BlockLeaves bLeaf && !(bblock instanceof WasteLeaves)) {
-                            BlockPlanks.EnumType type = null;
-                            try {
-                                type = bLeaf.getWoodType(bLeaf.getMetaFromState(c));
-                            } catch(UnsupportedOperationException ignored) {
-                                //TK bag programming catch
-                            }
-                            if(type == null) type = BlockPlanks.EnumType.OAK;
-                            world.setBlockState(pos, ModBlocks.waste_leaves.getDefaultState().withProperty(WasteLeaves.VARIANT, type));
+						} else if(bblock instanceof BlockLeaves) {
+							world.setBlockState(pos, ModBlocks.waste_leaves.getDefaultState());
 						}
 					}
 				}

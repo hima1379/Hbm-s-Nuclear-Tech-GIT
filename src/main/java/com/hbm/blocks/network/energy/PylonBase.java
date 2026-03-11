@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.ITooltipProvider;
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.client.util.ITooltipFlag;

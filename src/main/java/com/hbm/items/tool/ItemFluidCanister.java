@@ -24,10 +24,12 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.Sys;
 
 public class ItemFluidCanister extends Item implements IHasCustomModel {
 
@@ -133,10 +135,15 @@ public class ItemFluidCanister extends Item implements IHasCustomModel {
 				return true;
 			return f.amount == 1000 || f.amount == 0;
 			
-		} else return stack.getItem() == ModItems.canister_generic;
-    }
+		} else if(stack.getItem() == ModItems.canister_generic){
+			return true;
+		}
+		return false;
+	}
 
 	public static boolean isEmptyCanister(ItemStack out) {
-        return out.getItem() == ModItems.canister_generic && FluidUtil.getFluidContained(out) == null;
-    }
+		if(out.getItem() == ModItems.canister_generic && FluidUtil.getFluidContained(out) == null)
+			return true;
+		return false;
+	}
 }

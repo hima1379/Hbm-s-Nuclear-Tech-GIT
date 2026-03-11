@@ -3,6 +3,7 @@ package com.hbm.handler.crt;
 import crafttweaker.IAction;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.api.minecraft.CraftTweakerMC;
+import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.annotations.ZenRegister;
 import stanhebben.zenscript.annotations.ZenClass;
@@ -10,6 +11,8 @@ import stanhebben.zenscript.annotations.ZenMethod;
 
 import com.hbm.inventory.RBMKOutgasserRecipes;
 
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 @ZenRegister

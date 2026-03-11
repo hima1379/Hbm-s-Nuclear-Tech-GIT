@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.inventory.container.ContainerCoreTitanium;
 import com.hbm.lib.RefStrings;
 import com.hbm.lib.Library;
-import com.hbm.tileentity.machine.TileEntityCoreTitanium;
+import com.hbm.main.tileentity.machine.TileEntityCoreTitanium;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

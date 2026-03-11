@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import com.hbm.config.PotionConfig;
 
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.Potion;
 
 public class HbmDetox {

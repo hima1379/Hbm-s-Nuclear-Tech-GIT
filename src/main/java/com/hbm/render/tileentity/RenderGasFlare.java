@@ -3,7 +3,7 @@ package com.hbm.render.tileentity;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.oil.TileEntityMachineGasFlare;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineGasFlare;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -23,10 +23,8 @@ public class RenderGasFlare extends TileEntitySpecialRenderer<TileEntityMachineG
         GlStateManager.disableCull();
 		GL11.glRotatef(180, 0F, 1F, 0F);
 
-        GlStateManager.shadeModel(GL11.GL_SMOOTH);
-        bindTexture(ResourceManager.oilflare_tex);
+		bindTexture(ResourceManager.oilflare_tex);
         ResourceManager.oilflare.renderAll();
-        GlStateManager.shadeModel(GL11.GL_FLAT);
 
         GlStateManager.enableCull();
         GL11.glPopMatrix();

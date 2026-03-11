@@ -6,7 +6,7 @@ import com.hbm.util.I18nUtil;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
 import com.hbm.config.GeneralConfig;
-import com.hbm.tileentity.conductor.TileEntityFFFluidDuctMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFFluidDuctMk2;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -83,7 +83,7 @@ public class ItemFFFluidDuct extends Item {
         {
             world.setBlockState(pos, ModBlocks.fluid_duct_mk2.getDefaultState());
             if(world.getTileEntity(pos) instanceof TileEntityFFFluidDuctMk2) {
-            	((TileEntityFFFluidDuctMk2)world.getTileEntity(pos)).setType(getFluidFromStack(stack));
+            	((TileEntityFFFluidDuctMk2)world.getTileEntity(pos)).setType(getFluidFromStack(stack));;
             }
             stack.shrink(1);
             world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_STONE_PLACE, SoundCategory.PLAYERS, 1F, 0.8F + world.rand.nextFloat() * 0.2F);
@@ -100,7 +100,8 @@ public class ItemFFFluidDuct extends Item {
 	public static Fluid getFluidFromStack(ItemStack stack){
 		if(stack == null || !stack.hasTagCompound() || !stack.getTagCompound().hasKey("fluidType"))
 			return null;
-        return FluidRegistry.getFluid(stack.getTagCompound().getString("fluidType"));
+		Fluid f = FluidRegistry.getFluid(stack.getTagCompound().getString("fluidType"));
+		return f;
 	}
 	
 	public static ItemStack getStackFromFluid(Fluid f, int amount){

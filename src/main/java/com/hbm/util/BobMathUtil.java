@@ -34,16 +34,18 @@ public class BobMathUtil {
 	public static String getShortNumber(long number){
 		if(number < 1000D){
 			return ""+number;
-		}else if(number < 1000000D){
+		}else if(number < 1000D){
 			return String.format("%6.2fk", number/1000F);
-		}else if(number < 1000000000D){
+		}else if(number < 1000000D){
 			return String.format("%6.2fM", number/1000000F);
-		}else if(number < 1000000000000D){
+		}else if(number < 1000000000D){
 			return String.format("%6.2fG", number/1000000000F);
-		}else if(number < 1000000000000000D){
+		}else if(number < 1000000000000D){
 			return String.format("%6.2fT", number/1000000000000F);
-		}else if(number < 1000000000000000000D){
+		}else if(number < 1000000000000000D){
 			return String.format("%6.2fE", number/1000000000000000F);
+		}else if(number < 1000000000000000000D){
+			return String.format("%6.2fP", number/1000000000000000000F);
 		}
 		return "INFINTE";
 	}
@@ -396,5 +398,10 @@ public class BobMathUtil {
 		float g = gA + (gB-gA) * percentB;
 		float b = bA + (bB-bA) * percentB;
 		return (((int)r & 0xFF) << 16) | (((int)g & 0xFF) << 8) | ((int)b & 0xFF);
+	}
+
+	/** Soft peak sine */
+	public static double sps(double x) {
+		return Math.sin(Math.PI / 2D * Math.cos(x));
 	}
 }

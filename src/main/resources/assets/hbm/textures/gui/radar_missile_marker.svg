@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Missile marker for radar display -->
+  <!-- Triangle pointing upward (North) with center dot -->
+
+  <!-- Main triangle body (pink/red) -->
+  <path d="M 16 4 L 24 26 L 16 22 L 8 26 Z"
+        fill="#FF4D4D"
+        stroke="#FF4D4D"
+        stroke-width="1"
+        opacity="0.9"/>
+
+  <!-- Center dot -->
+  <circle cx="16" cy="16" r="2.5"
+          fill="#FF4D4D"
+          opacity="1.0"/>
+
+  <!-- Optional outline for better visibility -->
+  <path d="M 16 4 L 24 26 L 16 22 L 8 26 Z"
+        fill="none"
+        stroke="#CC0000"
+        stroke-width="0.5"
+        opacity="0.8"/>
+</svg>

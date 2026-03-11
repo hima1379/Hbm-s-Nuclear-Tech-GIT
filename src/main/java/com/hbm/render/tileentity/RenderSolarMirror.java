@@ -3,7 +3,7 @@ package com.hbm.render.tileentity;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntitySolarMirror;
+import com.hbm.main.tileentity.machine.TileEntitySolarMirror;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -26,19 +26,21 @@ public class RenderSolarMirror extends TileEntitySpecialRenderer<TileEntitySolar
         GL11.glTranslated(x + 0.5D, y, z + 0.5D);
         GlStateManager.enableLighting();
         GlStateManager.disableCull();
+        
+        TileEntitySolarMirror mirror = (TileEntitySolarMirror)te;
 
         bindTexture(ResourceManager.solar_mirror_tex);
         ResourceManager.solar_mirror.renderPart("Base");
 
         GL11.glTranslated(0, 1, 0);
 
-    	int dx = ((TileEntitySolarMirror)te).tX - ((TileEntitySolarMirror)te).getPos().getX();
-    	int dy = ((TileEntitySolarMirror)te).tY - ((TileEntitySolarMirror)te).getPos().getY();
-    	int dz = ((TileEntitySolarMirror)te).tZ - ((TileEntitySolarMirror)te).getPos().getZ();
+    	int dx = mirror.tX - mirror.getPos().getX();
+    	int dy = mirror.tY - mirror.getPos().getY();
+    	int dz = mirror.tZ - mirror.getPos().getZ();
 
     	double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-        if(((TileEntitySolarMirror)te).tY >= ((TileEntitySolarMirror)te).getPos().getY()) {
+        if(mirror.tY >= mirror.getPos().getY()) {
 
         	double pitch = Math.toDegrees(-Math.asin((dy + 0.5) / dist)) + 90;
         	double yaw = Math.toDegrees(-Math.atan2(dz, dx)) + 180;
@@ -50,7 +52,7 @@ public class RenderSolarMirror extends TileEntitySpecialRenderer<TileEntitySolar
         GL11.glTranslated(0, -1, 0);
         ResourceManager.solar_mirror.renderPart("Mirror");
 
-        if(((TileEntitySolarMirror)te).isOn) {
+        if(mirror.isOn) {
 			float min = 0.008F;
 	        float max = 0.008F;
 

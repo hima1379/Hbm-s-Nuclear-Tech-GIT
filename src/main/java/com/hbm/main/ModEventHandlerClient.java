@@ -8,21 +8,15 @@ import java.util.Map.Entry;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.forgefluid.ModForgeFluids;
 
-import com.hbm.interfaces.*;
 import com.hbm.render.item.*;
-import com.hbm.tileentity.machine.TileEntityMachineReactorSmall;
 import com.hbm.util.*;
 import com.hbm.items.IDynamicModels;
 import com.hbm.items.IModelRegister;
 import com.hbm.items.machine.*;
 import com.hbm.render.tileentity.RenderWatzMultiblock;
-import net.minecraft.block.*;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.block.statemap.StateMap;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemLeaves;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
+import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -51,6 +45,14 @@ import com.hbm.handler.HazmatRegistry;
 import com.hbm.handler.HbmShaderManager;
 import com.hbm.handler.HbmShaderManager2;
 import com.hbm.handler.JetpackHandler;
+import com.hbm.interfaces.IConstantRenderer;
+import com.hbm.interfaces.ICustomSelectionBox;
+import com.hbm.interfaces.IHasCustomModel;
+import com.hbm.interfaces.IHasCustomMetaModels;
+import com.hbm.interfaces.IHoldableWeapon;
+import com.hbm.interfaces.IItemHUD;
+import com.hbm.interfaces.IPostRender;
+import com.hbm.interfaces.Spaghetti;
 import com.hbm.inventory.AssemblerRecipes;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.RecipesCommon.NbtComparableStack;
@@ -116,10 +118,10 @@ import com.hbm.sound.MovingSoundPlayerLoop;
 import com.hbm.sound.MovingSoundPlayerLoop.EnumHbmSound;
 import com.hbm.sound.MovingSoundXVL1456;
 import com.hbm.sound.MovingSoundRadarLoop;
-import com.hbm.tileentity.bomb.TileEntityNukeCustom;
-import com.hbm.tileentity.bomb.TileEntityNukeCustom.CustomNukeEntry;
-import com.hbm.tileentity.bomb.TileEntityNukeCustom.EnumEntryType;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKBase;
+import com.hbm.main.tileentity.bomb.TileEntityNukeCustom;
+import com.hbm.main.tileentity.bomb.TileEntityNukeCustom.CustomNukeEntry;
+import com.hbm.main.tileentity.bomb.TileEntityNukeCustom.EnumEntryType;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKBase;
 import com.hbm.inventory.ChemplantRecipes;
 import com.hbm.inventory.CrucibleRecipes;
 import com.hbm.inventory.BreederRecipes;
@@ -127,6 +129,7 @@ import com.hbm.util.ArmorRegistry.HazardClass;
 import com.hbm.hazard.HazardSystem;
 
 import glmath.glm.vec._2.Vec2;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -136,8 +139,12 @@ import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;
 import net.minecraft.client.renderer.GlStateManager.SourceFactor;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.chunk.RenderChunk;
@@ -209,7 +216,22 @@ public class ModEventHandlerClient {
 	public static float deltaMouseY;
 	
 	public static float currentFOV = 70;
-	
+
+	// === NUCLEAR FLASH STATE ===
+	// Managed by RenderNukeTorexRealistic; rendered by onOverlayRender (CROSSHAIRS)
+	public static long nukeFlashTimestamp = 0L;
+	public static long nukeFlashDurationMs = 0L;
+
+	// === NUCLEAR SHAKE STATE ===
+	// Managed by RenderNukeTorexRealistic; rendered by onOverlayRender (HOTBAR)
+	public static long nukeShakeTimestamp = 0L;
+	public static long nukeShakeDurationMs = 0L;
+	public static double nukeShakeAmplitude = 1.0;
+
+	// Per-entity trigger sets — prevent re-triggering on the same explosion
+	public static final Set<Integer> nukeFlashTriggeredEntities = new HashSet<>();
+	public static final Set<Integer> nukeShakeTriggeredEntities = new HashSet<>();
+
 	public static void updateMouseDelta() {
 		Minecraft mc = Minecraft.getMinecraft();
 		if(mc.inGameHasFocus && Display.isActive()) {
@@ -261,7 +283,7 @@ public class ModEventHandlerClient {
 		IDynamicModels.registerModels();
 
 		registerBedrockOreModels();
-    }
+	}
 
 	public static void registerBedrockOreModels(){
 		for(int i = 0; i < 300; i++) {
@@ -356,16 +378,6 @@ public class ModEventHandlerClient {
             for(int i = 0; i < 4; i ++){
                 ModelLoader.setCustomModelResourceLocation(item, i, new ModelResourceLocation(item.getRegistryName(), "inventory"));
             }
-        } else if(item instanceof ItemLeaves leaf) {
-            boolean isOldLeaf = leaf.getBlock() == ModBlocks.ntmLeavesOld;
-            boolean isWasteLeaf = leaf.getBlock() == ModBlocks.waste_leaves;
-            for(BlockPlanks.EnumType type : BlockPlanks.EnumType.values()) {
-                if(isWasteLeaf){
-                    ModelLoader.setCustomModelResourceLocation(leaf, type.ordinal(), new ModelResourceLocation("hbm:waste_leaves_" + type.name(), "inventory"));
-                } else if((isOldLeaf && type.ordinal() < 4) || (!isOldLeaf && type.ordinal() > 3)) {
-                    ModelLoader.setCustomModelResourceLocation(leaf, type.ordinal(), new ModelResourceLocation("minecraft:" + type.name() + "_leaves", "inventory"));
-                }
-            }
 		} else if(item instanceof IHasCustomModel) {
 			ModelLoader.setCustomModelResourceLocation(item, meta, ((IHasCustomModel) item).getResourceLocation());
 		} else if(item instanceof IHasCustomMetaModels) {
@@ -404,53 +416,63 @@ public class ModEventHandlerClient {
 		ResourceManager.init();
 		Object object1 = evt.getModelRegistry().getObject(RedstoneSword.rsModel);
 		if(object1 instanceof IBakedModel) {
-            ItemRedstoneSwordRender.INSTANCE.itemModel = (IBakedModel) object1;
+			IBakedModel model = (IBakedModel) object1;
+			ItemRedstoneSwordRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(RedstoneSword.rsModel, new ItemRenderRedstoneSword());
 		}
 		Object object2 = evt.getModelRegistry().getObject(ItemAssemblyTemplate.location);
 		if(object2 instanceof IBakedModel) {
-            AssemblyTemplateRender.INSTANCE.itemModel = (IBakedModel) object2;
+			IBakedModel model = (IBakedModel) object2;
+			AssemblyTemplateRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(ItemAssemblyTemplate.location, new AssemblyTemplateBakedModel());
 		}
 
 		Object object3 = evt.getModelRegistry().getObject(GunB92.b92Model);
 		if(object3 instanceof IBakedModel) {
-            ItemRenderGunAnim.INSTANCE.b92ItemModel = (IBakedModel) object3;
+			IBakedModel model = (IBakedModel) object3;
+			ItemRenderGunAnim.INSTANCE.b92ItemModel = model;
 			evt.getModelRegistry().putObject(GunB92.b92Model, new B92BakedModel());
 		}
 		Object object4 = evt.getModelRegistry().getObject(ItemFluidTank.fluidTankModel);
 		if(object4 instanceof IBakedModel) {
-            FluidTankRender.INSTANCE.itemModel = (IBakedModel) object4;
+			IBakedModel model = (IBakedModel) object4;
+			FluidTankRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(ItemFluidTank.fluidTankModel, new FluidTankBakedModel());
 		}
 		Object object444 = evt.getModelRegistry().getObject(ItemFluidTank.fluidTankLeadModel);
 		if(object444 instanceof IBakedModel) {
-            FluidTankLeadRender.INSTANCE.itemModel = (IBakedModel) object444;
+			IBakedModel model = (IBakedModel) object444;
+			FluidTankLeadRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(ItemFluidTank.fluidTankLeadModel, new FluidTankLeadBakedModel());
 		}
 		Object object5 = evt.getModelRegistry().getObject(ItemFluidTank.fluidBarrelModel);
 		if(object5 instanceof IBakedModel) {
-            FluidBarrelRender.INSTANCE.itemModel = (IBakedModel) object5;
+			IBakedModel model = (IBakedModel) object5;
+			FluidBarrelRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(ItemFluidTank.fluidBarrelModel, new FluidBarrelBakedModel());
 		}
 		Object object6 = evt.getModelRegistry().getObject(ItemFluidCanister.fluidCanisterModel);
 		if(object6 instanceof IBakedModel) {
-            FluidCanisterRender.INSTANCE.itemModel = (IBakedModel) object6;
+			IBakedModel model = (IBakedModel) object6;
+			FluidCanisterRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(ItemFluidCanister.fluidCanisterModel, new FluidCanisterBakedModel());
 		}
 		Object object7 = evt.getModelRegistry().getObject(ItemChemistryTemplate.chemModel);
 		if(object7 instanceof IBakedModel) {
-            ChemTemplateRender.INSTANCE.itemModel = (IBakedModel) object7;
+			IBakedModel model = (IBakedModel) object7;
+			ChemTemplateRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(ItemChemistryTemplate.chemModel, new ChemTemplateBakedModel());
 		}
 		Object object8 = evt.getModelRegistry().getObject(ItemForgeFluidIdentifier.identifierModel);
 		if(object8 instanceof IBakedModel) {
-            FFIdentifierRender.INSTANCE.itemModel = (IBakedModel) object8;
+			IBakedModel model = (IBakedModel) object8;
+			FFIdentifierRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(ItemForgeFluidIdentifier.identifierModel, new FFIdentifierModel());
 		}
 		Object object9 = evt.getModelRegistry().getObject(ItemCrucibleTemplate.cruciModel);
 		if(object9 instanceof IBakedModel) {
-            CrucibleTemplateRender.INSTANCE.itemModel = (IBakedModel) object9;
+			IBakedModel model = (IBakedModel) object9;
+			CrucibleTemplateRender.INSTANCE.itemModel = model;
 			evt.getModelRegistry().putObject(ItemCrucibleTemplate.cruciModel, new CrucibleTemplateBakedModel());
 		}
 
@@ -1044,6 +1066,22 @@ public class ModEventHandlerClient {
 	public void cameraSetup(EntityViewRenderEvent.CameraSetup e){
 		RecoilHandler.modifiyCamera(e);
 		JetpackHandler.handleCameraTransform(e);
+
+		// === NUCLEAR SHOCKWAVE CAMERA SHAKE ===
+		long shakeRemaining = (nukeShakeTimestamp + nukeShakeDurationMs) - System.currentTimeMillis();
+		if (shakeRemaining > 0 && nukeShakeDurationMs > 0) {
+			long t = System.currentTimeMillis();
+			// Linear decay: 1.0 at trigger → 0.0 at end
+			double decay = (double) shakeRemaining / (double) nukeShakeDurationMs;
+			double amp = nukeShakeAmplitude * decay;
+
+			// Sinusoidal camera oscillation (horizontal ~3.5 Hz, vertical ~1.75 Hz)
+			double yawOffset   = Math.sin(t * 0.022) * amp * 4.0;
+			double pitchOffset = Math.sin(t * 0.011 + 1.2) * amp * 2.0;
+
+			e.setYaw((float)(e.getYaw() + yawOffset));
+			e.setPitch((float)(e.getPitch() + pitchOffset));
+		}
 	}
 	
 	FloatBuffer MODELVIEW = GLAllocation.createDirectFloatBuffer(16);
@@ -1353,8 +1391,10 @@ public class ModEventHandlerClient {
 				ArmorFSB chestplate = (ArmorFSB)plate.getItem();
 				if(chestplate.flashlightPosition != null && plate.hasTagCompound() && plate.getTagCompound().getBoolean("flActive")){
 					Vec3d start = chestplate.flashlightPosition.rotatePitch(-(float) Math.toRadians(player.rotationPitch)).rotateYaw(-(float) Math.toRadians(player.rotationYaw)).add(player.getPositionEyes(partialTicks));
-					boolean volume = player != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0;
-                    LightRenderer.addFlashlight(start, start.add(player.getLook(partialTicks).scale(30)), 30, 200, ResourceManager.fl_cookie, volume, true, true, true);
+					boolean volume = true;
+					if(player == Minecraft.getMinecraft().player && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0)
+						volume = false;
+					LightRenderer.addFlashlight(start, start.add(player.getLook(partialTicks).scale(30)), 30, 200, ResourceManager.fl_cookie, volume, true, true, true);
 				}
 			}
 			
@@ -1485,6 +1525,58 @@ public class ModEventHandlerClient {
 	@SubscribeEvent
 	public void onOverlayRender(RenderGameOverlayEvent.Pre event) {
 		EntityPlayer player = Minecraft.getMinecraft().player;
+
+		// === NUCLEAR FLASH OVERLAY ===
+		// Renders a full-screen white fade simulating temporary visual white-out
+		// from thermal radiation. Duration is physically calculated per yield/distance.
+		// Alpha curve: rapid ramp-up (0→1 in first 20%), then exponential fade-out.
+		if (event.getType() == ElementType.CROSSHAIRS) {
+			long flashRemaining = (nukeFlashTimestamp + nukeFlashDurationMs) - System.currentTimeMillis();
+			if (flashRemaining > 0 && nukeFlashDurationMs > 0) {
+				float progress = 1.0f - (float) flashRemaining / (float) nukeFlashDurationMs;
+				float alpha;
+				if (progress < 0.2f) {
+					// Phase 1: rapid ramp-up (0 → 1 in first 20% of duration)
+					alpha = progress / 0.2f;
+				} else {
+					// Phase 2: exponential fade-out matching Euler curve from Effects of Nuclear Weapons
+					float t = (progress - 0.2f) / 0.8f;
+					alpha = (float) Math.max(0.0, Math.exp(-t * 3.0) * (1.0 - t));
+				}
+				alpha = Math.max(0f, Math.min(1f, alpha));
+
+				if (alpha > 0.01f) {
+					int width = event.getResolution().getScaledWidth();
+					int height = event.getResolution().getScaledHeight();
+					int alphaInt = (int)(alpha * 255);
+
+					net.minecraft.client.renderer.Tessellator tess =
+						net.minecraft.client.renderer.Tessellator.getInstance();
+					BufferBuilder buf = tess.getBuffer();
+					GlStateManager.disableTexture2D();
+					GlStateManager.enableBlend();
+					// Additive blend: simulates emitted light burning into the retina
+					GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+					GlStateManager.depthMask(false);
+					buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+					buf.pos(width, 0,      0).color(255, 255, 255, alphaInt).endVertex();
+					buf.pos(0,     0,      0).color(255, 255, 255, alphaInt).endVertex();
+					buf.pos(0,     height, 0).color(255, 255, 255, alphaInt).endVertex();
+					buf.pos(width, height, 0).color(255, 255, 255, alphaInt).endVertex();
+					tess.draw();
+					GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+					GlStateManager.enableTexture2D();
+					GlStateManager.depthMask(true);
+
+					// Suppress crosshairs while the flash is intense
+					if (alpha > 0.5f) {
+						event.setCanceled(true);
+						return;
+					}
+				}
+			}
+		}
+
 		if(event.getType() == ElementType.CROSSHAIRS && player.getHeldItemMainhand().getItem() == ModItems.gun_supershotgun && !ItemGunShotty.hasHookedEntity(player.world, player.getHeldItemMainhand())) {
 			float x1 = ItemGunShotty.prevScreenPos.x + (ItemGunShotty.screenPos.x - ItemGunShotty.prevScreenPos.x) * event.getPartialTicks();
 			float y1 = ItemGunShotty.prevScreenPos.y + (ItemGunShotty.screenPos.y - ItemGunShotty.prevScreenPos.y) * event.getPartialTicks();
@@ -1821,16 +1913,7 @@ public class ModEventHandlerClient {
 		ItemStack stack = event.getItemStack();
 		List<String> list = event.getToolTip();
 
-        /// BREEDING ///
-        BreederRecipes.addBreedingTips(stack, event.getEntityPlayer(), list, event.getFlags());
-
-        /// Reactor Interactions ///
-        TileEntityMachineReactorSmall.addReactorInteractionTooltip(stack, list);
-
-        /// RAD SHIELDING ///
-        IRadResistantBlock.addShieldInfo(stack, list, event.getFlags());
-
-        /// HAZMAT INFO ///
+		/// HAZMAT INFO ///
 		List<HazardClass> hazInfo = ArmorRegistry.hazardClasses.get(stack.getItem());
 		
 		if(hazInfo != null) {
@@ -1889,8 +1972,11 @@ public class ModEventHandlerClient {
 
 		/// HAZARDS ///
 		HazardSystem.addHazardInfo(stack, event.getEntityPlayer(), list, event.getFlags());
-
-        //MKU
+		
+		/// BREEDING ///
+		BreederRecipes.addBreedingTips(stack, event.getEntityPlayer(), list, event.getFlags());
+		
+		//MKU
 		if(stack.hasTagCompound()){
 			if(stack.getTagCompound().getBoolean("ntmContagion"))
 				list.add("§4§l[" + I18nUtil.resolveKey("trait.mkuinfected") + "§4§l]");

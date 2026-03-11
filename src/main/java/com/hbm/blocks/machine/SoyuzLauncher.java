@@ -8,8 +8,8 @@ import com.hbm.handler.MultiblockHandlerXR;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntitySoyuzLauncher;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntitySoyuzLauncher;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -66,10 +66,11 @@ public class SoyuzLauncher extends BlockDummyable {
 
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack itemStack) {
-		if(!(player instanceof EntityPlayer pl))
+		if(!(player instanceof EntityPlayer))
 			return;
 
-        EnumHand hand = player.getHeldItemMainhand() == itemStack ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+		EntityPlayer pl = (EntityPlayer) player;
+		EnumHand hand = player.getHeldItemMainhand() == itemStack ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
 
 		int o = -getOffset();
 
@@ -125,8 +126,11 @@ public class SoyuzLauncher extends BlockDummyable {
 			return false;
 		if(!MultiblockHandlerXR.checkSpace(world, x, y, z, new int[] { 0, 4, 1, 1, -6, 8 }, x, y, z, dir))
 			return false;
-        return MultiblockHandlerXR.checkSpace(world, x, y, z, new int[]{0, 4, 2, 2, 9, -5}, x, y, z, dir);
-    }
+		if(!MultiblockHandlerXR.checkSpace(world, x, y, z, new int[] { 0, 4, 2, 2, 9, -5 }, x, y, z, dir))
+			return false;
+
+		return true;
+	}
 
 	@Override
 	public void fillSpace(World world, int x, int y, int z, ForgeDirection dir, int o) {
@@ -157,18 +161,20 @@ public class SoyuzLauncher extends BlockDummyable {
 
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-        InventoryHelper.dropInventoryItems(world, pos, world.getTileEntity(pos));
-        int x = pos.getX();
-        int y = pos.getY();
-        int z = pos.getZ();
-        for(int l = 0; l < 10; l++)
-            world.spawnEntity(new EntityItem(world, x + 0.5, y + 0.5, z + 0.5, new ItemStack(ModBlocks.struct_launcher, 38)));
-        for(int l = 0; l < 8; l++)
-            world.spawnEntity(new EntityItem(world, x + 0.5, y + 0.5, z + 0.5, new ItemStack(ModBlocks.concrete_smooth, 41)));
-        for(int l = 0; l < 6; l++)
-            world.spawnEntity(new EntityItem(world, x + 0.5, y + 0.5, z + 0.5, new ItemStack(ModBlocks.struct_scaffold, 64)));
-        world.spawnEntity(new EntityItem(world, x + 0.5, y + 0.5, z + 0.5, new ItemStack(ModBlocks.struct_scaffold, 53)));
-        world.notifyNeighborsOfStateChange(pos, state.getBlock(), true);
+		if(world.getTileEntity(pos) != null) {
+			InventoryHelper.dropInventoryItems(world, pos, world.getTileEntity(pos));
+			int x = pos.getX();
+			int y = pos.getY();
+			int z = pos.getZ();
+			for(int l = 0; l < 10; l++)
+				world.spawnEntity(new EntityItem(world, x + 0.5, y + 0.5, z + 0.5, new ItemStack(ModBlocks.struct_launcher, 38)));
+			for(int l = 0; l < 8; l++)
+				world.spawnEntity(new EntityItem(world, x + 0.5, y + 0.5, z + 0.5, new ItemStack(ModBlocks.concrete_smooth, 41)));
+			for(int l = 0; l < 6; l++)
+				world.spawnEntity(new EntityItem(world, x + 0.5, y + 0.5, z + 0.5, new ItemStack(ModBlocks.struct_scaffold, 64)));
+			world.spawnEntity(new EntityItem(world, x + 0.5, y + 0.5, z + 0.5, new ItemStack(ModBlocks.struct_scaffold, 53)));
+			world.notifyNeighborsOfStateChange(pos, state.getBlock(), true);
+		}
 		super.breakBlock(world, pos, state);
 	}
 

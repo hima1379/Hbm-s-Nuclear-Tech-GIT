@@ -314,7 +314,7 @@ public class ExplosionNT extends Explosion {
 	}
 
 	// this solution is a bit hacky but in the end easier to work with
-	public enum ExAttrib {
+	public static enum ExAttrib {
 		FIRE,		//classic vanilla fire explosion
 		BALEFIRE,	//same with but with balefire
 		DIGAMMA,

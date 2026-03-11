@@ -2,7 +2,7 @@ package com.hbm.render.tileentity;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.network.TileEntityCraneSplitter;
+import com.hbm.main.tileentity.network.TileEntityCraneSplitter;
 
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 

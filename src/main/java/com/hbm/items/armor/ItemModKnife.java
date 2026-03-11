@@ -67,7 +67,7 @@ public class ItemModKnife extends ItemArmorMod {
 				
 				try {
 					attributeinstance.removeModifier(attributeinstance.getModifier(trigamma_UUID));
-				} catch(Exception ignored) { }
+				} catch(Exception ex) { }
 				
 				attributeinstance.applyModifier(new AttributeModifier(trigamma_UUID, "digamma", -(entity.getMaxHealth() - health + 2), 0));
 				

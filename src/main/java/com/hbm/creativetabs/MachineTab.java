@@ -15,8 +15,8 @@ public class MachineTab extends CreativeTabs {
 
 	@Override
 	public ItemStack createIcon() {
-		if(ModBlocks.machine_rtg_grey != null)
-			return new ItemStack(Item.getItemFromBlock(ModBlocks.machine_rtg_grey));
+		if(ModBlocks.reactor_element != null)
+			return new ItemStack(Item.getItemFromBlock(ModBlocks.reactor_element));
 		return new ItemStack(Items.IRON_PICKAXE);
 	}
 

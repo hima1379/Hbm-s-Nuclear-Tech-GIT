@@ -11,7 +11,7 @@ import com.hbm.packet.PacketDispatcher;
 import com.hbm.render.misc.MissileMultipart;
 import com.hbm.render.misc.MissilePart;
 import com.hbm.render.misc.MissilePronter;
-import com.hbm.tileentity.machine.TileEntityMachineMissileAssembly;
+import com.hbm.main.tileentity.machine.TileEntityMachineMissileAssembly;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;

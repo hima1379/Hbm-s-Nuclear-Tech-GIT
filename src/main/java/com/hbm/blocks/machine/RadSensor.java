@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.tileentity.machine.TileEntityRadSensor;
+import com.hbm.main.tileentity.machine.TileEntityRadSensor;
 
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.SoundCategory;
@@ -70,7 +70,12 @@ public class RadSensor extends BlockContainer {
 		return true;
 	}
 
-    @Override
+	@Override
+	public boolean getWeakChanges(IBlockAccess world, BlockPos pos){
+		return false;
+	}
+	
+	@Override
 	public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
 		if(side == EnumFacing.UP)
 			return 0;

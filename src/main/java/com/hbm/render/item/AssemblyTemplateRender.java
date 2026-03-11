@@ -2,6 +2,7 @@ package com.hbm.render.item;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import java.lang.IndexOutOfBoundsException;
 
 import com.hbm.inventory.AssemblerRecipes;
 import com.hbm.items.machine.ItemAssemblyTemplate;

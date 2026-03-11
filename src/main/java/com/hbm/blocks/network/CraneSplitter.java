@@ -11,8 +11,8 @@ import com.hbm.entity.item.EntityMovingItem;
 import com.hbm.entity.item.EntityMovingPackage;
 import com.hbm.handler.MultiblockHandlerXR;
 import com.hbm.lib.ForgeDirection;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.network.TileEntityCraneSplitter;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.network.TileEntityCraneSplitter;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -139,10 +139,11 @@ public class CraneSplitter extends BlockDummyable implements IConveyorBelt, IEnt
                 dest.y - itemPos.y,
                 dest.z - itemPos.z);
         double len = motion.length();
-        return new Vec3d(
+        Vec3d ret = new Vec3d(
                 itemPos.x + motion.x / len * speed,
                 itemPos.y + motion.y / len * speed,
                 itemPos.z + motion.z / len * speed);
+        return ret;
     }
 
     @Override
@@ -228,6 +229,31 @@ public class CraneSplitter extends BlockDummyable implements IConveyorBelt, IEnt
         moving.setPosition(snap.x, snap.y, snap.z);
         moving.setItemStacks(stacks);
         worldIn.spawnEntity(moving);
+    }
+
+    @Override
+    public boolean isOpaqueCube(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isBlockNormalCube(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isNormalCube(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return false;
+    }
+
+    @Override
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+        return false;
     }
 
     @Override

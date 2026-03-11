@@ -7,7 +7,6 @@ import com.hbm.lib.HBMSoundHandler;
 import com.hbm.main.MainRegistry;
 import com.hbm.world.Meteorite;
 
-import glmath.jglm.Mat;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
@@ -46,10 +45,11 @@ public class EntityMeteor extends EntityThrowable {
 		this.motionY -= 0.03;
 		if(motionY < -2.5)
 			motionY = -2.5;
-
-        Material mat = this.world.getBlockState(new BlockPos((int)this.posX, (int)this.posY, (int)this.posZ)).getMaterial();
-        if(mat != Material.AIR && mat != Material.WATER && mat != Material.LAVA) {
-            if(!this.world.isRemote && CompatibilityConfig.isWarDim(world)) {
+        
+        if(this.world.getBlockState(new BlockPos((int)this.posX, (int)this.posY, (int)this.posZ)).getMaterial() != Material.AIR)
+        {
+            if(!this.world.isRemote && CompatibilityConfig.isWarDim(world))
+    		{	
     			world.createExplosion(this, this.posX, this.posY, this.posZ, 5 + rand.nextFloat(), !safe);
     			if(GeneralConfig.enableMeteorTails) {
     				ExplosionLarge.spawnParticles(world, posX, posY + 5, posZ, 75);
@@ -77,8 +77,6 @@ public class EntityMeteor extends EntityThrowable {
     		
     		MainRegistry.proxy.effectNT(data);
         }
-
-        if(!world.isRemote && posY < 0) this.setDead();
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -46,7 +46,6 @@ public class TEPylonDestructorPacket implements IMessage {
 		
 		@Override
 		public IMessage onMessage(TEPylonDestructorPacket m, MessageContext ctx) {
-            if(m == null) return null;
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				TileEntity te = Minecraft.getMinecraft().world.getTileEntity(new BlockPos(m.x, m.y, m.z));
 

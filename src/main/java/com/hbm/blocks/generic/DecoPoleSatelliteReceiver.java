@@ -1,7 +1,7 @@
 package com.hbm.blocks.generic;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.deco.TileEntityDecoPoleSatelliteReceiver;
+import com.hbm.main.tileentity.deco.TileEntityDecoPoleSatelliteReceiver;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;

@@ -59,7 +59,11 @@ public class ParticleSpark extends Particle {
 			setExpired();
 			return;
 		}
-        this.canCollide = this.particleAge >= 4;
+		if(this.particleAge < 4){
+			this.canCollide = false;
+		} else {
+			this.canCollide = true;
+		}
 		this.prevPosX = this.posX;
 		this.prevPosY = this.posY;
 		this.prevPosZ = this.posZ;

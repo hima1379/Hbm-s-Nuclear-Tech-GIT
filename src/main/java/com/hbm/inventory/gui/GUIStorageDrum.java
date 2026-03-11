@@ -6,7 +6,7 @@ import com.hbm.forgefluid.FFUtils;
 import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.inventory.container.ContainerStorageDrum;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityStorageDrum;
+import com.hbm.main.tileentity.machine.TileEntityStorageDrum;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

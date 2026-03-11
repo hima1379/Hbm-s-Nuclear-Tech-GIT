@@ -1,7 +1,7 @@
 package com.hbm.blocks.machine.rbmk;
 
-import com.hbm.tileentity.TileEntityProxyInventory;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKRodReaSim;
+import com.hbm.main.tileentity.TileEntityProxyInventory;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKRodReaSim;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;

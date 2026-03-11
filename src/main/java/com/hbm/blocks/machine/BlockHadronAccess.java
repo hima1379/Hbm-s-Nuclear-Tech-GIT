@@ -3,7 +3,7 @@ package com.hbm.blocks.machine;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.TileEntityProxyInventory;
+import com.hbm.main.tileentity.TileEntityProxyInventory;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;

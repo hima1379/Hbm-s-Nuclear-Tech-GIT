@@ -2,7 +2,7 @@ package com.hbm.inventory.container;
 
 import com.hbm.inventory.SlotMachineOutput;
 import com.hbm.inventory.SlotUpgrade;
-import com.hbm.tileentity.machine.TileEntityMachineCrystallizer;
+import com.hbm.main.tileentity.machine.TileEntityMachineCrystallizer;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

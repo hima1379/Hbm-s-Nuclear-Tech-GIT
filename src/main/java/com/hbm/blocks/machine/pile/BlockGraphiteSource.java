@@ -2,7 +2,7 @@ package com.hbm.blocks.machine.pile;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.machine.pile.TileEntityPileSource;
+import com.hbm.main.tileentity.machine.pile.TileEntityPileSource;
 
 import api.hbm.block.IToolable;
 import net.minecraft.block.state.IBlockState;

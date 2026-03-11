@@ -5,7 +5,7 @@ import com.hbm.inventory.control_panel.ControlEvent;
 import com.hbm.inventory.control_panel.ControlEventSystem;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.Library;
-import com.hbm.tileentity.machine.TileEntityBMPowerBox;
+import com.hbm.main.tileentity.machine.TileEntityBMPowerBox;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;
@@ -117,7 +117,7 @@ public class BMPowerBox extends BlockContainer {
 
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		boolean on = (meta & 1) == 1;
+		boolean on = (meta & 1) == 1 ? true : false;
 		meta = meta >> 1;
 		EnumFacing enumfacing = EnumFacing.byIndex(meta);
 

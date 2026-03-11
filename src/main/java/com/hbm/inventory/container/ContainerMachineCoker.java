@@ -1,6 +1,6 @@
 package com.hbm.inventory.container;
 
-import com.hbm.tileentity.machine.oil.TileEntityMachineCoker;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineCoker;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -49,9 +49,12 @@ public class ContainerMachineCoker extends Container {
                 return ItemStack.EMPTY;
             }
 
-            if (var5.isEmpty()) {
+            if (var5.isEmpty())
+            {
                 var4.putStack(ItemStack.EMPTY);
-            } else {
+            }
+            else
+            {
                 var4.onSlotChanged();
             }
         }

@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
 import com.hbm.forgefluid.ModForgeFluids;
-import com.hbm.tileentity.machine.TileEntityMachineMixer;
+import com.hbm.main.tileentity.machine.TileEntityMachineMixer;
 
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.GlStateManager;

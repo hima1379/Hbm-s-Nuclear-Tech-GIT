@@ -1,6 +1,6 @@
 package com.hbm.blocks.machine.rbmk;
 
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKCooler;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKCooler;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;

@@ -2,7 +2,7 @@ package com.hbm.inventory.gui;
 
 import com.hbm.inventory.container.ContainerSoyuzCapsule;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntitySoyuzCapsule;
+import com.hbm.main.tileentity.machine.TileEntitySoyuzCapsule;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;

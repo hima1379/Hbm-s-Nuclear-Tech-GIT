@@ -3,7 +3,7 @@ package com.hbm.packet;
 import com.hbm.items.machine.ItemCassette.SoundType;
 import com.hbm.items.machine.ItemCassette.TrackType;
 import com.hbm.sound.SoundLoopSiren;
-import com.hbm.tileentity.machine.TileEntityMachineSiren;
+import com.hbm.main.tileentity.machine.TileEntityMachineSiren;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -61,10 +61,9 @@ public class TESirenPacket implements IMessage {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public IMessage onMessage(TESirenPacket m, MessageContext ctx) {
-            if(m == null) return null;
 			TileEntity te = Minecraft.getMinecraft().world.getTileEntity(new BlockPos(m.x, m.y, m.z));
 
-			if (te instanceof TileEntityMachineSiren) {
+			if (te != null && te instanceof TileEntityMachineSiren) {
 				
 				SoundLoopSiren sound = null;
 				for(int i = 0; i < SoundLoopSiren.list.size(); i++)  {
@@ -91,7 +90,7 @@ public class TESirenPacket implements IMessage {
 						
 							if(!sound.getPath().equals(path)) {
 								//Track switched, stop and restart
-								sound.stop();
+								sound.endSound();
 								if(m.id > 0)
 									Minecraft.getMinecraft().getSoundHandler().playSound(new SoundLoopSiren(TrackType.getEnum(m.id).getSoundLocation(), te, TrackType.getEnum(m.id).getType()));
 							}
@@ -104,7 +103,7 @@ public class TESirenPacket implements IMessage {
 					
 					if(sound != null) {
 						//Stop sound
-						sound.stop();
+						sound.endSound();
 						SoundLoopSiren.list.remove(sound);
 					}
 				}

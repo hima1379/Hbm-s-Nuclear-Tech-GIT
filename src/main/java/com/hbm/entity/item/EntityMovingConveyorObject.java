@@ -2,7 +2,7 @@ package com.hbm.entity.item;
 
 import api.hbm.block.IConveyorBelt;
 import api.hbm.block.IEnterableBlock;
-import com.hbm.tileentity.network.TileEntityCraneBase;
+import com.hbm.main.tileentity.network.TileEntityCraneBase;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
@@ -47,6 +47,11 @@ public abstract class EntityMovingConveyorObject extends Entity {
         }
 
         return false;
+    }
+
+    @Override
+    protected boolean canTriggerWalking() {
+        return true;
     }
 
     @Override

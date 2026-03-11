@@ -6,9 +6,9 @@ import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.TileEntityProxyEnergy;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityMachineMiningLaser;
+import com.hbm.main.tileentity.TileEntityProxyEnergy;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityMachineMiningLaser;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

@@ -3,6 +3,8 @@ package com.hbm.inventory.material;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hbm.util.Compat;
+
 public class MaterialShapes {
 	
 	public static final List<MaterialShapes> allShapes = new ArrayList();

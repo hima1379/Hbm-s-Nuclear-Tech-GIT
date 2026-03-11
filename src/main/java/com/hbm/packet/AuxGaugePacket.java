@@ -4,31 +4,31 @@ import com.hbm.interfaces.Spaghetti;
 import com.hbm.items.weapon.ItemMissile.PartSize;
 import com.hbm.main.MainRegistry;
 import com.hbm.render.amlfrom1710.Vec3;
-import com.hbm.tileentity.bomb.TileEntityCompactLauncher;
-import com.hbm.tileentity.bomb.TileEntityLaunchTable;
-import com.hbm.tileentity.bomb.TileEntityLaunchPad;
-import com.hbm.tileentity.bomb.TileEntityRailgun;
-import com.hbm.tileentity.machine.TileEntityAMSBase;
-import com.hbm.tileentity.machine.TileEntityAMSEmitter;
-import com.hbm.tileentity.machine.TileEntityAMSLimiter;
-import com.hbm.tileentity.machine.TileEntityCoreEmitter;
-import com.hbm.tileentity.machine.TileEntityCoreInjector;
-import com.hbm.tileentity.machine.TileEntityCoreStabilizer;
-import com.hbm.tileentity.machine.TileEntityMachineArcFurnace;
-import com.hbm.tileentity.machine.TileEntityMachineBoiler;
-import com.hbm.tileentity.machine.TileEntityMachineBoilerElectric;
-import com.hbm.tileentity.machine.TileEntityMachineBoilerRTG;
-import com.hbm.tileentity.machine.TileEntityMachineCentrifuge;
-import com.hbm.tileentity.machine.TileEntityMachineCoal;
-import com.hbm.tileentity.machine.TileEntityMachineDiesel;
-import com.hbm.tileentity.machine.TileEntityMachineElectricFurnace;
-import com.hbm.tileentity.machine.TileEntityMachineGenerator;
-import com.hbm.tileentity.machine.TileEntityMachineReactorLarge;
-import com.hbm.tileentity.machine.TileEntityMachineReactorSmall;
-import com.hbm.tileentity.machine.TileEntityMachineSeleniumEngine;
-import com.hbm.tileentity.machine.TileEntitySlidingBlastDoor;
-import com.hbm.tileentity.turret.TileEntityTurretCIWS;
-import com.hbm.tileentity.turret.TileEntityTurretCheapo;
+import com.hbm.main.tileentity.bomb.TileEntityCompactLauncher;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchTable;
+import com.hbm.main.tileentity.bomb.TileEntityLaunchPad;
+import com.hbm.main.tileentity.bomb.TileEntityRailgun;
+import com.hbm.main.tileentity.machine.TileEntityAMSBase;
+import com.hbm.main.tileentity.machine.TileEntityAMSEmitter;
+import com.hbm.main.tileentity.machine.TileEntityAMSLimiter;
+import com.hbm.main.tileentity.machine.TileEntityCoreEmitter;
+import com.hbm.main.tileentity.machine.TileEntityCoreInjector;
+import com.hbm.main.tileentity.machine.TileEntityCoreStabilizer;
+import com.hbm.main.tileentity.machine.TileEntityMachineArcFurnace;
+import com.hbm.main.tileentity.machine.TileEntityMachineBoiler;
+import com.hbm.main.tileentity.machine.TileEntityMachineBoilerElectric;
+import com.hbm.main.tileentity.machine.TileEntityMachineBoilerRTG;
+import com.hbm.main.tileentity.machine.TileEntityMachineCentrifuge;
+import com.hbm.main.tileentity.machine.TileEntityMachineCoal;
+import com.hbm.main.tileentity.machine.TileEntityMachineDiesel;
+import com.hbm.main.tileentity.machine.TileEntityMachineElectricFurnace;
+import com.hbm.main.tileentity.machine.TileEntityMachineGenerator;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactorLarge;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactorSmall;
+import com.hbm.main.tileentity.machine.TileEntityMachineSeleniumEngine;
+import com.hbm.main.tileentity.machine.TileEntitySlidingBlastDoor;
+import com.hbm.main.tileentity.turret.TileEntityTurretCIWS;
+import com.hbm.main.tileentity.turret.TileEntityTurretCheapo;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -243,7 +243,7 @@ public class AuxGaugePacket implements IMessage {
 						if(m.id == 0)
 							((TileEntityMachineGenerator) te).heat = m.value;
 					} else if(te instanceof TileEntitySlidingBlastDoor){
-						((TileEntitySlidingBlastDoor) te).shouldUseBB = m.value == 1;
+						((TileEntitySlidingBlastDoor) te).shouldUseBB = m.value == 1 ? true : false;
 					}
 				} catch(Exception x) {
 				}

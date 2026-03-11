@@ -1,5 +1,6 @@
 package api.hbm.energy;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,9 @@ public class PowerNet implements IPowerNet {
 	private List<IEnergyConnector> subscribers = new ArrayList();
 
 	public static List<PowerNet> trackingInstances = null;
-	protected long totalTransfer = 0;
+
+	// Internal energy tracking using EnergyValue (supports beyond long range)
+	protected EnergyValue totalTransferEV = EnergyValue.ZERO;
 
 	@Override
 	public void joinNetworks(IPowerNet network) {
@@ -91,12 +94,14 @@ public class PowerNet implements IPowerNet {
 
 	@Override
 	public List<IEnergyConductor> getLinks() {
-        List<IEnergyConductor> linkList = new ArrayList(this.links.values());
+		List<IEnergyConductor> linkList = new ArrayList();
+		linkList.addAll(this.links.values());
 		return linkList;
 	}
 
 	public HashMap<Integer, Integer> getProxies() {
-        return (HashMap<Integer, Integer>) new HashMap(proxies);
+		HashMap<Integer, Integer> proxyCopy = new HashMap(proxies);
+		return proxyCopy;
 	}
 
 	@Override
@@ -123,29 +128,49 @@ public class PowerNet implements IPowerNet {
 
 	@Override
 	public long getTotalTransfer() {
-		return this.totalTransfer;
+		return this.totalTransferEV.toLongClamped();
+	}
+
+	@Override
+	public EnergyValue getTotalTransferEV() {
+		return this.totalTransferEV;
 	}
 	
 	public long lastCleanup = System.currentTimeMillis();
 	
 	@Override
 	public long transferPower(long power) {
-		
-		List<PowerNet> cache = new ArrayList<>();
+		// Use EnergyValue version internally, then convert back
+		EnergyValue result = this.transferPowerEV(EnergyValue.of(power));
+
+		// Warn if clamping occurs (result exceeds long range)
+		if(result.isGreaterThan(EnergyValue.of(Long.MAX_VALUE))) {
+			System.out.println("[PowerNet] WARNING: Transfer result " + result + " exceeds Long.MAX_VALUE, clamping to " + Long.MAX_VALUE);
+		}
+
+		return result.toLongClamped();
+	}
+
+	@Override
+	public EnergyValue transferPowerEV(EnergyValue power) {
+
+		List<PowerNet> cache = new ArrayList();
 		if(trackingInstances != null && !trackingInstances.isEmpty()) {
 			cache.addAll(trackingInstances);
 		}
 
-		trackingInstances = new ArrayList<>();
+		trackingInstances = new ArrayList();
 		trackingInstances.add(this);
-		long result = fairTransfer(this.subscribers, power);
+		EnergyValue result = fairTransferEV(this.subscribers, power);
 		trackingInstances.addAll(cache);
 		return result;
 	}
 	
 	public static void cleanup(List<IEnergyConnector> subscribers) {
 
-		subscribers.removeIf(x -> x == null || !(x instanceof TileEntity) || ((TileEntity)x).isInvalid() || !x.isLoaded());
+		subscribers.removeIf(x -> 
+			x == null || !(x instanceof TileEntity) || ((TileEntity)x).isInvalid() || !x.isLoaded()
+		);
 	}
 
 	public static boolean shouldSend(ConnectionPriority senderPrio, ConnectionPriority p, IEnergyConnector x){
@@ -167,7 +192,7 @@ public class PowerNet implements IPowerNet {
 		
 		for(ConnectionPriority p : priorities) {
 			
-			List<IEnergyConnector> subList = new ArrayList<>();
+			List<IEnergyConnector> subList = new ArrayList();
 			subscribers.forEach(x -> {
 				if(shouldSend(senderPrio, p, x)) {
 					subList.add(x);
@@ -177,7 +202,7 @@ public class PowerNet implements IPowerNet {
 			if(subList.isEmpty())
 				continue;
 			
-			List<Long> weight = new ArrayList<>();
+			List<Long> weight = new ArrayList();
 			long totalReq = 0;
 			
 			for(IEnergyConnector con : subList) {
@@ -200,8 +225,9 @@ public class PowerNet implements IPowerNet {
 				
 				totalGiven += (given - con.transferPower(given));
 
-				if(con instanceof TileEntity tile) {
-                    tile.getWorld().markChunkDirty(tile.getPos(), tile);
+				if(con instanceof TileEntity) {
+					TileEntity tile = (TileEntity) con;
+					tile.getWorld().markChunkDirty(tile.getPos(), tile);
 				}
 			}
 			
@@ -210,15 +236,16 @@ public class PowerNet implements IPowerNet {
 		}
 
 		if(trackingInstances != null) {
-			
+
 			for(int i = 0; i < trackingInstances.size(); i++) {
 				PowerNet net = trackingInstances.get(i);
-				net.totalTransfer += totalTransfer;
+				// Update EnergyValue-based total transfer
+				net.totalTransferEV = net.totalTransferEV.add(totalTransfer);
 			}
-			
+
 			trackingInstances.clear();
 		}
-		
+
 		return power;
 	}
 
@@ -281,21 +308,22 @@ public class PowerNet implements IPowerNet {
 		}
 
 		if(trackingInstances != null) {
-			
+
 			for(int i = 0; i < trackingInstances.size(); i++) {
 				PowerNet net = trackingInstances.get(i);
-				net.totalTransfer += totalTransfer;
+				// Update EnergyValue-based total transfer
+				net.totalTransferEV = net.totalTransferEV.add(totalTransfer);
 			}
-			
+
 			trackingInstances.clear();
 		}
-		
+
 		return power;
 	}
 
 	@Override
 	public void reevaluate() {
-		
+
 		if(!GeneralConfig.enableReEval) {
 			this.destroy();
 			return;
@@ -303,19 +331,179 @@ public class PowerNet implements IPowerNet {
 
 		HashMap<Integer, IEnergyConductor> copy = new HashMap(links);
 		HashMap<Integer, Integer> proxyCopy = new HashMap(proxies);
-		
+
 		for(IEnergyConductor link : copy.values()) {
 			this.leaveLink(link);
 		}
-		
+
 		for(IEnergyConductor link : copy.values()) {
-			
+
 			link.setPowerNet(null);
 			link.reevaluate(copy, proxyCopy);
-			
+
 			if(link.getPowerNet() == null) {
 				link.setPowerNet(new PowerNet().joinLink(link));
 			}
 		}
+	}
+
+	// ===== EnergyValue-based methods (for BigInteger support) =====
+
+	/**
+	 * Fair transfer using EnergyValue (supports values beyond long range)
+	 * This is the EnergyValue version of fairTransfer
+	 */
+	public static EnergyValue fairTransferEV(List<IEnergyConnector> subscribers, EnergyValue power) {
+
+		if(power.isZero() || power.isNegative()) return EnergyValue.ZERO;
+
+		if(subscribers.isEmpty())
+			return power;
+
+		cleanup(subscribers);
+
+		ConnectionPriority[] priorities = new ConnectionPriority[] {ConnectionPriority.HIGH, ConnectionPriority.NORMAL, ConnectionPriority.LOW};
+
+		EnergyValue totalTransferEV = EnergyValue.ZERO;
+
+		for(ConnectionPriority p : priorities) {
+
+			List<IEnergyConnector> subList = new ArrayList();
+			subscribers.forEach(x -> {
+				if(x.getPriority() == p) {
+					subList.add(x);
+				}
+			});
+
+			if(subList.isEmpty())
+				continue;
+
+			List<EnergyValue> weight = new ArrayList();
+			EnergyValue totalReq = EnergyValue.ZERO;
+
+			for(IEnergyConnector con : subList) {
+				EnergyValue req = con.getTransferWeightEV();
+				weight.add(req);
+				totalReq = totalReq.add(req);
+			}
+
+			if(totalReq.isZero())
+				continue;
+
+			EnergyValue totalGiven = EnergyValue.ZERO;
+
+			for(int i = 0; i < subList.size(); i++) {
+				IEnergyConnector con = subList.get(i);
+				EnergyValue req = weight.get(i);
+
+				// Calculate fraction using BigDecimal for precision
+				BigDecimal fraction = req.toBigDecimal().divide(totalReq.toBigDecimal(), 10, BigDecimal.ROUND_DOWN);
+				EnergyValue given = EnergyValue.of(power.toBigDecimal().multiply(fraction).toBigInteger());
+
+				// Transfer power and calculate how much was actually transferred
+				EnergyValue overshoot = con.transferPowerEV(given);
+				EnergyValue actuallyTransferred = given.subtract(overshoot);
+				totalGiven = totalGiven.add(actuallyTransferred);
+
+				if(con instanceof TileEntity) {
+					TileEntity tile = (TileEntity) con;
+					tile.getWorld().markChunkDirty(tile.getPos(), tile);
+				}
+			}
+
+			power = power.subtract(totalGiven);
+			totalTransferEV = totalTransferEV.add(totalGiven);
+		}
+
+		// Update tracking instances
+		if(trackingInstances != null) {
+			for(int i = 0; i < trackingInstances.size(); i++) {
+				PowerNet net = trackingInstances.get(i);
+				net.totalTransferEV = net.totalTransferEV.add(totalTransferEV);
+			}
+
+			trackingInstances.clear();
+		}
+
+		return power;
+	}
+
+	/**
+	 * Fair transfer with priority using EnergyValue (supports values beyond long range)
+	 * This is the EnergyValue version of fairTransferWithPrio
+	 */
+	public static EnergyValue fairTransferWithPrioEV(ConnectionPriority senderPrio, List<IEnergyConnector> subscribers, EnergyValue power) {
+
+		if(power.isZero() || power.isNegative()) return EnergyValue.ZERO;
+
+		if(subscribers.isEmpty())
+			return power;
+
+		cleanup(subscribers);
+
+		ConnectionPriority[] priorities = new ConnectionPriority[] {ConnectionPriority.HIGH, ConnectionPriority.NORMAL, ConnectionPriority.LOW};
+
+		EnergyValue totalTransferEV = EnergyValue.ZERO;
+
+		for(ConnectionPriority p : priorities) {
+
+			List<IEnergyConnector> subList = new ArrayList();
+			subscribers.forEach(x -> {
+				if(shouldSend(senderPrio, p, x)) {
+					subList.add(x);
+				}
+			});
+
+			if(subList.isEmpty())
+				continue;
+
+			List<EnergyValue> weight = new ArrayList();
+			EnergyValue totalReq = EnergyValue.ZERO;
+
+			for(IEnergyConnector con : subList) {
+				EnergyValue req = con.getTransferWeightEV();
+				weight.add(req);
+				totalReq = totalReq.add(req);
+			}
+
+			if(totalReq.isZero())
+				continue;
+
+			EnergyValue totalGiven = EnergyValue.ZERO;
+
+			for(int i = 0; i < subList.size(); i++) {
+				IEnergyConnector con = subList.get(i);
+				EnergyValue req = weight.get(i);
+
+				// Calculate fraction using BigDecimal for precision
+				BigDecimal fraction = req.toBigDecimal().divide(totalReq.toBigDecimal(), 10, BigDecimal.ROUND_DOWN);
+				EnergyValue given = EnergyValue.of(power.toBigDecimal().multiply(fraction).toBigInteger());
+
+				// Transfer power and calculate how much was actually transferred
+				EnergyValue overshoot = con.transferPowerEV(given);
+				EnergyValue actuallyTransferred = given.subtract(overshoot);
+				totalGiven = totalGiven.add(actuallyTransferred);
+
+				if(con instanceof TileEntity) {
+					TileEntity tile = (TileEntity) con;
+					tile.getWorld().markChunkDirty(tile.getPos(), tile);
+				}
+			}
+
+			power = power.subtract(totalGiven);
+			totalTransferEV = totalTransferEV.add(totalGiven);
+		}
+
+		// Update tracking instances
+		if(trackingInstances != null) {
+			for(int i = 0; i < trackingInstances.size(); i++) {
+				PowerNet net = trackingInstances.get(i);
+				net.totalTransferEV = net.totalTransferEV.add(totalTransferEV);
+			}
+
+			trackingInstances.clear();
+		}
+
+		return power;
 	}
 }

@@ -4,9 +4,9 @@ import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityDummy;
-import com.hbm.tileentity.machine.TileEntityDummyFluidPort;
-import com.hbm.tileentity.machine.oil.TileEntityMachineGasFlare;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityDummyFluidPort;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineGasFlare;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -57,7 +57,12 @@ public class DummyBlockFlare extends DummyOldBase {
 		return false;
 	}
 
-    @Override
+	@Override
+	public EnumBlockRenderType getRenderType(IBlockState state) {
+		return EnumBlockRenderType.INVISIBLE;
+	}
+	
+	@Override
 	public boolean isBlockNormalCube(IBlockState state) {
 		return false;
 	}

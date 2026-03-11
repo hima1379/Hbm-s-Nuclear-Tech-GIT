@@ -3,7 +3,7 @@ package com.hbm.blocks.machine;
 import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntityCyberCrab;
+import com.hbm.main.tileentity.machine.TileEntityCyberCrab;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

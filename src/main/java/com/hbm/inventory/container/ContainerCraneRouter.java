@@ -1,14 +1,13 @@
 package com.hbm.inventory.container;
 
 import com.hbm.inventory.SlotPattern;
-import com.hbm.tileentity.network.TileEntityCraneRouter;
+import com.hbm.main.tileentity.network.TileEntityCraneRouter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public class ContainerCraneRouter extends Container {
     private TileEntityCraneRouter router;
@@ -68,13 +67,7 @@ public class ContainerCraneRouter extends Container {
     }
 
     @Override
-    public boolean canMergeSlot(ItemStack stack, Slot slotIn)
-    {
-        return slotIn.slotNumber > 29;
-    }
-
-    @Override
-    public @NotNull ItemStack transferStackInSlot(EntityPlayer player, int index) {
+    public ItemStack transferStackInSlot(EntityPlayer player, int index) {
         return ItemStack.EMPTY;
     }
 

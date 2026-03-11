@@ -144,7 +144,9 @@ public class Flashlight {
 			
 			Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
 			float partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
-            if (Minecraft.getMinecraft().gameSettings.viewBobbing)
+			if(Minecraft.getMinecraft().isGamePaused()){
+			}
+			if (Minecraft.getMinecraft().gameSettings.viewBobbing)
 	        {
 	            applyBobbing(partialTicks, modelMatrix, rotMatrix);
 	        }

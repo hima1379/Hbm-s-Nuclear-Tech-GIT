@@ -8,8 +8,8 @@ import com.hbm.inventory.container.ContainerHadron;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityHadron;
-import com.hbm.tileentity.machine.TileEntityHadron.EnumHadronState;
+import com.hbm.main.tileentity.machine.TileEntityHadron;
+import com.hbm.main.tileentity.machine.TileEntityHadron.EnumHadronState;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.client.Minecraft;
@@ -37,7 +37,7 @@ public class GUIHadron extends GuiInfoContainer {
 	public void drawScreen(int mouseX, int mouseY, float f) {
 		super.drawScreen(mouseX, mouseY, f);
 
-		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 62, guiTop + 108, 70, 16, hadron.power, TileEntityHadron.maxPower);
+		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 62, guiTop + 108, 70, 16, hadron.power, hadron.maxPower);
 
 		if(hadron.hopperMode)
 			this.drawCustomInfoStat(mouseX, mouseY, guiLeft + 142, guiTop + 89, 18, 18, mouseX, mouseY, I18nUtil.resolveKeyArray("hadron.hopper1"));

@@ -1,7 +1,7 @@
 package com.hbm.render.tileentity;
 
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntityCondenserPowered;
+import com.hbm.main.tileentity.machine.TileEntityCondenserPowered;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import org.lwjgl.opengl.GL11;

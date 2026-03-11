@@ -2,7 +2,7 @@ package com.hbm.blocks.machine.pile;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.machine.pile.TileEntityPileFuel;
+import com.hbm.main.tileentity.machine.pile.TileEntityPileFuel;
 
 import api.hbm.block.IToolable;
 import net.minecraft.block.state.IBlockState;
@@ -53,8 +53,8 @@ public class BlockGraphiteFuel extends BlockGraphiteDrilledTE implements IToolab
 			if(tool == ToolType.HAND_DRILL) {
 				TileEntityPileFuel pile = (TileEntityPileFuel) world.getTileEntity(new BlockPos(x, y, z));
 				player.sendMessage(new TextComponentString("CP1 FUEL ASSEMBLY " + x + " " + y + " " + z).setStyle(new Style().setColor(TextFormatting.GOLD)));
-				player.sendMessage(new TextComponentString("HEAT: " + pile.heat + "/" + TileEntityPileFuel.maxHeat).setStyle(new Style().setColor(TextFormatting.YELLOW)));
-				player.sendMessage(new TextComponentString("DEPLETION: " + pile.progress + "/" + TileEntityPileFuel.maxProgress).setStyle(new Style().setColor(TextFormatting.YELLOW)));
+				player.sendMessage(new TextComponentString("HEAT: " + pile.heat + "/" + pile.maxHeat).setStyle(new Style().setColor(TextFormatting.YELLOW)));
+				player.sendMessage(new TextComponentString("DEPLETION: " + pile.progress + "/" + pile.maxProgress).setStyle(new Style().setColor(TextFormatting.YELLOW)));
 				player.sendMessage(new TextComponentString("FLUX: " + pile.lastNeutrons).setStyle(new Style().setColor(TextFormatting.YELLOW)));
 			}
 		}

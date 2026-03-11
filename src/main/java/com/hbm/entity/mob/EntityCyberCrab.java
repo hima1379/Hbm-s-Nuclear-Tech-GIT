@@ -3,6 +3,7 @@ package com.hbm.entity.mob;
 import com.google.common.base.Predicate;
 import com.hbm.entity.projectile.EntityBullet;
 import com.hbm.interfaces.IRadiationImmune;
+import com.hbm.items.ModItems;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.ModDamageSource;
 

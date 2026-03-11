@@ -41,7 +41,7 @@ public class GunFXPacket implements IMessage {
 
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeBoolean(hand == EnumHand.MAIN_HAND);
+		buf.writeBoolean(hand == EnumHand.MAIN_HAND ? true : false);
 		byte[] bytes = playerUUID.getBytes();
 		buf.writeInt(bytes.length);
 		buf.writeBytes(bytes);
@@ -67,7 +67,7 @@ public class GunFXPacket implements IMessage {
 		
 	}
 	
-	public enum FXType {
-		FIRE
-    }
+	public static enum FXType {
+		FIRE;
+	}
 }

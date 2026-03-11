@@ -3,7 +3,7 @@ package com.hbm.render.tileentity;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntityMachineRadGen;
+import com.hbm.main.tileentity.machine.TileEntityMachineRadGen;
 
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.GlStateManager;
@@ -42,8 +42,7 @@ public class RenderRadGen extends TileEntitySpecialRenderer<TileEntityMachineRad
 		}
 
         bindTexture(ResourceManager.radgen_body_tex);
-        GL11.glShadeModel(GL11.GL_SMOOTH);
-
+        
         ResourceManager.radgen_body.renderPart("Base");
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glColor3f(0F, 1F, 0F);
@@ -54,7 +53,7 @@ public class RenderRadGen extends TileEntitySpecialRenderer<TileEntityMachineRad
         GL11.glPushMatrix();
 	        if(te.fuel > 0){
 	        	GL11.glTranslated(0D, 1.5D, 0D);
-				GL11.glRotatef((System.currentTimeMillis() * te.strength/ TileEntityMachineRadGen.maxStrength) % 360, 1F, 0F, 0F);
+				GL11.glRotatef((System.currentTimeMillis() * te.strength/te.maxStrength) % 360, 1F, 0F, 0F);
 				GL11.glTranslated(0D, -1.5D, 0D);
 			}
 	        ResourceManager.radgen_body.renderPart("Rotor");
@@ -75,7 +74,6 @@ public class RenderRadGen extends TileEntitySpecialRenderer<TileEntityMachineRad
 			GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
 			GL11.glDisable(GL11.GL_BLEND);
 		GL11.glPopMatrix();
-        GL11.glShadeModel(GL11.GL_FLAT);
 
         GL11.glEnable(GL11.GL_CULL_FACE);
         GL11.glPopMatrix();

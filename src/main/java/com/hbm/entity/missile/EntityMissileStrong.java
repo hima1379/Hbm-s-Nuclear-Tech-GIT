@@ -23,6 +23,8 @@ public class EntityMissileStrong extends EntityMissileBaseAdvanced {
 
 	@Override
 	public void onImpact() {
+		// FIXED: ExplosionLarge.explode() now correctly handles conventional explosions
+		// Strength = 25 < 100 threshold, so it will use ExplosionNT (conventional) instead of nuclear physics
 		ExplosionLarge.explode(world, posX, posY, posZ, 25.0F, true, true, true);
 	}
 

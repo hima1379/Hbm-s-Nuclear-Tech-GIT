@@ -20,8 +20,11 @@ public abstract class EntityBOTPrimeBase extends EntityWormBaseNT {
 
 	protected final Predicate<Entity> selector = ent -> {
 
-        return !(ent instanceof EntityWormBaseNT) || ((EntityWormBaseNT) ent).getHeadID() != EntityBOTPrimeBase.this.getHeadID();
-    };
+		if(ent instanceof EntityWormBaseNT && ((EntityWormBaseNT) ent).getHeadID() == EntityBOTPrimeBase.this.getHeadID())
+			return false;
+
+		return true;
+	};
 
 	public EntityBOTPrimeBase(World world) {
 		super(world);

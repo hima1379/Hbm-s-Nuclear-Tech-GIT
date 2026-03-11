@@ -3,7 +3,7 @@ package com.hbm.render.tileentity;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.turret.TileEntityTurretFriendly;
+import com.hbm.main.tileentity.turret.TileEntityTurretFriendly;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.Vec3d;

@@ -16,6 +16,7 @@ import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemChemicalDye.EnumChemDye;
 import com.hbm.items.machine.ItemFluidIcon;
 import com.hbm.items.ItemEnums.EnumTarType;
+import com.hbm.inventory.OreDictManager.DictFrame;
 
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.ingredients.VanillaTypes;
@@ -94,13 +95,13 @@ public class CrystallizerRecipes {
 		
 		addRecipe(new ComparableStack(Items.SNOWBALL), new FluidStack(FluidRegistry.WATER, 8000), new ItemStack(Blocks.ICE, 1));
 		addRecipe(new ComparableStack(Blocks.ICE), new FluidStack(ModForgeFluids.COOLANT, 500), new ItemStack(Blocks.PACKED_ICE, 1));
-		addRecipe(KEY_GRAVEL, new FluidStack(FluidRegistry.LAVA, 500), new ItemStack(ModBlocks.gravel_obsidian, 1));
+		addRecipe(KEY_GRAVEL, new FluidStack(FluidRegistry.LAVA, 1000), new ItemStack(ModBlocks.gravel_obsidian, 1));
 		addRecipe(new ComparableStack(Items.ROTTEN_FLESH), new FluidStack(ModForgeFluids.ACID, 500), new ItemStack(Items.LEATHER));
 		addRecipe(new ComparableStack(Items.BONE), new FluidStack(ModForgeFluids.SULFURIC_ACID, 1000), new ItemStack(Items.SLIME_BALL, 16));
 		addRecipe(new ComparableStack(Items.DYE, 1, 15), new FluidStack(ModForgeFluids.SULFURIC_ACID, 250), new ItemStack(Items.SLIME_BALL, 4));
 		addRecipe(new ComparableStack(ModItems.powder_lithium), new FluidStack(ModForgeFluids.HEATINGOIL, 4000), new ItemStack(ModItems.crystal_redstone, 1));
 		addRecipe(new ComparableStack(ModItems.coal_infernal), new FluidStack(ModForgeFluids.SULFURIC_ACID, 500), new ItemStack(ModItems.solid_fuel));
-		addRecipe(new ComparableStack(ModBlocks.block_fallout), new FluidStack(ModForgeFluids.CORIUM_FLUID, 16000), new ItemStack(ModItems.powder_balefire));
+		addRecipe(new ComparableStack(ModBlocks.block_fallout), new FluidStack(ModForgeFluids.CORIUM_FLUID, 8000), new ItemStack(ModItems.powder_balefire));
 		
 		addRecipe(new ComparableStack(Blocks.DIRT), new FluidStack(ModForgeFluids.COLLOID, 1000), new ItemStack(Blocks.CLAY));
 		addRecipe(new ComparableStack(ModBlocks.sand_quartz), new FluidStack(ModForgeFluids.NITROGLYCERIN, 1000), new ItemStack(ModItems.ball_dynamite, 16));

@@ -29,7 +29,7 @@ public class GroupObject
     @SideOnly(Side.CLIENT)
     public void render()
     {
-        if (!faces.isEmpty())
+        if (faces.size() > 0)
         {
         	
             Tessellator tessellator = Tessellator.instance;
@@ -42,7 +42,7 @@ public class GroupObject
     @SideOnly(Side.CLIENT)
     public void render(Tessellator tessellator)
     {
-        if (!faces.isEmpty())
+        if (faces.size() > 0)
         {
             for (Face face : faces)
             {
@@ -54,7 +54,7 @@ public class GroupObject
     @SideOnly(Side.CLIENT)
     public void renderSplit(float splitHeight, float scale)
     {
-        if (!faces.isEmpty())
+        if (faces.size() > 0)
         {
             
             Tessellator tessellator = Tessellator.instance;
@@ -67,7 +67,7 @@ public class GroupObject
     @SideOnly(Side.CLIENT)
     public void renderSplit(Tessellator tessellator, float splitHeight, float scale)
     {
-        if (!faces.isEmpty())
+        if (faces.size() > 0)
         {
             for (Face face : faces)
             {

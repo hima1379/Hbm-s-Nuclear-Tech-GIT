@@ -52,9 +52,12 @@ public class Tuple {
 			} else if(!key.equals(other.key))
 				return false;
 			if(value == null) {
-                return other.value == null;
-			} else return value.equals(other.value);
-        }
+				if(other.value != null)
+					return false;
+			} else if(!value.equals(other.value))
+				return false;
+			return true;
+		}
 	}
 
 	public static class Triplet<X,Y,Z> {
@@ -111,9 +114,12 @@ public class Tuple {
 			} else if(!y.equals(other.y))
 				return false;
 			if(z == null) {
-                return other.z == null;
-			} else return z.equals(other.z);
-        }
+				if(other.z != null)
+					return false;
+			} else if(!z.equals(other.z))
+				return false;
+			return true;
+		}
 	}
 
 	public static class Quartet<W,X,Y,Z> {
@@ -154,9 +160,12 @@ public class Tuple {
 			} else if(!y.equals(other.y))
 				return false;
 			if(z == null) {
-                return other.z == null;
-			} else return z.equals(other.z);
-        }
+				if(other.z != null)
+					return false;
+			} else if(!z.equals(other.z))
+				return false;
+			return true;
+		}
 
 		W w;
 		X x;

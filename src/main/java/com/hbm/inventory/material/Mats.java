@@ -6,9 +6,10 @@ import static com.hbm.inventory.material.MaterialShapes.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
+import com.hbm.inventory.OreDictManager.DictFrame;
+import com.hbm.inventory.RecipesCommon;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.material.NTMMaterial.SmeltingBehavior;
 import com.hbm.items.ModItems;
@@ -54,11 +55,10 @@ public class Mats {
 	public static final NTMMaterial MAT_COALCOKE		= make(			1410, 		COALCOKE)	.setConversion(MAT_CARBON,  4, 3);
 	public static final NTMMaterial MAT_PETCOKE			= make(			1411, 		PETCOKE)	.setConversion(MAT_CARBON,  4, 3);
 	public static final NTMMaterial MAT_LIGCOKE			= make(			1412, 		LIGCOKE)	.setConversion(MAT_CARBON,  4, 3);
-    public static final NTMMaterial MAT_INFERNAL		= make(			1413, 		INFERNAL)	.setConversion(MAT_CARBON,  3, 2);
-    public static final NTMMaterial MAT_GRAPHITE		= make(			1420, 		GRAPHITE)	.setConversion(MAT_CARBON,  1, 1);
+	public static final NTMMaterial MAT_GRAPHITE		= make(			1420, 		GRAPHITE)	.setConversion(MAT_CARBON,  1, 1);
 	public static final NTMMaterial MAT_DIAMOND			= make(			1430, 		DIAMOND)	.setConversion(MAT_CARBON,  1, 1);
 	public static final NTMMaterial MAT_IRON			= makeSmeltable(2600,		IRON,		0xFFFFFF, 0x353535, 0xFFA259).setShapes(PIPE, CASTPLATE, WELDEDPLATE);
-	public static final NTMMaterial MAT_GOLD			= makeSmeltable(7900,		GOLD,		0xFFFF8B, 0xC26E00, 0xFFE653).setShapes(WIRE, DENSEWIRE, CASTPLATE);
+	public static final NTMMaterial MAT_GOLD			= makeSmeltable(7900,		GOLD,		0xFFFF8B, 0xC26E00, 0xE8D754).setShapes(WIRE, DENSEWIRE, CASTPLATE);
 	public static final NTMMaterial MAT_REDSTONE		= makeSmeltable(_VS + 01,	REDSTONE,	0xE3260C, 0x700E06, 0xFF1000);
 	public static final NTMMaterial MAT_OBSIDIAN		= makeSmeltable(_VS + 02,	df("Obsidian"), 0x3D234D);
 	public static final NTMMaterial MAT_HEMATITE		= makeAdditive(	2601, 		HEMATITE,	0xDFB7AE, 0x5F372E, 0x514441);
@@ -169,7 +169,7 @@ public class Mats {
 				
 				if(oreEntries != null) {
 					list.addAll(oreEntries);
-					break;
+					break outer;
 				}
 				
 				for(Entry<String, MaterialShapes> prefixEntry : prefixByName.entrySet()) {
@@ -204,7 +204,7 @@ public class Mats {
 	public static List<MaterialStack> getSmeltingMaterialsFromItem(ItemStack stack) {
 		List<MaterialStack> baseMats = getMaterialsFromItem(stack);
 		if(baseMats.isEmpty()) return baseMats;
-		List<MaterialStack> smelting = new ArrayList<>();
+		List<MaterialStack> smelting = new ArrayList();
 		baseMats.forEach(x -> smelting.add(new MaterialStack(x.material.smeltsInto, (int) (x.amount * x.material.convOut / x.material.convIn))));
 		return smelting;
 	}
@@ -241,23 +241,6 @@ public class Mats {
             }
         }
         return null;
-    }
-
-    public static List<MaterialStack> sum(List<List<MaterialStack>> mats, float factor){
-        HashMap<NTMMaterial, Integer> sumMats = new HashMap<>();
-        for(List<MaterialStack> matList : mats){
-            for(MaterialStack mat : matList) {
-                Integer amount = sumMats.get(mat.material);
-                if(amount == null) amount = 0;
-                amount += mat.amount;
-                sumMats.put(mat.material, amount);
-            }
-        }
-        List<MaterialStack> list = new ArrayList<>();
-        for(Map.Entry<NTMMaterial, Integer> e: sumMats.entrySet()){
-            list.add(new MaterialStack(e.getKey(), (int) (e.getValue() / factor)));
-        }
-        return list;
     }
 	
 	public static class MaterialStack {

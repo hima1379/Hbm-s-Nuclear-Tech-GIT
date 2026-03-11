@@ -5,8 +5,8 @@ import java.awt.Color;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.IRenderFoundry;
-import com.hbm.tileentity.machine.TileEntityFoundryCastingBase;
+import com.hbm.main.tileentity.machine.IRenderFoundry;
+import com.hbm.main.tileentity.machine.TileEntityFoundryCastingBase;
 import com.hbm.render.amlfrom1710.Tessellator;
 
 import net.minecraft.client.Minecraft;

@@ -184,8 +184,11 @@ public class ItemCell extends Item {
 				return true;
 			return f.amount == 1000 || f.amount == 0;
 			
-		} else return stack.getItem() == ModItems.cell;
-    }
+		} else if(stack.getItem() == ModItems.cell){
+			return true;
+		}
+		return false;
+	}
 
 	public static boolean hasEmptyCell(EntityPlayer player){
 		InventoryPlayer inv = player.inventory;

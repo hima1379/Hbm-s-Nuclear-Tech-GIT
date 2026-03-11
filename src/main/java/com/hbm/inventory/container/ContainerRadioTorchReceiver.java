@@ -1,6 +1,6 @@
 package com.hbm.inventory.container;
 
-import com.hbm.tileentity.network.TileEntityRadioTorchReceiver;
+import com.hbm.main.tileentity.network.TileEntityRadioTorchReceiver;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;

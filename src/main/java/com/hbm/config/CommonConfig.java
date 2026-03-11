@@ -53,16 +53,16 @@ public class CommonConfig {
 	}
 
 	private static Object parseType(String value, String type){
-		if(type.equals("Float")){
+		if(type == "Float"){
 			return Float.parseFloat(value);
 		}
-		if(type.equals("Int")){
+		if(type == "Int"){
 			return Integer.parseInt(value);
 		}
-		if(type.equals("Long")){
+		if(type == "Long"){
 			return Float.parseFloat(value);
 		}
-		if(type.equals("Double")){
+		if(type == "Double"){
 			return Double.parseDouble(value);
 		}
 		return value;

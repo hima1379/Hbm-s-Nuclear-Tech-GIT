@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.inventory.container.ContainerSafe;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntitySafe;
+import com.hbm.main.tileentity.machine.TileEntitySafe;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;

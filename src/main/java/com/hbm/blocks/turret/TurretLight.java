@@ -2,7 +2,7 @@ package com.hbm.blocks.turret;
 
 import com.hbm.entity.projectile.EntityBullet;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.tileentity.turret.TileEntityTurretLight;
+import com.hbm.main.tileentity.turret.TileEntityTurretLight;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntity;

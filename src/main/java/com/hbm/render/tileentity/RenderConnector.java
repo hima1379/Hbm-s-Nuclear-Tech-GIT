@@ -2,8 +2,8 @@ package com.hbm.render.tileentity;
 
 import com.hbm.main.ResourceManager;
 import com.hbm.render.amlfrom1710.Vec3;
-import com.hbm.tileentity.network.energy.TileEntityConnector;
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.network.energy.TileEntityConnector;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;

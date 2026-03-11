@@ -11,7 +11,7 @@ import com.hbm.animloader.AnimationWrapper.EndType;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntitySlidingBlastDoor;
+import com.hbm.main.tileentity.machine.TileEntitySlidingBlastDoor;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;

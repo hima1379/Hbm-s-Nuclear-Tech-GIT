@@ -5,7 +5,7 @@ import java.util.List;
 import com.hbm.util.I18nUtil;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.network.energy.TileEntityPylonBase;
+import com.hbm.main.tileentity.network.energy.TileEntityPylonBase;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -71,7 +71,7 @@ public class ItemWiring extends Item {
 							int distance = (int)MathHelper.sqrt(vector.getX() * vector.getX() + vector.getY() * vector.getY() + vector.getZ() * vector.getZ());
 							player.sendMessage(new TextComponentTranslation("chat.wiring.tofar", distance, thisPylon.getMaxWireLength()));
 						}
-					} else if(pos.equals(newPos)){
+					} else if(pos == newPos){
 						if (world.isRemote)
 							player.sendMessage(new TextComponentTranslation("chat.wiring.noself"));
 					} else{

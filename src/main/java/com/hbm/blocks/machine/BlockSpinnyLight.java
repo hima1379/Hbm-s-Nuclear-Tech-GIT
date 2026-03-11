@@ -3,7 +3,7 @@ package com.hbm.blocks.machine;
 import java.util.List;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.deco.TileEntitySpinnyLight;
+import com.hbm.main.tileentity.deco.TileEntitySpinnyLight;
 
 import com.hbm.util.I18nUtil;
 import net.minecraft.block.Block;

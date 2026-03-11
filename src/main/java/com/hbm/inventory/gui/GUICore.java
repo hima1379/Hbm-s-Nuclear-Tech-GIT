@@ -3,7 +3,7 @@ package com.hbm.inventory.gui;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.inventory.container.ContainerCore;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityCore;
+import com.hbm.main.tileentity.machine.TileEntityCore;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;

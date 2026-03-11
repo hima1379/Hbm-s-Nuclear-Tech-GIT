@@ -8,8 +8,8 @@ import com.hbm.blocks.BlockDummyable;
 import com.hbm.main.MainRegistry;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.inventory.FluidCombustionRecipes.FuelGrade;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityMachineTurbofan;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityMachineTurbofan;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

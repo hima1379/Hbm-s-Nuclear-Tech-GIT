@@ -13,7 +13,7 @@ import com.hbm.util.I18nUtil;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.turret.TileEntityTurretBaseNT;
+import com.hbm.main.tileentity.turret.TileEntityTurretBaseNT;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -214,16 +214,24 @@ public abstract class GUITurretBase extends GuiInfoContainer {
 		this.fontRenderer.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, getTurretFontColor());
 		
 		List<String> names = turret.getWhitelist();
-		
+
 		String n = TextFormatting.ITALIC + "None";
-		
-		while(this.index >= this.getCount())
-			this.index--;
-		
-		if(index < 0)
-			index = 0;
-		
-		if(names != null) {
+
+		// フリーズ防止：getCount()が0の場合は無限ループを回避
+		int count = this.getCount();
+		if(count <= 0) {
+			this.index = 0;
+		} else {
+			// indexをカウント範囲内に修正
+			while(this.index >= count)
+				this.index--;
+
+			if(index < 0)
+				index = 0;
+		}
+
+		// namesがnullでなく、かつindexが範囲内の場合のみ取得
+		if(names != null && !names.isEmpty() && index < names.size()) {
 			n = names.get(index);
 		}
 		

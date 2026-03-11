@@ -109,7 +109,9 @@ public class ItemCustomMissile extends Item {
 				stability = (ItemMissile) item;
 			ItemMissile thruster = (ItemMissile) Item.getItemById(readFromNBT(stack, "thruster"));
 
-            return new MissileStruct(warhead, fuselage, stability, thruster);
+			MissileStruct missile = new MissileStruct(warhead, fuselage, stability, thruster);
+
+			return missile;
 		} catch(ClassCastException x) {
 			return null;
 		}

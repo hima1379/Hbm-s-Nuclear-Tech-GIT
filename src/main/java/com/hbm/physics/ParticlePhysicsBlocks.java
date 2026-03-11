@@ -2,7 +2,6 @@ package com.hbm.physics;
 
 import java.util.ArrayList;
 
-import net.minecraft.block.BlockLeaves;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.render.amlfrom1710.Vec3;
@@ -50,7 +49,7 @@ public class ParticlePhysicsBlocks extends Particle {
 			IBlockState state = world.getBlockState(pos);
 			state.addCollisionBoxToList(world, pos, TileEntity.INFINITE_EXTENT_AABB, boxes2, null, false);
 			for(AxisAlignedBB box : boxes2){
-				boolean light = state.getBlock() instanceof BlockLeaves;
+				boolean light = state.getBlock() == Blocks.LEAVES || state.getBlock() == Blocks.LEAVES2;
 				float mass = light ? 0.25F : 1F;
 				boxs.add(new AABBCollider(box.offset(-posX, -posY + offsetY, -posZ), mass));
 			}
@@ -141,8 +140,10 @@ public class ParticlePhysicsBlocks extends Particle {
 		
 		GlStateManager.disableTexture2D();
 		GlStateManager.glLineWidth(4);
-        //RenderGlobal.drawSelectionBoundingBox(box, 1, collided ? 0 : 1, collided ? 0 : 1, 1);
-        GlStateManager.enableTexture2D();
+		for(AxisAlignedBB box : boxes){
+			//RenderGlobal.drawSelectionBoundingBox(box, 1, collided ? 0 : 1, collided ? 0 : 1, 1);
+		}
+		GlStateManager.enableTexture2D();
 		Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 		GlStateManager.enableCull();
 		GlStateManager.shadeModel(GL11.GL_SMOOTH);

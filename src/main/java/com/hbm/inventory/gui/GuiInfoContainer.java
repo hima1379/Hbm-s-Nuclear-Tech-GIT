@@ -176,10 +176,9 @@ public abstract class GuiInfoContainer extends GuiContainer {
 				boolean hasStack = false;
 				
 				for(Object o : line) {
-                    if (!(o instanceof String)) {
-                        hasStack = true;
-                        break;
-                    }
+					if(!(o instanceof String)) {
+						hasStack = true;
+					}
 				}
 				
 				for(int i = 0; i < line.length; i++) {

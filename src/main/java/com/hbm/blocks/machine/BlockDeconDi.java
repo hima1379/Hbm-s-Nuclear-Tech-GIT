@@ -3,7 +3,7 @@ package com.hbm.blocks.machine;
 import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntityDeconDi;
+import com.hbm.main.tileentity.machine.TileEntityDeconDi;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -25,13 +25,13 @@ public class BlockDeconDi extends BlockContainer {
 		super(materialIn);
 		this.setTranslationKey(s);
 		this.setRegistryName(s);
-		digammaRemove = digamma;
+		this.digammaRemove = digamma;
 		ModBlocks.ALL_BLOCKS.add(this);
 	}
 
 	@Override
 	public TileEntity createNewTileEntity(World worldIn, int meta) {
-		return new TileEntityDeconDi(digammaRemove);
+		return new TileEntityDeconDi(this.digammaRemove);
 	}
 	
 	@Override

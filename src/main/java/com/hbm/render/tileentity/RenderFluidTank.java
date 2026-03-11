@@ -8,7 +8,7 @@ import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.forgefluid.FFUtils;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntityMachineFluidTank;
+import com.hbm.main.tileentity.machine.TileEntityMachineFluidTank;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;

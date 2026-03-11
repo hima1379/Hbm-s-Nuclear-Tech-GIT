@@ -1,8 +1,8 @@
 package com.hbm.blocks.machine;
 
 import com.hbm.blocks.BlockDummyable;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityMachineArcWelder;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityMachineArcWelder;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

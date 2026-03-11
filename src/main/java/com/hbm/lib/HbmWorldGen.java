@@ -14,8 +14,8 @@ import com.hbm.handler.WeightedRandomChestContentFrom1710;
 import com.hbm.items.ModItems;
 import com.hbm.main.MainRegistry;
 import com.hbm.inventory.BedrockOreRegistry;
-import com.hbm.tileentity.machine.TileEntitySafe;
-import com.hbm.tileentity.machine.TileEntitySoyuzCapsule;
+import com.hbm.main.tileentity.machine.TileEntitySafe;
+import com.hbm.main.tileentity.machine.TileEntitySoyuzCapsule;
 import com.hbm.world.Antenna;
 import com.hbm.world.Barrel;
 import com.hbm.world.Bunker;
@@ -254,25 +254,25 @@ public class HbmWorldGen implements IWorldGenerator {
 		int dimBedrockOreFreq = parseInt(BedrockOreJsonConfig.dimOreRarity.get(dimID));
 		if (dimBedrockOreFreq > 0 && rand.nextInt(dimBedrockOreFreq) == 0) {
 			
-			int tier = BedrockOreRegistry.rollOreTier(rand);
-			if(tier == -1) return;
+			String oreName = BedrockOreRegistry.rollOreName(dimID, rand);
+			if(oreName == null) return;
 			int sqrsize = 2;
 			for(int v = sqrsize; v >= -sqrsize; v--) {
 				for(int w = sqrsize; w >= -sqrsize; w--) {
 					for(int y = 6; y >= 0; y--) {
 						if(rand.nextInt(4) == 0) continue;
-						placeBedrockOre(world, new BlockPos(i+8+w, y, j+8+v), tier);
+						placeBedrockOre(world, new BlockPos(i+8+w, y, j+8+v), oreName);
 					}
 				}
 			}
 		}
 	}
 	
-	private void placeBedrockOre(World world, BlockPos orePos, int tier){
+	private void placeBedrockOre(World world, BlockPos orePos, String oreName){
 		if(!isBedrock(world, orePos)) return;
 		world.setBlockState(orePos, ModBlocks.ore_bedrock_block.getDefaultState());
 		TileEntityBedrockOre bedrockOre = (TileEntityBedrockOre)world.getTileEntity(orePos);
-		bedrockOre.setTier(tier);
+		bedrockOre.setOre(oreName);
 	}
 
 	private boolean isBedrock(World world, BlockPos bPos){
@@ -535,14 +535,6 @@ public class HbmWorldGen implements IWorldGenerator {
                     generateJungleDungeon(world, x, z, rand);
 				}
 			}
-            if(biome.getTempCategory() != Biome.TempCategory.OCEAN){
-                int dimVaultStructure = parseInt(CompatibilityConfig.vaulttecStructure.get(dimID));
-                if(dimVaultStructure > 0 && rand.nextInt(dimVaultStructure) == 0) {
-                    int x = i + rand.nextInt(16);
-                    int z = j + rand.nextInt(16);
-                    generateVaultDungeon(world, x, z, rand);
-                }
-            }
 			if(biome.getTempCategory() == Biome.TempCategory.COLD){
 				int dimArcticStructure = parseInt(CompatibilityConfig.arcticStructure.get(dimID));
 				if (dimArcticStructure > 0 && rand.nextInt(dimArcticStructure) == 0) {
@@ -683,7 +675,14 @@ public class HbmWorldGen implements IWorldGenerator {
         if(GeneralConfig.enableDebugMode)
             MainRegistry.logger.info("[Debug] Successfully spawned meteor dungeon at x=" + x + " y=10 z=" + z);
 
-        int columnY = Library.getGroundHeight(world, x, z);
+        int y = world.getHeight(x, z);
+        int columnY = y;
+        for(int y1 = y+1; y1 > 1; y1--){
+            if(!world.getBlockState(new BlockPos(x, y1, z)).getBlock().isReplaceable(world, new BlockPos(x, y1, z)) && world.getBlockState(new BlockPos(x, y1, z)).getBlock().isOpaqueCube(world.getBlockState(new BlockPos(x, y1, z)))){
+                columnY = y1+1;
+                break;
+            }
+        }
 
         for(int f = 0; f < 3; f++)
             world.setBlockState(new BlockPos(x, columnY + f, z), ModBlocks.meteor_pillar.getDefaultState().withProperty(BlockRotatedPillar.AXIS, EnumFacing.Axis.Y));
@@ -695,11 +694,11 @@ public class HbmWorldGen implements IWorldGenerator {
             sx = x + (int)(rand.nextGaussian() * 4);
             sz = z + (int)(rand.nextGaussian() * 4);
             if(x == sx && sz == z) continue;
-            columnY = Library.getGroundHeight(world, sx, sz);
+            y = world.getHeight(sx, sz);
 
-            if(world.getBlockState(new BlockPos(sx, columnY - 1, sz)).isSideSolid(world, new BlockPos(sx, columnY - 1, sz), EnumFacing.UP)) {
-                world.setBlockState(new BlockPos(sx, columnY, sz), Blocks.SKULL.getDefaultState().withProperty(BlockSkull.FACING, EnumFacing.UP));
-                TileEntitySkull skull = (TileEntitySkull)world.getTileEntity(new BlockPos(sx, columnY, sz));
+            if(world.getBlockState(new BlockPos(sx, y - 1, sz)).isSideSolid(world, new BlockPos(sx, y - 1, sz), EnumFacing.UP)) {
+                world.setBlockState(new BlockPos(sx, y, sz), Blocks.SKULL.getDefaultState().withProperty(BlockSkull.FACING, EnumFacing.UP));
+                TileEntitySkull skull = (TileEntitySkull)world.getTileEntity(new BlockPos(sx, y, sz));
 
                 if(skull != null) skull.setSkullRotation(rand.nextInt(16));
             }
@@ -714,18 +713,17 @@ public class HbmWorldGen implements IWorldGenerator {
         if(GeneralConfig.enableDebugMode)
             MainRegistry.logger.info("[Debug] Successfully spawned jungle dungeon at x=" + x + " y=10 z=" + z);
 
-        int columnY = Math.max(Library.getGroundHeight(world, x, z), 33);
+        int y = Math.max(world.getHeight(x, z), 33);
+        int columnY = y;
+        for(int y1 = y+1; y1 > 1; y1--){
+            if(!world.getBlockState(new BlockPos(x, y1, z)).getBlock().isReplaceable(world, new BlockPos(x, y1, z)) && world.getBlockState(new BlockPos(x, y1, z)).getBlock().isOpaqueCube(world.getBlockState(new BlockPos(x, y1, z)))){
+                columnY = y1+1;
+                break;
+            }
+        }
 
         for(int f = 0; f < 3; f++)
             world.setBlockState(new BlockPos(x, columnY + f, z), ModBlocks.deco_titanium.getDefaultState());
         world.setBlockState(new BlockPos(x, columnY + 3, z), Blocks.REDSTONE_BLOCK.getDefaultState());
-    }
-
-    public static void generateVaultDungeon(World world, int x, int z, Random rand) {
-        CellularDungeonFactory.vault.generate(world, x, 16, z, rand);
-
-        if(GeneralConfig.enableDebugMode)
-            MainRegistry.logger.info("[Debug] Successfully spawned vault dungeon at x=" + x + " y=10 z=" + z);
-
     }
 }

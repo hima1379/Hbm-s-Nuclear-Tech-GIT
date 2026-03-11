@@ -1,7 +1,7 @@
 package com.hbm.inventory.container;
 
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.machine.TileEntitySILEX;
+import com.hbm.main.tileentity.machine.TileEntitySILEX;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

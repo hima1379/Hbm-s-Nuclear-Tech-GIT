@@ -47,8 +47,8 @@ public class FFPipeNetworkMk2 implements IFluidHandler {
 				itr.remove();
 				continue;
 			}
-			if(FFUtils.safeCheckCapa(te, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)){
-				IFluidHandler h = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+			if(te.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, EnumFacing.UP)){
+				IFluidHandler h = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, EnumFacing.UP);
 				if(h != null && h.fill(new FluidStack(resource.getFluid(), 1), false) > 0){
 					handlers.add(h);
 				}
@@ -109,7 +109,7 @@ public class FFPipeNetworkMk2 implements IFluidHandler {
 			pipes.remove(te.getPos());
 		} else{
 			try{
-				if(FFUtils.safeCheckCapa(te, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)) {
+				if(te.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)) {
 					fillables.remove(te.getPos());
 				}
 			} catch(Throwable ignored){
@@ -125,7 +125,7 @@ public class FFPipeNetworkMk2 implements IFluidHandler {
 				pipes.put(te.getPos(), (IFluidPipeMk2) te);
 				return true;
 			}
-		} else if(FFUtils.safeCheckCapa(te, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)) {
+		} else if(te.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)) {
 			if(!fillables.containsKey(te.getPos())) {
 				fillables.put(te.getPos(), te);
 				return true;
@@ -206,9 +206,10 @@ public class FFPipeNetworkMk2 implements IFluidHandler {
 					networks.add(pipe.getNetwork());
 				}
 			}
-		} else if(FFUtils.safeCheckCapa(te, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)) {
+		} else if(te.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)) {
 			if(!consumers.containsKey(te.getPos()))
 				consumers.put(te.getPos(), te);
 		}
 	}
+
 }

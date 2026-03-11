@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.render.RenderHelper;
-import com.hbm.tileentity.machine.TileEntityMultiblock;
+import com.hbm.main.tileentity.machine.TileEntityMultiblock;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;

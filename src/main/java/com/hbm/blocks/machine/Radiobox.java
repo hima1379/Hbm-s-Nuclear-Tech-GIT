@@ -6,7 +6,7 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemBattery;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.tileentity.machine.TileEntityRadiobox;
+import com.hbm.main.tileentity.machine.TileEntityRadiobox;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;
@@ -157,7 +157,7 @@ public class Radiobox extends BlockContainer {
 
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		boolean state = (meta & 1) == 1;
+		boolean state = (meta & 1) == 1 ? true : false;
 		meta = meta >> 1;
 		EnumFacing enumfacing = EnumFacing.byIndex(meta);
 

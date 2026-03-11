@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.main.MainRegistry;
 import com.hbm.handler.ArmorModHandler;
 import com.hbm.render.model.ModelBackTesla;
-import com.hbm.tileentity.machine.TileEntityTesla;
+import com.hbm.main.tileentity.machine.TileEntityTesla;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;

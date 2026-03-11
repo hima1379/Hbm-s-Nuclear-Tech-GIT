@@ -9,7 +9,7 @@ import com.hbm.inventory.control_panel.ContainerControlEdit.SlotItemHandlerDisab
 import com.hbm.items.tool.ItemMultiDetonator;
 import com.hbm.lib.RefStrings;
 
-import com.hbm.tileentity.machine.TileEntityDummy;
+import com.hbm.main.tileentity.machine.TileEntityDummy;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.item.ItemStack;

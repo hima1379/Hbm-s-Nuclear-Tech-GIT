@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ITooltipProvider;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityFurnaceIron;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityFurnaceIron;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

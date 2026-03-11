@@ -7,7 +7,7 @@ import com.hbm.lib.Library;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.blocks.ITooltipProvider;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntityCharger;
+import com.hbm.main.tileentity.machine.TileEntityCharger;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.state.IBlockState;

@@ -16,10 +16,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public interface ILookOverlay {
 
 	@SideOnly(Side.CLIENT)
-    void printHook(RenderGameOverlayEvent.Pre event, World world, int x, int y, int z);
+	public void printHook(RenderGameOverlayEvent.Pre event, World world, int x, int y, int z);
 
 	@SideOnly(Side.CLIENT)
-    static void printGeneric(RenderGameOverlayEvent.Pre event, String title, int titleCol, int bgCol, List<String> text) {
+	public static void printGeneric(RenderGameOverlayEvent.Pre event, String title, int titleCol, int bgCol, List<String> text) {
 
 		Minecraft mc = Minecraft.getMinecraft();
 		ScaledResolution resolution = event.getResolution();

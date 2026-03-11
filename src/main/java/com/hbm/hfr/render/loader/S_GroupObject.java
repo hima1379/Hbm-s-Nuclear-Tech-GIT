@@ -24,7 +24,7 @@ public class S_GroupObject {
 	}
 
 	public void render() {
-		if (!this.faces.isEmpty()) {
+		if (this.faces.size() > 0) {
 			Tessellator tessellator = Tessellator.getInstance();
 			tessellator.getBuffer().begin(glDrawingMode, DefaultVertexFormats.POSITION_TEX_NORMAL);
 			render(tessellator);
@@ -33,7 +33,7 @@ public class S_GroupObject {
 	}
 
 	public void render(Tessellator tessellator) {
-		if (!this.faces.isEmpty()) {
+		if (this.faces.size() > 0) {
 			for (S_Face face : this.faces) {
 				face.addFaceForRender(tessellator.getBuffer());
 			}

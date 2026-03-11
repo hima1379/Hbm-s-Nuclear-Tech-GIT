@@ -1,6 +1,6 @@
 package com.hbm.packet;
 
-import com.hbm.tileentity.machine.oil.TileEntityMachinePumpjack;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachinePumpjack;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -57,7 +57,6 @@ public class TEPumpjackPacket implements IMessage {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public IMessage onMessage(TEPumpjackPacket m, MessageContext ctx) {
-            if(m == null) return null;
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				try {
 					TileEntity te = Minecraft.getMinecraft().world.getTileEntity(new BlockPos(m.x, m.y, m.z));

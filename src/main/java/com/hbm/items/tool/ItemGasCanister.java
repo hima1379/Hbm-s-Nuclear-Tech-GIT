@@ -3,6 +3,7 @@ package com.hbm.items.tool;
 import java.util.List;
 
 import com.hbm.forgefluid.HbmFluidHandlerGasCanister;
+import com.hbm.forgefluid.HbmFluidHandlerItemStack;
 import com.hbm.forgefluid.SpecialContainerFillLists.EnumGasCanister;
 import com.hbm.interfaces.IHasCustomModel;
 import com.hbm.items.ModItems;
@@ -56,12 +57,17 @@ public class ItemGasCanister extends Item implements IHasCustomModel {
 				return true;
 			return f.amount == 4000 || f.amount == 0;
 			
-		} else return stack.getItem() == ModItems.gas_canister;
-    }
+		} else if(stack.getItem() == ModItems.gas_canister){
+			return true;
+		}
+		return false;
+	}
 	
 	public static boolean isEmptyCanister(ItemStack out) {
-        return out.getItem() == ModItems.gas_canister && FluidUtil.getFluidContained(out) == null;
-    }
+		if(out.getItem() == ModItems.gas_canister && FluidUtil.getFluidContained(out) == null)
+			return true;
+		return false;
+	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -114,7 +120,8 @@ public class ItemGasCanister extends Item implements IHasCustomModel {
 	
 	public static boolean isFullCanister(ItemStack stack, Fluid fluid){
 		if(stack != null){
-            return stack.getItem() instanceof ItemGasCanister && FluidUtil.getFluidContained(stack) != null && FluidUtil.getFluidContained(stack).getFluid() == fluid && FluidUtil.getFluidContained(stack).amount == ((ItemGasCanister) stack.getItem()).cap;
+			if(stack.getItem() instanceof ItemGasCanister && FluidUtil.getFluidContained(stack) != null && FluidUtil.getFluidContained(stack).getFluid() == fluid && FluidUtil.getFluidContained(stack).amount == ((ItemGasCanister)stack.getItem()).cap)
+				return true;
 		}
 		return false;
 	}

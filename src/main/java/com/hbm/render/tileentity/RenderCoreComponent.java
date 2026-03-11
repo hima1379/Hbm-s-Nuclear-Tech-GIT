@@ -9,11 +9,11 @@ import com.hbm.render.amlfrom1710.Vec3;
 import com.hbm.render.misc.BeamPronter;
 import com.hbm.render.misc.BeamPronter.EnumBeamType;
 import com.hbm.render.misc.BeamPronter.EnumWaveType;
-import com.hbm.tileentity.TileEntityMachineBase;
-import com.hbm.tileentity.machine.TileEntityCoreEmitter;
-import com.hbm.tileentity.machine.TileEntityCoreInjector;
-import com.hbm.tileentity.machine.TileEntityCoreReceiver;
-import com.hbm.tileentity.machine.TileEntityCoreStabilizer;
+import com.hbm.main.tileentity.TileEntityMachineBase;
+import com.hbm.main.tileentity.machine.TileEntityCoreEmitter;
+import com.hbm.main.tileentity.machine.TileEntityCoreInjector;
+import com.hbm.main.tileentity.machine.TileEntityCoreReceiver;
+import com.hbm.main.tileentity.machine.TileEntityCoreStabilizer;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;

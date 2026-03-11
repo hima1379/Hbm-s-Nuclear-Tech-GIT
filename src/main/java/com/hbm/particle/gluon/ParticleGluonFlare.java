@@ -1,5 +1,7 @@
 package com.hbm.particle.gluon;
 
+import java.nio.FloatBuffer;
+
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.items.weapon.ItemGunEgon;
@@ -11,6 +13,7 @@ import com.hbm.render.misc.LensVisibilityHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;
 import net.minecraft.client.renderer.GlStateManager.SourceFactor;

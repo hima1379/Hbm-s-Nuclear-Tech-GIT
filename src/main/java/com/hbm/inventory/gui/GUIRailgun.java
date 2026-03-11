@@ -8,7 +8,7 @@ import com.hbm.inventory.container.ContainerRailgun;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.bomb.TileEntityRailgun;
+import com.hbm.main.tileentity.bomb.TileEntityRailgun;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

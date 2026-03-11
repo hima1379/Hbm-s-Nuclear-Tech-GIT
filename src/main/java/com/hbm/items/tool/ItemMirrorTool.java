@@ -6,7 +6,7 @@ import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.ModItems;
 import com.hbm.render.amlfrom1710.Vec3;
-import com.hbm.tileentity.machine.TileEntitySolarMirror;
+import com.hbm.main.tileentity.machine.TileEntitySolarMirror;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.block.Block;
@@ -60,18 +60,13 @@ public class ItemMirrorTool extends Item {
 		if(b == ModBlocks.solar_mirror && stack.hasTagCompound()) {
 
 			if(!world.isRemote) {
+				TileEntitySolarMirror mirror = (TileEntitySolarMirror)world.getTileEntity(pos1);
 				int tx = stack.getTagCompound().getInteger("posX");
 				int ty = stack.getTagCompound().getInteger("posY");
 				int tz = stack.getTagCompound().getInteger("posZ");
-                if(player.isSneaking()) {
-                    for (int i = -2; i < 3; i++) {
-                        for (int j = -2; j < 3; j++) {
-                            trySetTarget(world, pos1.add(i, 0, j), tx, ty, tz);
-                        }
-                    }
-                } else {
-                    trySetTarget(world, pos1, tx, ty, tz);
-                }
+
+				if(Vec3.createVectorHelper(pos1.getX()- tx, pos1.getY() - ty, pos1.getZ() - tz).length() < 25)
+					mirror.setTarget(tx, ty, tz);
 			}
 
 			return EnumActionResult.SUCCESS;
@@ -79,13 +74,6 @@ public class ItemMirrorTool extends Item {
 
 		return EnumActionResult.PASS;
 	}
-
-    public static void trySetTarget(World world, BlockPos pos, int tx, int ty, int tz){
-        TileEntitySolarMirror mirror = (TileEntitySolarMirror)world.getTileEntity(pos);
-        if(mirror == null) return;
-        if(Vec3.createVectorHelper(pos.getX()- tx, pos.getY() - ty, pos.getZ() - tz).length() < 64)
-            mirror.setTarget(tx, ty, tz);
-    }
 	
 	@Override
 	public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {

@@ -1,6 +1,6 @@
 package com.hbm.render.tileentity;
 
-import com.hbm.tileentity.machine.TileEntityHeatBoiler;
+import com.hbm.main.tileentity.machine.TileEntityHeatBoiler;
 import org.lwjgl.opengl.GL11;
 
 import com.hbm.blocks.BlockDummyable;

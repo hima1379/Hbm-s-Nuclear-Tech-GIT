@@ -1,0 +1,12 @@
+# Blender 5.0.1 MTL File: 'sm-6.blend'
+# www.blender.org
+
+newmtl mat1
+Ns 4.999998
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd sm6_main.png

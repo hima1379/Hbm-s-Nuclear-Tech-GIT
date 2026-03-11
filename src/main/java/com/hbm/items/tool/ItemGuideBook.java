@@ -61,11 +61,11 @@ public class ItemGuideBook extends Item {
 		MSWORD("book.msword.cover", 1.5F, statFacMSword()),
 		HADRON("book.error.cover", 1.5F, statFacHadron());
 		
-		public final List<GuidePage> pages;
-		public final float titleScale;
-		public final String title;
+		public List<GuidePage> pages;
+		public float titleScale;
+		public String title;
 		
-		BookType(String title, float titleScale, List<GuidePage> pages) {
+		private BookType(String title, float titleScale, List<GuidePage> pages) {
 			this.title = title;
 			this.titleScale = titleScale;
 			this.pages = pages;

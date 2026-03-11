@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import com.hbm.blocks.turret.TurretBase;
 import com.hbm.lib.HBMSoundHandler;
-import com.hbm.tileentity.turret.TileEntityTurretBase;
+import com.hbm.main.tileentity.turret.TileEntityTurretBase;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;

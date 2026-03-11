@@ -4,7 +4,7 @@ import com.hbm.forgefluid.FFUtils;
 import com.hbm.inventory.container.ContainerMachineHydrotreater;
 import com.hbm.items.ModItems;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.oil.TileEntityMachineHydrotreater;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineHydrotreater;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -36,7 +36,7 @@ public class GUIMachineHydrotreater extends GuiInfoContainer {
         FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 53, guiTop + 69 - 52, 16, 52, hydrotreater.tanks[1]);
         FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 125, guiTop + 69 - 52, 16, 52, hydrotreater.tanks[2]);
         FFUtils.renderTankInfo(this, mouseX, mouseY, guiLeft + 143, guiTop + 69 - 52, 16, 52, hydrotreater.tanks[3]);
-        this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 17, guiTop + 69 - 52, 16, 52, hydrotreater.power, TileEntityMachineHydrotreater.maxPower);
+        this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 17, guiTop + 69 - 52, 16, 52, hydrotreater.power, hydrotreater.maxPower);
 
         if(this.mc.player.inventory.getItemStack().isEmpty() && this.isMouseOverSlot(this.inventorySlots.getSlot(10), mouseX, mouseY) && !this.inventorySlots.getSlot(10).getHasStack()) {
             List<Object[]> lines = new ArrayList<>();

@@ -2,7 +2,7 @@ package com.hbm.blocks.machine;
 
 import java.util.List;
 
-import com.hbm.tileentity.machine.TileEntityFoundryMold;
+import com.hbm.main.tileentity.machine.TileEntityFoundryMold;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;

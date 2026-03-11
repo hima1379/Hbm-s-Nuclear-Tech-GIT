@@ -1,7 +1,7 @@
 package com.hbm.render.tileentity;
 
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.oil.TileEntityMachineHydrotreater;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineHydrotreater;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import org.lwjgl.opengl.GL11;
 

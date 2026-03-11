@@ -2,7 +2,7 @@ package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityCore;
+import com.hbm.main.tileentity.machine.TileEntityCore;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

@@ -11,7 +11,7 @@ import com.hbm.explosion.ExplosionLarge;
 import com.hbm.interfaces.IBomb;
 import com.hbm.items.ModItems;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.bomb.TileEntityLandmine;
+import com.hbm.main.tileentity.bomb.TileEntityLandmine;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.block.Block;
@@ -89,9 +89,13 @@ public class Landmine extends BlockContainer implements IBomb {
         	explode(world, pos);
         }
         
-		boolean flag = !world.getBlockState(pos.down()).isSideSolid(world, pos.down(), EnumFacing.UP) && !(world.getBlockState(pos.down()).getBlock() instanceof BlockFence);
+		boolean flag = false;
 
-        if (flag) {
+		if (!world.getBlockState(pos.down()).isSideSolid(world, pos.down(), EnumFacing.UP) && !(world.getBlockState(pos.down()).getBlock() instanceof BlockFence)) {
+			flag = true;
+		}
+
+		if (flag) {
 			this.dropBlockAsItem(world, pos, world.getBlockState(pos), 0);
 			world.setBlockToAir(pos);
 		}

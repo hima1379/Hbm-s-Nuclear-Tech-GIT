@@ -55,7 +55,7 @@ public class HbmKeybinds {
 		}
 	}
 	
-	public enum EnumKeybind {
+	public static enum EnumKeybind {
 		JETPACK,
 		TOGGLE_JETPACK,
 		TOGGLE_HEAD,

@@ -11,7 +11,7 @@ import com.hbm.entity.logic.EntityNukeExplosionMK5;
 import com.hbm.interfaces.IBomb;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.bomb.TileEntityNukeMan;
+import com.hbm.main.tileentity.bomb.TileEntityNukeMan;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.block.Block;
@@ -69,7 +69,7 @@ public class NukeMan extends BlockContainer implements IBomb {
 
             if (tileentity instanceof TileEntityNukeMan)
             {
-                InventoryHelper.dropInventoryItems(world, pos, tileentity);
+                InventoryHelper.dropInventoryItems(world, pos, (TileEntityNukeMan)tileentity);
                 
                 world.updateComparatorOutputLevel(pos, this);
             }

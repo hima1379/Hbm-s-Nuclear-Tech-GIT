@@ -5,8 +5,8 @@ import api.hbm.block.IConveyorPackage;
 import api.hbm.block.IEnterableBlock;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
-import com.hbm.tileentity.network.TileEntityCraneBase;
-import com.hbm.tileentity.network.TileEntityCraneInserter;
+import com.hbm.main.tileentity.network.TileEntityCraneBase;
+import com.hbm.main.tileentity.network.TileEntityCraneInserter;
 
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;

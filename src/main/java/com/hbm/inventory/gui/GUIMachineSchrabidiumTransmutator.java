@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.hbm.inventory.container.ContainerMachineSchrabidiumTransmutator;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineSchrabidiumTransmutator;
+import com.hbm.main.tileentity.machine.TileEntityMachineSchrabidiumTransmutator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -37,7 +37,7 @@ public class GUIMachineSchrabidiumTransmutator extends GuiInfoContainer {
 		String name = this.diFurnace.hasCustomInventoryName() ? this.diFurnace.getName() : I18n.format(this.diFurnace.getName());
 		
 		this.fontRenderer.drawString(name, this.xSize / 2 - this.fontRenderer.getStringWidth(name) / 2, 6, 4210752);
-		this.fontRenderer.drawString(I18n.format(diFurnace.getPower() + " HE"), this.xSize / 2 - this.fontRenderer.getStringWidth(diFurnace.getPower() + " HE") / 2, 16, 4210752);
+		this.fontRenderer.drawString(I18n.format(String.valueOf(diFurnace.getPower()) + " HE"), this.xSize / 2 - this.fontRenderer.getStringWidth(String.valueOf(diFurnace.getPower()) + " HE") / 2, 16, 4210752);
 		this.fontRenderer.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
 	}
 

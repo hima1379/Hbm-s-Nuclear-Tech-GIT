@@ -6,7 +6,7 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.render.RenderHelper;
 import com.hbm.render.util.IconUtil;
 import com.hbm.render.util.SmallBlockPronter;
-import com.hbm.tileentity.machine.TileEntityITERStruct;
+import com.hbm.main.tileentity.machine.TileEntityITERStruct;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;

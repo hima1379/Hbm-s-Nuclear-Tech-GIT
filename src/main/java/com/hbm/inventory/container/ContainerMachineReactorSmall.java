@@ -2,7 +2,7 @@ package com.hbm.inventory.container;
 
 import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.inventory.SlotMachineOutput;
-import com.hbm.tileentity.machine.TileEntityMachineReactorSmall;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactorSmall;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

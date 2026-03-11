@@ -13,8 +13,8 @@ import com.hbm.animloader.AnimationWrapper.EndResult;
 import com.hbm.animloader.AnimationWrapper.EndType;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.render.WavefrontObjDisplayList;
-import com.hbm.tileentity.DoorDecl;
-import com.hbm.tileentity.TileEntityDoorGeneric;
+import com.hbm.main.tileentity.DoorDecl;
+import com.hbm.main.tileentity.TileEntityDoorGeneric;
 
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;

@@ -81,9 +81,10 @@ public class JetpackBase extends ItemArmorMod {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void modRender(Pre event, ItemStack armor) {
-        EntityPlayer player = event.getEntityPlayer();
-        if(player.isSpectator()) return;
-        ModelBiped modelJetpack = getArmorModel(event.getEntityLiving(), null, EntityEquipmentSlot.CHEST, null);
+
+		ModelBiped modelJetpack = getArmorModel(event.getEntityLiving(), null, EntityEquipmentSlot.CHEST, null);
+		
+		EntityPlayer player = event.getEntityPlayer();
 
 		RenderPlayer renderer = event.getRenderer();
 		ModelBiped model = renderer.getMainModel();
@@ -127,11 +128,14 @@ public class JetpackBase extends ItemArmorMod {
 	}
 	
 	protected void useUpFuel(EntityPlayer player, ItemStack stack, int rate) {
-		if(player.ticksExisted % rate == 0) setFuel(stack, getFuel(stack) - 1);
+
+		if(player.ticksExisted % rate == 0)
+			setFuel(stack, getFuel(stack) - 1);
 	}
 
     public static int getFuel(ItemStack stack) {
-		if(!stack.hasTagCompound()) {
+		if(stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
 			return 0;
 		}
 

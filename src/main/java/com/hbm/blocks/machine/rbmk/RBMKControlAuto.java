@@ -1,7 +1,7 @@
 package com.hbm.blocks.machine.rbmk;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKControlAuto;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKControlAuto;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

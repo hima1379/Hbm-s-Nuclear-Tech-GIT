@@ -4,7 +4,7 @@ import com.hbm.inventory.container.ContainerCraneBoxer;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.NBTControlPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.network.TileEntityCraneBoxer;
+import com.hbm.main.tileentity.network.TileEntityCraneBoxer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;

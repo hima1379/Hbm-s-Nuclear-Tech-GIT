@@ -5,8 +5,8 @@ import api.hbm.block.IConveyorPackage;
 import api.hbm.block.IEnterableBlock;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
-import com.hbm.tileentity.network.TileEntityCraneBase;
-import com.hbm.tileentity.network.TileEntityCraneUnboxer;
+import com.hbm.main.tileentity.network.TileEntityCraneBase;
+import com.hbm.main.tileentity.network.TileEntityCraneUnboxer;
 
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
@@ -73,7 +73,8 @@ public class CraneUnboxer extends BlockCraneBase implements IEnterableBlock {
 
     @Override
     public int getComparatorInputOverride(IBlockState blockState, World world, BlockPos pos) {
-        return blockState.getComparatorInputOverride(world, pos);
+        int redstoneSignal = blockState.getComparatorInputOverride(world, pos);
+        return redstoneSignal;
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntityHadronDiode;
-import com.hbm.tileentity.machine.TileEntityHadronDiode.DiodeConfig;
+import com.hbm.main.tileentity.machine.TileEntityHadronDiode;
+import com.hbm.main.tileentity.machine.TileEntityHadronDiode.DiodeConfig;
 
 import api.hbm.block.IToolable;
 import net.minecraft.block.Block;

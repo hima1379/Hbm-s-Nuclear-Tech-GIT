@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.inventory.container.ContainerCrateTungsten;
 import com.hbm.lib.RefStrings;
 import com.hbm.lib.Library;
-import com.hbm.tileentity.machine.TileEntityCrateTungsten;
+import com.hbm.main.tileentity.machine.TileEntityCrateTungsten;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;

@@ -2,7 +2,7 @@ package com.hbm.blocks.machine.rbmk;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.handler.MultiblockHandlerXR;
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKCraneConsole;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKCraneConsole;
 import com.hbm.lib.ForgeDirection;
 
 import net.minecraft.block.material.Material;
@@ -35,7 +35,31 @@ public class RBMKCraneConsole extends BlockDummyable {
 		return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
 	}
 
-    @Override
+	@Override
+	public boolean isOpaqueCube(IBlockState state) {
+		return false;
+	}
+	
+	@Override
+	public boolean isBlockNormalCube(IBlockState state) {
+		return false;
+	}
+	
+	@Override
+	public boolean isNormalCube(IBlockState state) {
+		return false;
+	}
+	
+	@Override
+	public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return false;
+	}
+	@Override
+	public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+		return false;
+	}
+
+	@Override
 	public int[] getDimensions() {
 		return new int[] {1, 0, 0, 0, 1, 1};
 	}

@@ -3,7 +3,7 @@ package com.hbm.inventory.container;
 import com.hbm.inventory.SlotMachineOutput;
 import com.hbm.packet.AuxGaugePacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityMachineGenerator;
+import com.hbm.main.tileentity.machine.TileEntityMachineGenerator;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;

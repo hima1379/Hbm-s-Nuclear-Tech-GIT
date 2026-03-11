@@ -10,7 +10,7 @@ import com.hbm.inventory.container.ContainerMachineReactorSmall;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.AuxButtonPacket;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.tileentity.machine.TileEntityMachineReactorSmall;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactorSmall;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -193,7 +193,8 @@ public class GUIMachineReactorSmall extends GuiInfoContainer {
     {
         super.keyTyped(p_73869_1_, p_73869_2_);
         
-        if (p_73869_2_ == 56) {
+        if (p_73869_2_ == 56)
+        {
             this.toggleOverlay = !this.toggleOverlay;
         }
         

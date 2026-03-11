@@ -3,7 +3,7 @@ package com.hbm.inventory.gui;
 import com.hbm.inventory.container.ContainerNukeBoy;
 import com.hbm.items.ModItems;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.bomb.TileEntityNukeBoy;
+import com.hbm.main.tileentity.bomb.TileEntityNukeBoy;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;

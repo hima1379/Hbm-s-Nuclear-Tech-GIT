@@ -2,7 +2,7 @@ package com.hbm.blocks.network;
 
 import com.hbm.main.MainRegistry;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.network.TileEntityRadioTorchSender;
+import com.hbm.main.tileentity.network.TileEntityRadioTorchSender;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.block.BlockContainer;

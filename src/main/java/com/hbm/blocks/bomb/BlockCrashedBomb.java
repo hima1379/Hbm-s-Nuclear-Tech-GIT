@@ -14,7 +14,7 @@ import com.hbm.entity.effect.EntityNukeTorex;
 import com.hbm.entity.logic.EntityBalefire;
 import com.hbm.interfaces.IBomb;
 import com.hbm.items.ModItems;
-import com.hbm.tileentity.bomb.TileEntityCrashedBomb;
+import com.hbm.main.tileentity.bomb.TileEntityCrashedBomb;
 
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.client.util.ITooltipFlag;

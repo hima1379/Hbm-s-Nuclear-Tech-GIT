@@ -1,7 +1,7 @@
 package com.hbm.blocks.generic;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.machine.TileEntityChlorineSeal;
+import com.hbm.main.tileentity.machine.TileEntityChlorineSeal;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

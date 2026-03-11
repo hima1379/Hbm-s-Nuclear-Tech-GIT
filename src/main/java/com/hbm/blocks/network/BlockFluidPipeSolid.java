@@ -7,9 +7,9 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.util.I18nUtil;
-import com.hbm.tileentity.conductor.TileEntityFFDuctBaseMk2;
-import com.hbm.tileentity.conductor.TileEntityFFFluidDuctMk2Solid;
-import com.hbm.tileentity.conductor.TileEntityFFFluidSuccMk2Solid;
+import com.hbm.main.tileentity.conductor.TileEntityFFDuctBaseMk2;
+import com.hbm.main.tileentity.conductor.TileEntityFFFluidDuctMk2Solid;
+import com.hbm.main.tileentity.conductor.TileEntityFFFluidSuccMk2Solid;
 
 import api.hbm.block.IToolable;
 import net.minecraft.block.Block;

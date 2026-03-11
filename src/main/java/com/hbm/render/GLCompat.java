@@ -9,6 +9,7 @@ import org.lwjgl.opengl.ARBDepthTexture;
 import org.lwjgl.opengl.ARBDrawInstanced;
 import org.lwjgl.opengl.ARBFragmentShader;
 import org.lwjgl.opengl.ARBFramebufferObject;
+import org.lwjgl.opengl.ARBGeometryShader4;
 import org.lwjgl.opengl.ARBImaging;
 import org.lwjgl.opengl.ARBInstancedArrays;
 import org.lwjgl.opengl.ARBMultitexture;
@@ -24,12 +25,14 @@ import org.lwjgl.opengl.ContextCapabilities;
 import org.lwjgl.opengl.EXTDrawInstanced;
 import org.lwjgl.opengl.EXTFramebufferBlit;
 import org.lwjgl.opengl.EXTFramebufferObject;
+import org.lwjgl.opengl.EXTGeometryShader4;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
+import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.opengl.GLContext;
 
@@ -704,22 +707,22 @@ public class GLCompat {
 		return "";
 	}
 	
-	public enum VAOType {
+	public static enum VAOType {
 		NORMAL,
 		ARB,
-		APPLE
-    }
+		APPLE;
+	}
 	
-	public enum FBOType {
+	public static enum FBOType {
 		NORMAL,
 		ARB,
-		EXT
-    }
+		EXT;
+	}
 	
-	public enum InstancingType {
+	public static enum InstancingType {
 		NORMAL,
 		ARB,
-		EXT
-    }
+		EXT;
+	}
 
 }

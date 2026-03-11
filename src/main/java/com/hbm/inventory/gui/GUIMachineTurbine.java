@@ -6,7 +6,7 @@ import com.hbm.forgefluid.FFUtils;
 import com.hbm.forgefluid.ModForgeFluids;
 import com.hbm.inventory.container.ContainerMachineTurbine;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.machine.TileEntityMachineTurbine;
+import com.hbm.main.tileentity.machine.TileEntityMachineTurbine;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;

@@ -8,12 +8,11 @@ import com.hbm.blocks.ILookOverlay;
 import com.hbm.blocks.ITooltipProvider;
 import com.hbm.lib.Library;
 import com.hbm.lib.ForgeDirection;
-import com.hbm.tileentity.INBTPacketReceiver;
-import com.hbm.tileentity.TileEntityLoadedBase;
+import com.hbm.main.tileentity.INBTPacketReceiver;
+import com.hbm.main.tileentity.TileEntityLoadedBase;
 import com.hbm.util.I18nUtil;
 
 import api.hbm.block.IToolable;
-import api.hbm.block.IToolable.ToolType;
 import api.hbm.energy.IEnergyUser;
 import api.hbm.energy.IEnergyConnectorBlock;
 import api.hbm.energy.IEnergyConnector.ConnectionPriority;

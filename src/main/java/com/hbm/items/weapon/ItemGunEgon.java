@@ -47,7 +47,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemGunEgon extends ItemGunBase {
 
-	public float charge = 1F;
+	public float charge = 0.25F;
 	public static float chargeScaling = 1.011619F; //double dmg every 2 sec
 	public static int activeTicks = 0;
 	public static Map<EntityPlayer, ParticleGluonBurnTrail> activeTrailParticles = new HashMap<>();
@@ -140,10 +140,10 @@ public class ItemGunEgon extends ItemGunBase {
                 if(ent instanceof EntityPlayer && ((EntityPlayer)ent).isCreative()){
 					return;
 				}
-				this.charge = this.charge * chargeScaling;
+				this.charge = this.charge * this.chargeScaling;
 				float damage = Math.min(ent.getHealth(), this.charge);
 				ent.getCombatTracker().trackDamage(ModDamageSource.gluon, ent.getHealth(), damage);
-				ent.attackEntityFrom(ModDamageSource.gluon, damage);
+				ent.setHealth(ent.getHealth()-damage);
 				
 				PacketDispatcher.wrapper.sendToAllTracking(new PacketSpecialDeath(ent, 1), ent);
 				//Why doesn't the player count as tracking itself? I don't know.
@@ -161,16 +161,13 @@ public class ItemGunEgon extends ItemGunBase {
 						PacketDispatcher.wrapper.sendTo(new PacketSpecialDeath(ent, 0), (EntityPlayerMP) ent);
 					}
 				}
-                return;
-			}
+			} else {
+				this.charge = 1F;
+			}	
 		} else {
 			setIsFiring(stack, false);
 		}
-        if(this.charge > 1){
-            this.charge *= 0.95F;
-            this.charge = Math.max(1, this.charge);
-        }
-    }
+	}
 	
 	/// if the gun is firing ///
 	public static void setIsFiring(ItemStack stack, boolean b) {

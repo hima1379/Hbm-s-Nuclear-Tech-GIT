@@ -1,6 +1,6 @@
 package com.hbm.blocks.machine.rbmk;
 
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKAbsorber;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKAbsorber;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;

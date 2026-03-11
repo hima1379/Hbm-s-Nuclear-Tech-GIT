@@ -2,7 +2,7 @@ package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.interfaces.IBomb;
-import com.hbm.tileentity.machine.TileEntityHatch;
+import com.hbm.main.tileentity.machine.TileEntityHatch;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -248,7 +248,7 @@ public class BlockSeal extends Block implements IBomb {
 	
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		boolean activated = (meta & 1) == 1;
+		boolean activated = (meta & 1) == 1 ? true : false;
 		meta = meta >> 1;
 		EnumFacing enumfacing = EnumFacing.byIndex(meta);
 

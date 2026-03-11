@@ -3,7 +3,7 @@ package com.hbm.blocks.generic;
 import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.tileentity.deco.TileEntityVent;
+import com.hbm.main.tileentity.deco.TileEntityVent;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;

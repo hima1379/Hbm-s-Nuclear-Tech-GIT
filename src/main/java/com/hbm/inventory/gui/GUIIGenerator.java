@@ -14,7 +14,7 @@ import com.hbm.packet.PacketDispatcher;
 import com.hbm.render.amlfrom1710.Vec3;
 import com.hbm.render.util.GaugeUtil;
 import com.hbm.render.util.GaugeUtil.Gauge;
-import com.hbm.tileentity.machine.TileEntityMachineIGenerator;
+import com.hbm.main.tileentity.machine.TileEntityMachineIGenerator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;

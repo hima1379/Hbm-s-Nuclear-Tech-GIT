@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.RenderSparks;
-import com.hbm.tileentity.machine.TileEntityMachineReactor;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactor;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -27,7 +27,8 @@ public class RenderBreeder extends TileEntitySpecialRenderer<TileEntityMachineRe
 
         GL11.glRotatef(90, 0F, 1F, 0F);
 
-		switch(breeder.getBlockMetadata() - BlockDummyable.offset) {
+		switch(breeder.getBlockMetadata() - BlockDummyable.offset)
+		{
 		case 2: GL11.glRotatef(0, 0F, 1F, 0F); break;
 		case 4: GL11.glRotatef(90, 0F, 1F, 0F); break;
 		case 3: GL11.glRotatef(180, 0F, 1F, 0F); break;

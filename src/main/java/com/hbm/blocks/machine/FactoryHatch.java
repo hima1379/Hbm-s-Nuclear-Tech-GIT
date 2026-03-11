@@ -2,9 +2,9 @@ package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityFactoryHatch;
-import com.hbm.tileentity.machine.TileEntityCoreAdvanced;
-import com.hbm.tileentity.machine.TileEntityCoreTitanium;
+import com.hbm.main.tileentity.machine.TileEntityFactoryHatch;
+import com.hbm.main.tileentity.machine.TileEntityCoreAdvanced;
+import com.hbm.main.tileentity.machine.TileEntityCoreTitanium;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;

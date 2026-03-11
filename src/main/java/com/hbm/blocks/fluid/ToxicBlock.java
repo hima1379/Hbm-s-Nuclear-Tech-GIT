@@ -8,6 +8,7 @@ import com.hbm.util.ContaminationUtil.ContaminationType;
 import com.hbm.util.ContaminationUtil.HazardType;
 import com.hbm.saveddata.RadiationSavedData;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -87,7 +88,6 @@ public class ToxicBlock extends BlockFluidClassic {
 
 	@Override
 	public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
-        super.updateTick(world, pos, state, rand);
 		if(reactToBlocks(world, pos.east()))
 			world.setBlockState(pos.east(), getRandomSellafite(world));
 		if(reactToBlocks(world, pos.west()))
@@ -102,6 +102,8 @@ public class ToxicBlock extends BlockFluidClassic {
 			world.setBlockState(pos.north(), getRandomSellafite(world));
 
 		if(world.rand.nextInt(15) == 0) RadiationSavedData.incrementRad(world, pos, 300F, 3000F);
+
+		super.updateTick(world, pos, state, rand);
 	}
 
 	private IBlockState getRandomSellafite(World world){
@@ -117,7 +119,7 @@ public class ToxicBlock extends BlockFluidClassic {
 			IBlockState state = world.getBlockState(pos);
 			if(state.getMaterial().isLiquid()) return true;
 			if(state.getBlock() instanceof BlockStone) return true;
-            return state.getBlock() == ModBlocks.sellafield_slaked || state.getBlock() == ModBlocks.sellafield_0 || state.getBlock() == ModBlocks.sellafield_1;
+			if(state.getBlock() == ModBlocks.sellafield_slaked || state.getBlock() == ModBlocks.sellafield_0 || state.getBlock() == ModBlocks.sellafield_1) return true;
 		}
 		return false;
 	}

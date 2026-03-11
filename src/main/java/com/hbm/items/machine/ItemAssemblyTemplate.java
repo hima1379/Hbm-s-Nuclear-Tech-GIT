@@ -4,7 +4,9 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.hbm.interfaces.IHasCustomModel;
 import com.hbm.inventory.AssemblerRecipes;
+import com.hbm.inventory.RecipesCommon.AStack;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.RecipesCommon.OreDictStack;
 import com.hbm.items.ModItems;
@@ -122,11 +124,11 @@ public class ItemAssemblyTemplate extends Item {
 				OreDictStack input = (OreDictStack) o;
 				NonNullList<ItemStack> ores = OreDictionary.getOres(input.name);
 
-				if(!ores.isEmpty()) {
+				if(ores.size() > 0) {
 					ItemStack inStack = ores.get((int) (Math.abs(System.currentTimeMillis() / 1000) % ores.size()));
 		    		list.add(" §c"+ input.count() + "x " + inStack.getDisplayName());
 				} else {
-		    		list.add("I AM ERROR - No OrdDict match found for "+ o);
+		    		list.add("I AM ERROR - No OrdDict match found for "+o.toString());
 				}
 			}
 		}

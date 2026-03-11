@@ -241,15 +241,27 @@ public abstract class BlockDummyable extends BlockContainer implements ICopiable
 		BlockPos pos = new BlockPos(x, y, z);
 		if(world.getBlockState(pos).getBlock() != this)
 			return;
-		
+
 		int meta = world.getBlockState(pos).getValue(META);
-		
+
 		if(meta > 5)
 			return;
-			
+
 		//world.setBlockMetadataWithNotify(x, y, z, meta + extra, 3);
 		safeRem = true;
+
+		// Remove old TileEntity if it exists
+		world.removeTileEntity(pos);
+
+		// Set new metadata
 		world.setBlockState(pos, this.getDefaultState().withProperty(META, meta + extra), 3);
+
+		// Force creation of new TileEntity with correct metadata
+		net.minecraft.tileentity.TileEntity te = this.createTileEntity(world, world.getBlockState(pos));
+		if(te != null) {
+			world.setTileEntity(pos, te);
+		}
+
 		safeRem = false;
 	}
 	
@@ -258,15 +270,27 @@ public abstract class BlockDummyable extends BlockContainer implements ICopiable
 		BlockPos pos = new BlockPos(x, y, z);
 		if(world.getBlockState(pos).getBlock() != this)
 			return;
-		
+
 		int meta = world.getBlockState(pos).getValue(META);
-		
+
 		if(meta <= 5 || meta >= 12)
 			return;
-			
+
 		//world.setBlockMetadataWithNotify(x, y, z, meta + extra, 3);
 		safeRem = true;
+
+		// Remove old TileEntity if it exists
+		world.removeTileEntity(pos);
+
+		// Set new metadata
 		world.setBlockState(pos, this.getDefaultState().withProperty(META, meta - extra), 3);
+
+		// Force creation of new TileEntity with correct metadata (usually null for regular dummies)
+		net.minecraft.tileentity.TileEntity te = this.createTileEntity(world, world.getBlockState(pos));
+		if(te != null) {
+			world.setTileEntity(pos, te);
+		}
+
 		safeRem = false;
 	}
 		
@@ -359,8 +383,13 @@ public abstract class BlockDummyable extends BlockContainer implements ICopiable
 
 		return new AxisAlignedBB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ).offset(x + 0.5, y + 0.5, z + 0.5);
 	}
-
-    @Override
+	
+	@Override
+	public EnumBlockRenderType getRenderType(IBlockState state) {
+		return EnumBlockRenderType.INVISIBLE;
+	}
+	
+	@Override
 	public boolean isOpaqueCube(IBlockState state) {
 		return false;
 	}

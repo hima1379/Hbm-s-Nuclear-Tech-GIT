@@ -36,18 +36,18 @@ public class RenderBomber extends Render<EntityBomber> {
         
         
         int i = (int) entity.getDataManager().get(EntityBomber.STYLE);
-        
+
         switch(i) {
-        case 0: bindTexture(ResourceManager.dornier_0_tex); break;
-        case 1: bindTexture(ResourceManager.dornier_1_tex); break;
-        case 2: bindTexture(ResourceManager.dornier_2_tex); break;
-        case 3: bindTexture(ResourceManager.dornier_3_tex); break;
-        case 4: bindTexture(ResourceManager.dornier_4_tex); break;
+        case 0: bindTexture(ResourceManager.b29_0_tex); break;
+        case 1: bindTexture(ResourceManager.b29_1_tex); break;
+        case 2: bindTexture(ResourceManager.b29_2_tex); break;
+        case 3: bindTexture(ResourceManager.b29_3_tex); break;
+        case 4: bindTexture(ResourceManager.b29_0_tex); break;
         case 5: bindTexture(ResourceManager.b29_0_tex); break;
         case 6: bindTexture(ResourceManager.b29_1_tex); break;
         case 7: bindTexture(ResourceManager.b29_2_tex); break;
         case 8: bindTexture(ResourceManager.b29_3_tex); break;
-        default: bindTexture(ResourceManager.dornier_1_tex); break;
+        default: bindTexture(ResourceManager.b29_1_tex); break;
         }
 
         switch(i) {
@@ -55,12 +55,12 @@ public class RenderBomber extends Render<EntityBomber> {
         case 1:
         case 2:
         case 3:
-        case 4: GL11.glScalef(5F, 5F, 5F); GL11.glRotatef(-90, 0F, 1F, 0F); ResourceManager.dornier.renderAll(); break;
+        case 4:
         case 5:
         case 6:
         case 7:
         case 8: GL11.glScalef(30F/3.1F, 30F/3.1F, 30F/3.1F); GL11.glRotatef(180, 0F, 1F, 0F); ResourceManager.b29.renderAll(); break;
-        default: ResourceManager.dornier.renderAll(); break;
+        default: GL11.glScalef(30F/3.1F, 30F/3.1F, 30F/3.1F); GL11.glRotatef(180, 0F, 1F, 0F); ResourceManager.b29.renderAll(); break;
         }
         
 
@@ -71,7 +71,7 @@ public class RenderBomber extends Render<EntityBomber> {
 
 	@Override
 	protected ResourceLocation getEntityTexture(EntityBomber entity) {
-		return ResourceManager.dornier_1_tex;
+		return ResourceManager.b29_1_tex;
 	}
 
 }

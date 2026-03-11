@@ -3,10 +3,11 @@ package com.hbm.render.tileentity;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.oil.TileEntityMachineCatalyticReformer;
+import com.hbm.main.tileentity.machine.oil.TileEntityMachineCatalyticReformer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 public class RenderCatalyticReformer extends TileEntitySpecialRenderer<TileEntityMachineCatalyticReformer> {
 

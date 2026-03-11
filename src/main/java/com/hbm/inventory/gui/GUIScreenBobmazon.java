@@ -291,7 +291,7 @@ public class GUIScreenBobmazon extends GuiScreen {
 		NUCLEAR(AdvancementManager.bobNuclear, "bobnuclear"),
 		HIDDEN(AdvancementManager.bobHidden, "bobhidden");
 		
-		Requirement(Advancement achievement, String advName) {
+		private Requirement(Advancement achievement, String advName) {
 			this.setAchievement(achievement);
 			this.advName = advName;
 		}
@@ -318,7 +318,7 @@ public class GUIScreenBobmazon extends GuiScreen {
 		}
 
 		private Advancement achievement;
-		private final String advName;
+		private String advName;
 	}
 
 }

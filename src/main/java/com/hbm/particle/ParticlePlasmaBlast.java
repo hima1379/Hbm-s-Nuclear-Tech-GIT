@@ -34,8 +34,12 @@ public class ParticlePlasmaBlast extends Particle {
 		this.rotationPitch = pitch;
 		this.rotationYaw = yaw;
 	}
-
-    public void setScale(float scale) {
+	
+	public void setMaxAge(int maxAge) {
+		this.particleMaxAge = maxAge;
+	}
+	
+	public void setScale(float scale) {
 		this.particleScale = scale;
 	}
 

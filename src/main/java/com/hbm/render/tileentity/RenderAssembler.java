@@ -3,7 +3,7 @@ package com.hbm.render.tileentity;
 import org.lwjgl.opengl.GL11;
 import com.hbm.inventory.AssemblerRecipes;
 import com.hbm.main.ResourceManager;
-import com.hbm.tileentity.machine.TileEntityMachineAssembler;
+import com.hbm.main.tileentity.machine.TileEntityMachineAssembler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -124,8 +124,10 @@ public class RenderAssembler extends TileEntitySpecialRenderer<TileEntityMachine
         
         if(offset > 500)
         	offset = 500 - (offset - 500);
-
-        if(((TileEntityMachineAssembler) tileEntity).isProgressing)
+        
+        TileEntityMachineAssembler assembler = (TileEntityMachineAssembler) tileEntity;
+        
+        if(assembler.isProgressing)
         	GL11.glTranslated(offset * 0.003 - 0.75, 0, 0);
 		
         ResourceManager.assembler_slider.renderAll();
@@ -136,7 +138,7 @@ public class RenderAssembler extends TileEntitySpecialRenderer<TileEntityMachine
 
         sway = Math.sin(sway / Math.PI / 50);
 
-        if(((TileEntityMachineAssembler) tileEntity).isProgressing)
+        if(assembler.isProgressing)
         	GL11.glTranslated(0, 0, sway * 0.3);
         ResourceManager.assembler_arm.renderAll();
 
@@ -170,8 +172,10 @@ public class RenderAssembler extends TileEntitySpecialRenderer<TileEntityMachine
 		bindTexture(ResourceManager.assembler_cog_tex);
 
         int rotation = (int) (System.currentTimeMillis() % (360 * 5)) / 5;
+        
+        TileEntityMachineAssembler assembler = (TileEntityMachineAssembler) tileEntity;
 
-        if(!((TileEntityMachineAssembler) tileEntity).isProgressing)
+        if(!assembler.isProgressing)
         	rotation = 0;
         
         GL11.glPushMatrix();

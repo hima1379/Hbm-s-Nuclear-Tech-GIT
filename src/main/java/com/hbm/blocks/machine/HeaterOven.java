@@ -1,12 +1,13 @@
 package com.hbm.blocks.machine;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.blocks.ITooltipProvider;
-import com.hbm.tileentity.TileEntityProxyCombo;
-import com.hbm.tileentity.machine.TileEntityHeaterOven;
+import com.hbm.main.tileentity.TileEntityProxyCombo;
+import com.hbm.main.tileentity.machine.TileEntityHeaterOven;
 import com.hbm.util.I18nUtil;
 
 import net.minecraft.block.material.Material;
@@ -24,7 +25,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 public class HeaterOven extends BlockDummyable implements ITooltipProvider, ILookOverlay {
     public HeaterOven(Material mat, String s) {

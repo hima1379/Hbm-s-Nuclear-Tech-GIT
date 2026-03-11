@@ -10,9 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.lang.NoClassDefFoundError;
 
-import com.hbm.lib.Library;
-import net.minecraft.block.*;
 import org.apache.logging.log4j.Level;
 
 import com.hbm.config.CompatibilityConfig;
@@ -26,6 +25,15 @@ import com.hbm.main.MainRegistry;
 import api.hbm.energy.IEnergyUser;
 
 import cofh.redstoneflux.api.IEnergyProvider;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockHugeMushroom;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.BlockSand;
+import net.minecraft.block.BlockBush;
+import net.minecraft.block.BlockIce;
+import net.minecraft.block.BlockSnow;
+import net.minecraft.block.BlockSnowBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -51,15 +59,16 @@ public class ExplosionNukeGeneric {
 			return;
 		}
 		MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        int r2 = bombStartStrength * bombStartStrength;
+		int r = bombStartStrength;
+		int r2 = r * r;
 		int r22 = r2 / 2;
-		for (int xx = -bombStartStrength; xx < bombStartStrength; xx++) {
+		for (int xx = -r; xx < r; xx++) {
 			int X = xx + x;
 			int XX = xx * xx;
-			for (int yy = -bombStartStrength; yy < bombStartStrength; yy++) {
+			for (int yy = -r; yy < r; yy++) {
 				int Y = yy + y;
 				int YY = XX + yy * yy;
-				for (int zz = -bombStartStrength; zz < bombStartStrength; zz++) {
+				for (int zz = -r; zz < r; zz++) {
 					int Z = zz + z;
 					int ZZ = YY + zz * zz;
 					if (ZZ < r22) {
@@ -78,14 +87,15 @@ public class ExplosionNukeGeneric {
 		double d5;
 		double d6;
 		double d7;
+		double wat = radius;
 
-        // bombStartStrength *= 2.0F;
-		i = MathHelper.floor(x - (double) radius - 1.0D);
-		j = MathHelper.floor(x + (double) radius + 1.0D);
-		k = MathHelper.floor(y - (double) radius - 1.0D);
-		int i2 = MathHelper.floor(y + (double) radius + 1.0D);
-		int l = MathHelper.floor(z - (double) radius - 1.0D);
-		int j2 = MathHelper.floor(z + (double) radius + 1.0D);
+		// bombStartStrength *= 2.0F;
+		i = MathHelper.floor(x - wat - 1.0D);
+		j = MathHelper.floor(x + wat + 1.0D);
+		k = MathHelper.floor(y - wat - 1.0D);
+		int i2 = MathHelper.floor(y + wat + 1.0D);
+		int l = MathHelper.floor(z - wat - 1.0D);
+		int j2 = MathHelper.floor(z + wat + 1.0D);
 		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(null, new AxisAlignedBB(i, k, l, j, i2, j2));
 
 		for (int i1 = 0; i1 < list.size(); ++i1) {
@@ -101,12 +111,12 @@ public class ExplosionNukeGeneric {
 				d6 = entity.posY + entity.getEyeHeight() - y;
 				d7 = entity.posZ - z;
 				double d9 = MathHelper.sqrt(d5 * d5 + d6 * d6 + d7 * d7);
-				if (d9 < (double) radius && !(entity instanceof EntityPlayer && ArmorUtil.checkArmor((EntityPlayer) entity, ModItems.euphemium_helmet, ModItems.euphemium_plate, ModItems.euphemium_legs, ModItems.euphemium_boots))) {
+				if (d9 < wat && !(entity instanceof EntityPlayer && ArmorUtil.checkArmor((EntityPlayer) entity, ModItems.euphemium_helmet, ModItems.euphemium_plate, ModItems.euphemium_legs, ModItems.euphemium_boots))) {
 					d5 /= d9;
 					d6 /= d9;
 					d7 /= d9;
 					
-					if (!Library.isCreative(entity)) {
+					if (!(entity instanceof EntityPlayer && ((EntityPlayer) entity).capabilities.isCreativeMode)) {
 						double d8 = 0.125 + (random.nextDouble() * 0.25);
 						entity.motionX -= d5 * d8;
 						entity.motionY -= d6 * d8;
@@ -190,15 +200,16 @@ public class ExplosionNukeGeneric {
 			return;
 		}
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        int r2 = radius * radius;
+		int r = radius;
+		int r2 = r * r;
 		int r22 = r2 / 2;
-		for (int xx = -radius; xx < radius; xx++) {
+		for (int xx = -r; xx < r; xx++) {
 			int X = xx + x;
 			int XX = xx * xx;
-			for (int yy = -radius; yy < radius; yy++) {
+			for (int yy = -r; yy < r; yy++) {
 				int Y = yy + y;
 				int YY = XX + yy * yy;
-				for (int zz = -radius; zz < radius; zz++) {
+				for (int zz = -r; zz < r; zz++) {
 					int Z = zz + z;
 					int ZZ = YY + zz * zz;
 					if (ZZ < r22 + world.rand.nextInt(r22 / 5)) {
@@ -349,15 +360,16 @@ public class ExplosionNukeGeneric {
 		int y = pos.getY();
 		int z = pos.getZ();
 		MutableBlockPos mpos = new BlockPos.MutableBlockPos(pos);
-        int r2 = radius * radius;
+		int r = radius;
+		int r2 = r * r;
 		int r22 = r2 / 2;
-		for (int xx = -radius; xx < radius; xx++) {
+		for (int xx = -r; xx < r; xx++) {
 			int X = xx + x;
 			int XX = xx * xx;
-			for (int yy = -radius; yy < radius; yy++) {
+			for (int yy = -r; yy < r; yy++) {
 				int Y = yy + y;
 				int YY = XX + yy * yy;
-				for (int zz = -radius; zz < radius; zz++) {
+				for (int zz = -r; zz < r; zz++) {
 					int Z = zz + z;
 					int ZZ = YY + zz * zz;
 					if (ZZ < r22 + world.rand.nextInt(r22 / 5)) {
@@ -381,7 +393,7 @@ public class ExplosionNukeGeneric {
 
 			else if (b == Blocks.GLASS || b == Blocks.STAINED_GLASS
 					|| b == Blocks.ACACIA_DOOR || b == Blocks.BIRCH_DOOR || b == Blocks.DARK_OAK_DOOR || b == Blocks.JUNGLE_DOOR || b == Blocks.OAK_DOOR || b == Blocks.SPRUCE_DOOR || b == Blocks.IRON_DOOR
-					|| b instanceof BlockLeaves) {
+					|| b == Blocks.LEAVES || b == Blocks.LEAVES2) {
 				world.setBlockToAir(pos);
 			}
 
@@ -538,7 +550,7 @@ public class ExplosionNukeGeneric {
 				
 				while((currentLine = read.readLine()) != null){
 					lineCount ++;
-					if(currentLine.startsWith("#") || currentLine.isEmpty())
+					if(currentLine.startsWith("#") || currentLine.length() == 0)
 						continue;
 					String[] blocks = currentLine.trim().split("|");
 					if(blocks.length != 2)

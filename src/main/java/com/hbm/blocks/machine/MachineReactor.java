@@ -3,8 +3,8 @@ package com.hbm.blocks.machine;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.TileEntityProxyInventory;
-import com.hbm.tileentity.machine.TileEntityMachineReactor;
+import com.hbm.main.tileentity.TileEntityProxyInventory;
+import com.hbm.main.tileentity.machine.TileEntityMachineReactor;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

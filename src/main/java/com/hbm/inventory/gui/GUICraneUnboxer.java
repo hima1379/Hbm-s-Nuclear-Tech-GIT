@@ -2,7 +2,7 @@ package com.hbm.inventory.gui;
 
 import com.hbm.inventory.container.ContainerCraneUnboxer;
 import com.hbm.lib.RefStrings;
-import com.hbm.tileentity.network.TileEntityCraneUnboxer;
+import com.hbm.main.tileentity.network.TileEntityCraneUnboxer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;

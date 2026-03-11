@@ -3,7 +3,7 @@ package com.hbm.blocks.machine;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.machine.TileEntityMachineRTG;
+import com.hbm.main.tileentity.machine.TileEntityMachineRTG;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -52,7 +52,7 @@ public class MachineRTG extends BlockContainer {
 		TileEntity tileentity = world.getTileEntity(pos);
 
 		if(tileentity instanceof TileEntityMachineRTG) {
-			InventoryHelper.dropInventoryItems(world, pos, tileentity);
+			InventoryHelper.dropInventoryItems(world, pos, (TileEntityMachineRTG) tileentity);
 
 			world.updateComparatorOutputLevel(pos, this);
 		}

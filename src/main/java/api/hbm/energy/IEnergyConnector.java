@@ -1,11 +1,15 @@
 package api.hbm.energy;
 
+import com.hbm.packet.AuxParticlePacketNT;
+import com.hbm.packet.PacketDispatcher;
 import com.hbm.render.amlfrom1710.Vec3;
 import com.hbm.lib.ForgeDirection;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 /**
  * For anything that connects to power and can be transferred power to, the bottom-level interface.
@@ -19,7 +23,7 @@ public interface IEnergyConnector extends ILoadedTile {
 	 * @param power
 	 * @return
 	 */
-    long transferPower(long power);
+	public long transferPower(long power);
 	
 	/**
 	 * Whether the given side can be connected to
@@ -27,7 +31,7 @@ public interface IEnergyConnector extends ILoadedTile {
 	 * @param dir
 	 * @return
 	 */
-	default boolean canConnect(ForgeDirection dir) {
+	public default boolean canConnect(ForgeDirection dir) {
 		return dir != ForgeDirection.UNKNOWN;
 	}
 	
@@ -35,16 +39,64 @@ public interface IEnergyConnector extends ILoadedTile {
 	 * The current power of either the machine or an entire network
 	 * @return
 	 */
-    long getPower();
+	public long getPower();
 	
 	/**
 	 * The capacity of either the machine or an entire network
 	 * @return
 	 */
-    long getMaxPower();
+	public long getMaxPower();
 	
-	default long getTransferWeight() {
+	public default long getTransferWeight() {
 		return Math.max(getMaxPower() - getPower(), 0);
+	}
+
+	// EnergyValue-based methods (for BigInteger support)
+	// Default implementations use existing long-based methods for backward compatibility
+
+	/**
+	 * Transfer power using EnergyValue (supports values beyond long range)
+	 * Default implementation converts to/from long for compatibility
+	 * @param power The amount of power to transfer
+	 * @return The amount of power that could not be transferred (overshoot)
+	 */
+	public default EnergyValue transferPowerEV(EnergyValue power) {
+		// Warn if receiving BigInteger power but using long-based implementation
+		if(power.isGreaterThan(EnergyValue.of(Long.MAX_VALUE))) {
+			System.out.println("[" + this.getClass().getSimpleName() + "] WARNING: Receiving BigInteger power (" +
+			                   power + "), but using long-based transferPower() - will be clamped to Long.MAX_VALUE");
+		}
+
+		// Default implementation: convert to long, call existing method, convert back
+		long overshoot = this.transferPower(power.toLongClamped());
+		return EnergyValue.of(overshoot);
+	}
+
+	/**
+	 * Get current power as EnergyValue
+	 * Default implementation uses existing getPower() method
+	 * @return Current power level
+	 */
+	public default EnergyValue getPowerEV() {
+		return EnergyValue.of(this.getPower());
+	}
+
+	/**
+	 * Get maximum power capacity as EnergyValue
+	 * Default implementation uses existing getMaxPower() method
+	 * @return Maximum power capacity
+	 */
+	public default EnergyValue getMaxPowerEV() {
+		return EnergyValue.of(this.getMaxPower());
+	}
+
+	/**
+	 * Get transfer weight as EnergyValue (how much power this connector wants)
+	 * Default implementation uses existing getTransferWeight() method
+	 * @return Transfer weight
+	 */
+	public default EnergyValue getTransferWeightEV() {
+		return EnergyValue.of(this.getTransferWeight());
 	}
 	
 	/**
@@ -54,7 +106,7 @@ public interface IEnergyConnector extends ILoadedTile {
 	 * @param y
 	 * @param z
 	 */
-	default void trySubscribe(World world, BlockPos pos, ForgeDirection dir) {
+	public default void trySubscribe(World world, BlockPos pos, ForgeDirection dir) {
 
 		TileEntity te = world.getTileEntity(pos);
 		boolean red = false;
@@ -86,7 +138,7 @@ public interface IEnergyConnector extends ILoadedTile {
 		// }
 	}
 	
-	default void tryUnsubscribe(World world, BlockPos pos) {
+	public default void tryUnsubscribe(World world, BlockPos pos) {
 
 		TileEntity te = world.getTileEntity(pos);
 		
@@ -98,39 +150,40 @@ public interface IEnergyConnector extends ILoadedTile {
 		}
 	}
 	
-	boolean particleDebug = true;
+	public static final boolean particleDebug = true;
 	
-	default Vec3 getDebugParticlePos() {
+	public default Vec3 getDebugParticlePos() {
 		BlockPos pos = ((TileEntity) this).getPos();
-        return Vec3.createVectorHelper(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
+		Vec3 vec = Vec3.createVectorHelper(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
+		return vec;
 	}
 	
-	default ConnectionPriority getPriority() {
+	public default ConnectionPriority getPriority() {
 		return ConnectionPriority.NORMAL;
 	}
 	
-	enum ConnectionPriority {
+	public enum ConnectionPriority {
 		LOW,
 		NORMAL,
 		HIGH
 	}
 
-	default boolean isStorage() { //used for batteries
+	public default boolean isStorage() { //used for batteries
 		return false;
 	}
 
-	default void updateStandardConnections(World world, TileEntity te) {
+	public default void updateStandardConnections(World world, TileEntity te) {
 		updateStandardConnections(world, te.getPos());
 	}
 		
-	default void updateStandardConnections(World world, BlockPos pos) {
+	public default void updateStandardConnections(World world, BlockPos pos) {
 		
 		for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
 			this.trySubscribe(world, pos.add(dir.offsetX, dir.offsetY, dir.offsetZ), dir);
 		}
 	}
 
-	default void updateConnectionsExcept(World world, BlockPos pos, ForgeDirection nogo) {
+	public default void updateConnectionsExcept(World world, BlockPos pos, ForgeDirection nogo) {
 		
 		for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
 			if(dir != nogo)

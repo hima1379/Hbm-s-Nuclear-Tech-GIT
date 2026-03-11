@@ -1,6 +1,6 @@
 package com.hbm.inventory.container;
 
-import com.hbm.tileentity.machine.rbmk.TileEntityRBMKStorage;
+import com.hbm.main.tileentity.machine.rbmk.TileEntityRBMKStorage;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
