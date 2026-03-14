@@ -74,9 +74,21 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
     // Seeker and fuse
     private static final double ACTIVE_SEEKER_RANGE     = 22500.0;  // m
     private static final double SEEKER_FOV_COS          = Math.cos(Math.toRadians(30.0));  // ±30° half-angle (real SM-6 ARH)
-    // Proximity fuse radius increased 20→35 m to improve kill probability on high-speed near-miss
-    // geometries where the swept-path check may skip past the target between ticks.
-    private static final double PROXIMITY_FUSE_RANGE    = 35.0;     // m
+    // Proximity fuse kill radius — single-radius design (restored with 200Hz sub-stepping).
+    //
+    // With 200Hz terminal physics the missile advances ≈6.8 m per sub-step at Mach 4,
+    // so a 35 m radius is reachable every sub-step; the CPA estimator in checkTermination()
+    // fires reliably before the missile has passed the target.
+    //
+    // Two-radius fallback (2026-03 patch — uncomment to re-enable if sub-stepping is OFF):
+    //   Scan horizon PROXIMITY_FUSE_RANGE = 65 m → AABB search + pass-through log window.
+    //   Kill sphere  PROXIMITY_FUSE_RANGE = 35 m → actual detonation threshold.
+    //   Also restore `final double FUSE_R2 = PROXIMITY_FUSE_RANGE²` in checkTermination()
+    //   and replace FUSE_R2 with FUSE_R2 in all detonation checks (①–⑤) there.
+    //
+    // private static final double PROXIMITY_FUSE_RANGE = 65.0;  // m — two-radius scan horizon
+    // private static final double PROXIMITY_FUSE_RANGE = 35.0;  // m — two-radius kill sphere
+    private static final double PROXIMITY_FUSE_RANGE    = 35.0;     // m  — kill sphere (200Hz mode)
     private static final int    PROX_FUSE_ARM_TICKS     = 60;
 
     // Warhead – Mk 125 blast-fragmentation, 64 kg
@@ -239,6 +251,16 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
         return new EntityMissileBaseGuidance.GuidanceLIFT();
     }
 
+    /**
+     * SM-6 seeker half-angle FOV: 30°.  The CRUISE/COAST→TERMINAL handover gate
+     * (EuroGNC 2022 α(tf)=0 condition) uses this to check that the velocity
+     * vector is within the seeker's field of view before handing off.
+     */
+    @Override
+    protected double getTerminalEntryMaxLookAngleDeg() {
+        return 30.0;
+    }
+
     /** Pitch-over from 80° down to target elevation (ticks 60–220).
      *  Extended from 160 → 220 ticks so the velocity pitch at APG entry is
      *  ~7° lower (~40° vs ~47°), reducing the initial flight-path error that
@@ -248,10 +270,17 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
         return new EntityMissileBaseGuidance.GuidanceTURN(60, 220);
     }
 
-    /** ICAS-2024 4th-order polynomial trajectory shaping (BOOST + CRUISE). */
+    /**
+     * ICAS-2024 4th-order polynomial altitude shaping (BOOST + CRUISE).
+     * Peak altitude computed dynamically at launch (ICAS 2024): scales with
+     * horizontal range to avoid AoA saturation.  Formula:
+     *   h_above  = min(R_horiz × 0.12, 12000 m)
+     *   h_peak   = clamp(tgt_Y + max(h_above, 5000), mY+2000, 22000 m)
+     * This replaces the previous fixed 20,000 m value.
+     */
     @Override
     protected EntityMissileBaseGuidance createMidcourseGuidance() {
-        return new EntityMissileBaseGuidance.GuidanceAPG();
+        return new EntityMissileBaseGuidance.GuidanceLoftAPG();
     }
 
     /**
@@ -272,12 +301,28 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
     }
 
     /**
-     * ZEM-APN, N=5, τ_f=0.20 s – TERMINAL 5–20 km.
-     * Guidance filter smooths APN command; target accel estimate via finite diff.
+     * ZEM-APN, N=5, τ_f=0.15 s – far terminal ≥5 km.
+     *
+     * Replaces GuidanceIACG(6.0, 0.10, NaN) with GuidanceAPN(5.0, 0.15):
+     *
+     * Root cause of ~174 m miss (log analysis 2026-03):
+     *   At TERMINAL entry (range≈17 759 m) ZEM was only −174 m (dgamma=−0.64°),
+     *   trivially correctable with the available 6 °/s turn rate.
+     *   However IACG drove ZEM from −174 m → −270 m over the 17–5 km leg because
+     *   its impact-angle constraint commanded the missile upward (f≈+42°) while the
+     *   required gamma_cmd was downward.  APN near (τ=0.08) partially recovered to
+     *   −201 m before endgame, but APN endgame (τ=0.04, tgo=0.81 s) could not null
+     *   201 m in time → 174 m CPA.
+     *
+     *   With APN from 17 759 m the missile corrects the −174 m ZEM immediately
+     *   (dgamma=−0.64° ≪ 6 °/s limit), so near/endgame APN receives ~0 m ZEM.
+     *
+     * τ_f=0.15 s: matches COAST APN — smooth response at long ranges where tgo
+     * is large and ZEM changes slowly.
      */
     @Override
     protected EntityMissileBaseGuidance createTerminalGuidanceFar() {
-        return new EntityMissileBaseGuidance.GuidanceAPN(5.0, 0.20);
+        return new EntityMissileBaseGuidance.GuidanceAPN(5.0, 0.15);
     }
 
     /**
@@ -376,6 +421,18 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
     protected void onPreGuidance() {
         tickSeekerState();
         if (flightPhase != FlightPhase.LIFT && flightPhase != FlightPhase.TURN) {
+            // Force-load the chunk containing the estimated target position so that
+            // getEntitiesWithinAABBExcludingEntity() in acquireTarget() can find the
+            // target entity.  Without this, targets beyond the player's view distance
+            // live in unloaded chunks → AABB scan returns nothing → seeker stays at
+            // SEARCHING indefinitely → activeTarget=null → proximity fuse never fires.
+            // forceLoadChunkAtPos() is a no-op if the chunk hasn't changed since last call.
+            if (seekerState == SeekerState.SEARCHING || seekerState == SeekerState.LOCKED) {
+                double[] estTgt = getTargetPosition();
+                if (estTgt != null) {
+                    forceLoadChunkAtPos(estTgt[0], estTgt[2]);
+                }
+            }
             acquireTarget();
         }
 
@@ -542,8 +599,31 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
 
     @Override
     protected boolean checkTermination() {
+        // ── ENTRY DIAGNOSTIC — always prints when target is within 200 m ─────────
+        // This fires unconditionally (before the arm check) so we can verify:
+        //   (a) checkTermination() is being called each tick, and
+        //   (b) the exact lastTickPos / activeTarget.posX values used in check ①.
+        if (activeTarget != null && !activeTarget.isDead) {
+            double _dxE = this.lastTickPosX - activeTarget.posX;
+            double _dyE = this.lastTickPosY - activeTarget.posY;
+            double _dzE = this.lastTickPosZ - activeTarget.posZ;
+            double _preSq = _dxE*_dxE + _dyE*_dyE + _dzE*_dzE;
+            if (_preSq < 200.0 * 200.0) {
+                System.out.println(String.format(
+                    "[SM6-ENTRY age=%d] checkTermination() | armed=%b | ltp=(%.2f,%.2f,%.2f) posX=(%.2f,%.2f,%.2f) tgt=(%.2f,%.2f,%.2f) preDist=%.2fm FUSE_R=%.0fm fire=%b",
+                    age, (age >= PROX_FUSE_ARM_TICKS),
+                    lastTickPosX, lastTickPosY, lastTickPosZ,
+                    posX, posY, posZ,
+                    activeTarget.posX, activeTarget.posY, activeTarget.posZ,
+                    Math.sqrt(_preSq), PROXIMITY_FUSE_RANGE,
+                    (_preSq < PROXIMITY_FUSE_RANGE * PROXIMITY_FUSE_RANGE)));
+            }
+        }
         if (age < PROX_FUSE_ARM_TICKS) return false;
 
+        // Kill radius² — used for ALL detonation decisions (①–⑤) and the AABB expansion.
+        // With 200Hz sub-stepping PROXIMITY_FUSE_RANGE = 35 m (single-radius mode).
+        // Two-radius mode: restore FUSE_R2 = PROXIMITY_FUSE_RANGE² and use it instead.
         final double FUSE_R2 = PROXIMITY_FUSE_RANGE * PROXIMITY_FUSE_RANGE;
 
         // ── Primary + pass-through fallback: actively-tracked target ───────────
@@ -562,7 +642,7 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
         //   the previous endpoint distance was within PROXIMITY_FUSE_RANGE and
         //   the missile is now diverging (further away), the warhead detonates at
         //   the last recorded target position — guaranteeing a kill whenever the
-        //   missile's path ever brought it within the fuse radius.
+        //   missile's path ever brought it within the kill sphere.
         if (activeTarget != null && !activeTarget.isDead) {
             double tx = activeTarget.posX;
             double ty = activeTarget.posY;
@@ -573,8 +653,7 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
             //    between lastTickPos assignment and the physics step).  When the
             //    target updates before SM6 ("Case A" entity ordering), target.posX is
             //    already the target's post-tick position while this.lastTickPosX is
-            //    SM6's pre-tick position.  If their separation < FUSE_R2 the paths
-            //    crossed within this tick.
+            //    SM6's pre-tick position.  Detonates only if separation < FUSE_R2.
             {
                 double dxPre = this.lastTickPosX - tx;
                 double dyPre = this.lastTickPosY - ty;
@@ -583,8 +662,8 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
                 if (preDistSq < FUSE_R2) {
                     this.setPosition(this.lastTickPosX, this.lastTickPosY, this.lastTickPosZ);
                     System.out.println(String.format(
-                        "[SM6-FUSE age=%d] pre-tick dist=%.1fm tgt=(%.0f,%.0f,%.0f) det=(%.0f,%.0f,%.0f)",
-                        age, Math.sqrt(preDistSq), tx, ty, tz,
+                        "[SM6-FUSE age=%d] ① pre-tick dist=%.1fm (<%.0fm kill) tgt=(%.0f,%.0f,%.0f) det=(%.0f,%.0f,%.0f)",
+                        age, Math.sqrt(preDistSq), PROXIMITY_FUSE_RANGE, tx, ty, tz,
                         this.lastTickPosX, this.lastTickPosY, this.lastTickPosZ));
                     return true;
                 }
@@ -605,6 +684,10 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
             //    r(t) = (SM6_start + t·SM6_vel) − (tgt_start + t·tgt_vel)
             //         = r0 + t·dv
             //    Minimised at  t* = −(r0·dv) / |dv|²  (clamped to [0,1])
+            //
+            //    Detonation threshold: FUSE_R2 (35 m).  The CPA debug log prints the
+            //    true CPA even when it exceeds FUSE_R2, so miss distances are always
+            //    visible in the log regardless of whether the fuse fires.
             {
                 double r0x = this.lastTickPosX - activeTarget.lastTickPosX;
                 double r0y = this.lastTickPosY - activeTarget.lastTickPosY;
@@ -620,15 +703,18 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
                 double cy = r0y + tStar * dvy;
                 double cz = r0z + tStar * dvz;
                 double cpaDistSq = cx*cx + cy*cy + cz*cz;
-                // Debug: log all CPA inputs/output when target is within 200 m (pre-physics dist)
+                // Debug: log CPA when target is within scan horizon (4× fuse radius = 140 m).
+                // Using 4× so the log fires even when pre-tick dist > FUSE_R2, allowing
+                // "donut-hole" miss distances to be measured in the log.
                 {
                     double dxDbg = this.lastTickPosX - tx;
                     double dyDbg = this.lastTickPosY - ty;
                     double dzDbg = this.lastTickPosZ - tz;
-                    if (dxDbg*dxDbg + dyDbg*dyDbg + dzDbg*dzDbg < 40000.0) { // 200 m radius
+                    final double CPA_LOG_R = PROXIMITY_FUSE_RANGE * 4.0; // 140 m horizon
+                    if (dxDbg*dxDbg + dyDbg*dyDbg + dzDbg*dzDbg < CPA_LOG_R * CPA_LOG_R) {
                         System.out.println(String.format(
-                            "[SM6-CPA-DBG age=%d] r0=(%.1f,%.1f,%.1f) dv=(%.1f,%.1f,%.1f) t*=%.3f cpa=%.1fm | tLTP=(%.1f,%.1f,%.1f) tPos=(%.1f,%.1f,%.1f)",
-                            age, r0x, r0y, r0z, dvx, dvy, dvz, tStar, Math.sqrt(cpaDistSq),
+                            "[SM6-CPA-DBG age=%d] r0=(%.1f,%.1f,%.1f) dv=(%.1f,%.1f,%.1f) t*=%.3f cpa=%.1fm (kill<%.0fm) | tLTP=(%.1f,%.1f,%.1f) tPos=(%.1f,%.1f,%.1f)",
+                            age, r0x, r0y, r0z, dvx, dvy, dvz, tStar, Math.sqrt(cpaDistSq), PROXIMITY_FUSE_RANGE,
                             activeTarget.lastTickPosX, activeTarget.lastTickPosY, activeTarget.lastTickPosZ,
                             tx, ty, tz));
                     }
@@ -640,8 +726,8 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
                     double detZ = this.lastTickPosZ + tStar * (this.posZ - this.lastTickPosZ);
                     this.setPosition(detX, detY, detZ);
                     System.out.println(String.format(
-                        "[SM6-FUSE age=%d] CPA-detonate dist=%.1fm tgt=(%.0f,%.0f,%.0f) det=(%.1f,%.1f,%.1f) t*=%.3f",
-                        age, Math.sqrt(cpaDistSq), tx, ty, tz, detX, detY, detZ, tStar));
+                        "[SM6-FUSE age=%d] ② CPA-detonate dist=%.1fm (<%.0fm kill) tgt=(%.0f,%.0f,%.0f) det=(%.1f,%.1f,%.1f) t*=%.3f",
+                        age, Math.sqrt(cpaDistSq), PROXIMITY_FUSE_RANGE, tx, ty, tz, detX, detY, detZ, tStar));
                     return true;
                 }
             }
@@ -653,28 +739,30 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
 
             if (curDistSq < FUSE_R2) {
                 System.out.println(String.format(
-                    "[SM6-FUSE age=%d] endpoint dist=%.1fm tgt=(%.0f,%.0f,%.0f)",
-                    age, Math.sqrt(curDistSq), tx, ty, tz));
+                    "[SM6-FUSE age=%d] ③ endpoint dist=%.1fm (<%.0fm kill) tgt=(%.0f,%.0f,%.0f)",
+                    age, Math.sqrt(curDistSq), PROXIMITY_FUSE_RANGE, tx, ty, tz));
                 return true;
             }
 
-            // ④ Pass-through fallback: fires if LAST TICK's endpoint was within
-            //    range and missile is now moving away (closest approach was missed).
+            // ④ Pass-through fallback: fires if LAST TICK's endpoint was within the
+            //    kill sphere and missile is now moving away (closest approach was missed).
             if (fuseLastEndDistSq < FUSE_R2 && curDistSq > fuseLastEndDistSq) {
-                // Pass-through: missile was within fuse range last tick but is now diverging
-                // (closest approach has passed).  Detonate at a random point within
-                // PROXIMITY_FUSE_RANGE of the CURRENT target position — dynamic because
-                // the target has moved since fuseLastKnown* was recorded last tick.
+                // Missile was within kill sphere last tick but is now diverging.
+                // Detonate at a random point within PROXIMITY_FUSE_RANGE of the CURRENT
+                // target position — dynamic because the target has moved since
+                // fuseLastKnown* was recorded last tick.
                 double[] det = randomPointInSphere(tx, ty, tz, PROXIMITY_FUSE_RANGE);
                 System.out.println(String.format(
-                    "[SM6-FUSE-FALLBACK age=%d] pass-through! lastDist=%.1fm->%.1fm detonate near tgt=(%.0f,%.0f,%.0f) at=(%.1f,%.1f,%.1f)",
-                    age, Math.sqrt(fuseLastEndDistSq), Math.sqrt(curDistSq),
+                    "[SM6-FUSE-FALLBACK age=%d] ④ pass-through! lastDist=%.1fm->%.1fm (<%.0fm kill) tgt=(%.0f,%.0f,%.0f) det=(%.1f,%.1f,%.1f)",
+                    age, Math.sqrt(fuseLastEndDistSq), Math.sqrt(curDistSq), PROXIMITY_FUSE_RANGE,
                     tx, ty, tz, det[0], det[1], det[2]));
                 this.setPosition(det[0], det[1], det[2]);
                 return true;
             }
 
-            // Update tracker for next tick
+            // Update tracker for next tick.
+            // Always record the current distance so that the pass-through fallback
+            // and ⑤ have accurate data whenever the missile enters the scan horizon.
             fuseLastEndDistSq = curDistSq;
             fuseLastKnownTX   = tx;
             fuseLastKnownTY   = ty;
@@ -682,18 +770,19 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
 
         } else if (fuseLastEndDistSq < FUSE_R2) {
             // ⑤ Target entity vanished (null / dead) while missile was within kill
-            //    radius.  Detonate at the last known target position.
+            //    sphere.  Detonate at the last known target position.
             System.out.println(String.format(
-                "[SM6-FUSE-FALLBACK age=%d] target lost within %.1fm — snap detonate (%.0f,%.0f,%.0f)",
-                age, Math.sqrt(fuseLastEndDistSq),
+                "[SM6-FUSE-FALLBACK age=%d] ⑤ target lost within %.1fm (<%.0fm kill) — snap detonate (%.0f,%.0f,%.0f)",
+                age, Math.sqrt(fuseLastEndDistSq), PROXIMITY_FUSE_RANGE,
                 fuseLastKnownTX, fuseLastKnownTY, fuseLastKnownTZ));
             this.setPosition(fuseLastKnownTX, fuseLastKnownTY, fuseLastKnownTZ);
             return true;
         }
 
         // ── Secondary: general area-defence sweep (aircraft, drones, etc.) ─────
-        // Grow the search AABB by the full swept distance so that fast-moving
-        // threats are not missed when the missile crosses their sphere in one tick.
+        // AABB search uses PROXIMITY_FUSE_RANGE (35 m) expanded by motionDist so that
+        // fast-moving threats are caught even if they crossed the kill sphere in one tick.
+        // The detonation check also uses FUSE_R2 (35 m), consistent with primary checks.
         double motionDist = Math.sqrt(this.motionX*this.motionX
                 + this.motionY*this.motionY + this.motionZ*this.motionZ);
         double fuseSearch = PROXIMITY_FUSE_RANGE + motionDist;
@@ -743,6 +832,39 @@ public class EntityMissileSM6 extends EntityMissileBaseRealistic implements IDat
                 (ax*bx + ay*by + az*bz) / bLen2)) : 0.0;
         double cx = ax - t*bx, cy = ay - t*by, cz = az - t*bz;
         return cx*cx + cy*cy + cz*cz;
+    }
+
+    /**
+     * 200Hz proximity fuse: called after each sub-step position update in the
+     * TERMINAL physics loop.  Checks the straight-line distance from the missile's
+     * current sub-step position to the actively-tracked target.
+     *
+     * This eliminates the "donut-hole" miss mode: a missile that enters and exits
+     * the 35m kill sphere within a single 50ms tick (start and end outside, peak
+     * inside) was previously undetected by the once-per-tick CPA estimator when
+     * the target had moved significantly between lastTickPos and posX.
+     *
+     * Fires check ⑥ log tag to distinguish 200Hz sub-step detonations from the
+     * tick-level checks (①–⑤) in checkTermination().
+     */
+    @Override
+    protected boolean checkProximityFuseSubStep() {
+        if (age < PROX_FUSE_ARM_TICKS) return false;
+        Entity tgt = activeTarget;
+        if (tgt == null || tgt.isDead) return false;
+        double dx = this.posX - tgt.posX;
+        double dy = this.posY - tgt.posY;
+        double dz = this.posZ - tgt.posZ;
+        double distSq = dx*dx + dy*dy + dz*dz;
+        if (distSq < PROXIMITY_FUSE_RANGE * PROXIMITY_FUSE_RANGE) {
+            System.out.println(String.format(
+                "[SM6-FUSE age=%d] \u2466 200Hz sub-step dist=%.1fm (<%.0fm kill) tgt=(%.0f,%.0f,%.0f) det=(%.0f,%.0f,%.0f)",
+                age, Math.sqrt(distSq), PROXIMITY_FUSE_RANGE,
+                tgt.posX, tgt.posY, tgt.posZ,
+                this.posX, this.posY, this.posZ));
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -47,6 +47,13 @@ public abstract class EntityMissileBaseRealistic extends Entity
     protected static final double GRAVITY = 9.80665;   // m/s²
     protected static final double DT      = 0.05;      // seconds per tick
 
+    // ---- 200Hz terminal guidance sub-stepping --------------------------------
+    // During TERMINAL phase onUpdate() runs TERMINAL_SUB_STEPS autopilot+physics
+    // iterations per Minecraft tick (each DT_SUB seconds), giving 200Hz resolution.
+    // Midcourse phases (LIFT/TURN/BOOST/CRUISE/COAST) stay at the standard 20Hz rate.
+    protected static final int    TERMINAL_SUB_STEPS = 10;              // 200Hz = 10 × 20Hz
+    protected static final double DT_SUB             = DT / TERMINAL_SUB_STEPS; // 0.005 s
+
     // ISA atmosphere layers
     private static final double ISA_T0    = 288.15;  // K  sea level
     private static final double ISA_P0    = 101325.0;// Pa sea level
@@ -90,6 +97,8 @@ public abstract class EntityMissileBaseRealistic extends Entity
     protected int chunkX = 0, chunkZ = 0;
     private final List<ChunkPos> loadedChunks = new ArrayList<ChunkPos>();
     private ChunkPos mainChunk;
+    // Extra chunks requested by subclasses (e.g. target entity chunk for seeker acquisition)
+    private final List<ChunkPos> extraChunks = new ArrayList<ChunkPos>();
 
     // -------------------------------------------------------------------------
     // Guidance objects (created once by factory methods in subclass)
@@ -102,6 +111,10 @@ public abstract class EntityMissileBaseRealistic extends Entity
     private EntityMissileBaseGuidance terminalGuidanceNear;
     private EntityMissileBaseGuidance terminalGuidanceEndgame;
     private boolean guidanceInitialized = false;
+
+    // Active timestep used by updateAutopilot() and calculatePhysicsForces().
+    // Set to DT_SUB (0.005 s) inside the TERMINAL 200Hz sub-step loop; DT otherwise.
+    private double stepDT = DT;
 
     // -------------------------------------------------------------------------
     // ARH seeker model  (Palumbo 2010, Figure 6/7, Eq.24 / Eq.27-28)
@@ -197,6 +210,21 @@ public abstract class EntityMissileBaseRealistic extends Entity
      */
     protected double getAeroTimeConstant() { return 0.08; }
 
+    /**
+     * Maximum 3-D look angle (velocity vector → target LOS) permitted at
+     * CRUISE/COAST → TERMINAL handover (EuroGNC 2022 FOV-constrained condition).
+     *
+     * The EuroGNC 2022 paper constrains α(tf)=0 at the handover point (body
+     * axis ≈ velocity vector), so the seeker's look angle equals the angle
+     * between the velocity vector and the target LOS.  Enter TERMINAL only when
+     * this angle is within the seeker's FOV — otherwise the seeker cannot acquire
+     * immediately and the missile overshoots.
+     *
+     * Default: 40° (permissive; works for missiles without a narrow seeker FOV).
+     * Override in subclasses to match the actual seeker FOV (e.g. 30° for SM-6).
+     */
+    protected double getTerminalEntryMaxLookAngleDeg() { return 40.0; }
+
     // =========================================================================
     // ABSTRACT GUIDANCE FACTORIES  (override to supply missile-specific laws)
     // =========================================================================
@@ -245,6 +273,14 @@ public abstract class EntityMissileBaseRealistic extends Entity
      * @return true if the missile should detonate (proximity fuse, impact, etc.)
      */
     protected abstract boolean checkTermination();
+
+    /**
+     * Called after each 200Hz sub-step position update during TERMINAL phase.
+     * Override in subclasses to implement a per-sub-step proximity fuse check.
+     * Returning true immediately triggers onImpact() + setDead().
+     * Default implementation returns false (no sub-step fuse).
+     */
+    protected boolean checkProximityFuseSubStep() { return false; }
 
     /** Called when booster fuel runs out and booster separates. */
     protected abstract void onBoosterSeparation();
@@ -328,6 +364,42 @@ public abstract class EntityMissileBaseRealistic extends Entity
         }
     }
 
+    /**
+     * Force-load the chunk containing world-space position (worldX, worldZ).
+     * Subclasses call this to keep a target entity's chunk loaded so that
+     * World.getEntitiesWithinAABBExcludingEntity() can find it during seeker
+     * acquisition — without this, entities in unloaded chunks are invisible
+     * to the AABB scan and the seeker can never acquire at long range.
+     *
+     * Only loads the chunk once per chunk-boundary crossing (no-op if the same
+     * chunk is requested again).  Old extra chunks are unforced before the new
+     * one is loaded so we do not exceed the ticket's chunk limit.
+     */
+    protected void forceLoadChunkAtPos(double worldX, double worldZ) {
+        if (world.isRemote || loaderTicket == null) return;
+        int tcx = (int) Math.floor(worldX / 16.0);
+        int tcz = (int) Math.floor(worldZ / 16.0);
+        ChunkPos target = new ChunkPos(tcx, tcz);
+        // Already loaded — nothing to do
+        if (!extraChunks.isEmpty() && extraChunks.get(extraChunks.size() - 1).equals(target)) return;
+        // Unload previous extras, then load the new chunk (+ immediate neighbours)
+        for (ChunkPos c : extraChunks) ForgeChunkManager.unforceChunk(loaderTicket, c);
+        extraChunks.clear();
+        extraChunks.add(new ChunkPos(tcx,     tcz));
+        extraChunks.add(new ChunkPos(tcx + 1, tcz));
+        extraChunks.add(new ChunkPos(tcx - 1, tcz));
+        extraChunks.add(new ChunkPos(tcx,     tcz + 1));
+        extraChunks.add(new ChunkPos(tcx,     tcz - 1));
+        for (ChunkPos c : extraChunks) ForgeChunkManager.forceChunk(loaderTicket, c);
+    }
+
+    /** Release all extra (subclass-requested) chunk tickets. Called on missile death. */
+    protected void clearExtraChunks() {
+        if (world.isRemote || loaderTicket == null) return;
+        for (ChunkPos c : extraChunks) ForgeChunkManager.unforceChunk(loaderTicket, c);
+        extraChunks.clear();
+    }
+
     // =========================================================================
     // INITIALISATION
     // =========================================================================
@@ -397,31 +469,21 @@ public abstract class EntityMissileBaseRealistic extends Entity
                 updateGuidanceCommands(tPos, tVel);
             }
 
-            // --- Autopilot: drive body angles toward command ---
-            updateAutopilot();
-
-            // --- Physics forces → acceleration → velocity ---
-            double[] forces = calculatePhysicsForces();
-            double curMass  = getCurrentMass();
-            velX += (forces[0] / curMass) * DT;
-            velY += (forces[1] / curMass) * DT;
-            velZ += (forces[2] / curMass) * DT;
-
-            // --- Diagnostic log every tick ---
+            // --- Diagnostic log (once per tick, before physics) ---
             // Tag [RDBG] allows grepping from latest.log without reading entire 70 MB file.
-            // Logs: aerodynamics (rho, dyn pressure, max achievable G), guidance angles,
-            //       τ_FC filtered command, and target geometry.
+            // Logged before physics so it reflects the pre-physics velocity (end of previous
+            // tick). In TERMINAL phase the label shows "200Hz" to distinguish sub-stepping.
+            // netVertG is unavailable here (forces computed per sub-step); shown as 0.
             if (true) {
                 double _V   = Math.sqrt(velX*velX + velY*velY + velZ*velZ);
                 double[] _atm = getAtmosphericProperties(posY);
                 double _rho = _atm[0];
                 double _mach = _atm[1];
+                double _curMassDbg = getCurrentMass();
                 double _q   = 0.5 * _rho * _V * _V * getReferenceArea(); // dynamic pressure × area (N)
                 // Max achievable lateral acceleration from aerodynamics at this altitude/speed
                 double _maxLiftN = _q * getCLAlpha() * getMaxAoA();
-                double _maxAeroG = _maxLiftN / (curMass * GRAVITY);
-                // Net vertical force (thrust+lift component − gravity) as G-equivalent
-                double _netVertG = forces[1] / (curMass * GRAVITY);
+                double _maxAeroG = _maxLiftN / (_curMassDbg * GRAVITY);
                 double[] _tPos = getTargetPosition();
                 double _range = -1, _Vc = 0, _tPitch = 0, _tYaw = 0;
                 if (_tPos != null) {
@@ -436,56 +498,152 @@ public abstract class EntityMissileBaseRealistic extends Entity
                     _tYaw   = Math.toDegrees(Math.atan2(_dx, _dz));
                 }
                 System.out.println(String.format(
-                    "[RDBG age=%d] ph=%s pos=(%.0f,%.0f,%.0f) V=%.0f M=%.2f | rho=%.4f q=%.0fN maxLiftG=%.2fG netVertG=%.2fG | mP=%.1f cmdP=%.1f thP=%.1f mY=%.1f thY=%.1f losY=%.1f (deg) | range=%.0fm Vc=%.1fm/s losPitch=%.1fdeg",
-                    age, flightPhase, posX, posY, posZ, _V, _mach,
-                    _rho, _q, _maxAeroG, _netVertG,
+                    "[RDBG age=%d%s] ph=%s pos=(%.0f,%.0f,%.0f) V=%.0f M=%.2f | rho=%.4f q=%.0fN maxLiftG=%.2fG | mP=%.1f cmdP=%.1f thP=%.1f mY=%.1f thY=%.1f losY=%.1f (deg) | range=%.0fm Vc=%.1fm/s losPitch=%.1fdeg",
+                    age, (flightPhase == FlightPhase.TERMINAL ? " 200Hz" : ""),
+                    flightPhase, posX, posY, posZ, _V, _mach,
+                    _rho, _q, _maxAeroG,
                     Math.toDegrees(mAngPitch), Math.toDegrees(cmdAngPitch), Math.toDegrees(thAngPitch),
                     Math.toDegrees(mAngYaw),   Math.toDegrees(thAngYaw),   _tYaw,
                     _range, _Vc, _tPitch));
             }
 
-            // --- Position update ---
-            this.motionX = velX * DT;
-            this.motionY = velY * DT;
-            this.motionZ = velZ * DT;
-            updateAnglesFromVelocity();
-            this.posX += this.motionX;
-            this.posY += this.motionY;
-            this.posZ += this.motionZ;
-            // Forge 1.12.2: Entity.getEntityBoundingBox() returns a CACHED AxisAlignedBB
-            // that is only updated when setPosition() is called.  Direct assignment of
-            // posX/Y/Z (above) does NOT sync the AABB.  Without this call the bounding
-            // box remains at the entity's spawn position for its entire lifetime, so
-            // World.getEntitiesWithinAABBExcludingEntity() in checkTermination() always
-            // searches near spawn — the proximity fuse can never fire at range.
-            this.setPosition(this.posX, this.posY, this.posZ);
+            // =================================================================
+            // PHYSICS + POSITION UPDATE
+            //
+            // TERMINAL phase: 200Hz sub-stepping
+            //   – Guidance command (thAngPitch/thAngYaw) held constant at 20Hz above.
+            //   – Autopilot + forces iterated TERMINAL_SUB_STEPS (10) times per tick.
+            //   – Each sub-step advances by DT_SUB = DT / TERMINAL_SUB_STEPS = 0.005 s.
+            //   – Block / void collision checked every sub-step (missile moves ~6.8 m/step
+            //     at Mach 4, so per-step collision avoids tunnelling through 1 m blocks).
+            //   – Proximity fuse (CPA check) runs once after the loop using the full-tick
+            //     swept path lastTickPos → posXYZ; that window is already very accurate.
+            //
+            // Midcourse phases (LIFT/TURN/BOOST/CRUISE/COAST): standard 20Hz update.
+            // =================================================================
 
-            // --- Termination check (proximity fuse, ground, etc.) ---
-            if (checkTermination()) {
-                onImpact();
-                clearLoadedChunks();
-                unloadMainChunk();
-                this.setDead();
-                return;
-            }
+            if (flightPhase == FlightPhase.TERMINAL) {
+                // -- 200Hz terminal physics loop ------------------------------
+                stepDT = DT_SUB;
+                for (int subStep = 0; subStep < TERMINAL_SUB_STEPS; subStep++) {
+                    updateAutopilot();                          // body angles → cmd (200Hz, uses stepDT)
+                    double[] forces = calculatePhysicsForces(); // lift/drag/thrust  (200Hz, uses stepDT for betaA)
+                    double curMass  = getCurrentMass();
+                    velX += (forces[0] / curMass) * stepDT;
+                    velY += (forces[1] / curMass) * stepDT;
+                    velZ += (forces[2] / curMass) * stepDT;
+                    updateAnglesFromVelocity();
+                    // Advance position by one sub-step displacement
+                    this.posX += velX * stepDT;
+                    this.posY += velY * stepDT;
+                    this.posZ += velZ * stepDT;
+                    // Sync AABB after each sub-step so collision queries are accurate.
+                    this.setPosition(this.posX, this.posY, this.posZ);
 
-            // Ground / block collision
-            // Use age (server-authoritative tick counter) to match the proximity-fuse
-            // arm time — avoids detonating on the launch structure during the first second.
-            if (checkBlockCollision()) {
-                if (age >= 60) onImpact();
-                clearLoadedChunks();
-                unloadMainChunk();
-                this.setDead();
-                return;
-            }
+                    // Block collision every sub-step — can't skip blocks at Mach 4+
+                    if (checkBlockCollision()) {
+                        if (age >= 60) onImpact();
+                        clearExtraChunks();
+                        clearLoadedChunks();
+                        unloadMainChunk();
+                        stepDT = DT;
+                        this.setDead();
+                        return;
+                    }
+                    // Below void
+                    if (this.posY < 0) {
+                        clearExtraChunks();
+                        clearLoadedChunks();
+                        unloadMainChunk();
+                        stepDT = DT;
+                        this.setDead();
+                        return;
+                    }
+                    // 200Hz proximity fuse: check kill-sphere at sub-step resolution.
+                    // Catches "donut-hole" passes where the missile crosses the fuse
+                    // radius mid-tick but starts and ends outside it.
+                    if (checkProximityFuseSubStep()) {
+                        onImpact();
+                        clearExtraChunks();
+                        clearLoadedChunks();
+                        unloadMainChunk();
+                        stepDT = DT;
+                        this.setDead();
+                        return;
+                    }
+                }
+                stepDT = DT;
 
-            // Below void: remove silently
-            if (this.posY < 0) {
-                clearLoadedChunks();
-                unloadMainChunk();
-                this.setDead();
-                return;
+                // motionX/Y/Z = full-tick displacement (used by client particles)
+                this.motionX = this.posX - this.lastTickPosX;
+                this.motionY = this.posY - this.lastTickPosY;
+                this.motionZ = this.posZ - this.lastTickPosZ;
+
+                // Proximity fuse: CPA uses the full-tick swept path (lastTickPos → posXYZ).
+                // With 200Hz physics the intercept trajectory is accurate to ≈6.8 m/sub-step,
+                // so the CPA estimator correctly finds sub-35m approaches even in head-on geometry.
+                if (checkTermination()) {
+                    onImpact();
+                    clearExtraChunks();
+                    clearLoadedChunks();
+                    unloadMainChunk();
+                    this.setDead();
+                    return;
+                }
+
+            } else {
+                // -- Standard 20Hz midcourse physics --------------------------
+                updateAutopilot();
+                double[] forces = calculatePhysicsForces();
+                double curMass  = getCurrentMass();
+                velX += (forces[0] / curMass) * DT;
+                velY += (forces[1] / curMass) * DT;
+                velZ += (forces[2] / curMass) * DT;
+                this.motionX = velX * DT;
+                this.motionY = velY * DT;
+                this.motionZ = velZ * DT;
+                updateAnglesFromVelocity();
+                this.posX += this.motionX;
+                this.posY += this.motionY;
+                this.posZ += this.motionZ;
+                // Forge 1.12.2: Entity.getEntityBoundingBox() returns a CACHED AxisAlignedBB
+                // that is only updated when setPosition() is called.  Direct assignment of
+                // posX/Y/Z (above) does NOT sync the AABB.  Without this call the bounding
+                // box remains at the entity's spawn position for its entire lifetime, so
+                // World.getEntitiesWithinAABBExcludingEntity() in checkTermination() always
+                // searches near spawn — the proximity fuse can never fire at range.
+                this.setPosition(this.posX, this.posY, this.posZ);
+
+                // --- Termination check (proximity fuse, ground, etc.) ---
+                if (checkTermination()) {
+                    onImpact();
+                    clearExtraChunks();
+                    clearLoadedChunks();
+                    unloadMainChunk();
+                    this.setDead();
+                    return;
+                }
+
+                // Ground / block collision
+                // Use age (server-authoritative tick counter) to match the proximity-fuse
+                // arm time — avoids detonating on the launch structure during the first second.
+                if (checkBlockCollision()) {
+                    if (age >= 60) onImpact();
+                    clearExtraChunks();
+                    clearLoadedChunks();
+                    unloadMainChunk();
+                    this.setDead();
+                    return;
+                }
+
+                // Below void: remove silently
+                if (this.posY < 0) {
+                    clearExtraChunks();
+                    clearLoadedChunks();
+                    unloadMainChunk();
+                    this.setDead();
+                    return;
+                }
             }
 
             // --- Fuel consumption ---
@@ -594,14 +752,34 @@ public abstract class EntityMissileBaseRealistic extends Entity
                         double dx = tPosCruise[0] - posX, dy = tPosCruise[1] - posY, dz = tPosCruise[2] - posZ;
                         double range = Math.sqrt(dx*dx + dy*dy + dz*dz);
                         if (range < 20000.0) {
-                            double VTerm = Math.sqrt(velX*velX+velY*velY+velZ*velZ);
-                            System.out.println(String.format(
-                                "[RDBG age=%d] CRUISE→TERMINAL range=%.0fm pos=(%.0f,%.0f,%.0f) V=%.0f angP=%.1f",
-                                age, range, posX, posY, posZ, VTerm, Math.toDegrees(mAngPitch)));
-                            flightPhase = FlightPhase.TERMINAL;
-                            if (terminalGuidanceFar     != null) terminalGuidanceFar.resetGuidanceFiltersOnly();
-                            if (terminalGuidanceNear    != null) terminalGuidanceNear.resetGuidanceFiltersOnly();
-                            if (terminalGuidanceEndgame != null) terminalGuidanceEndgame.resetGuidanceFiltersOnly();
+                            // FOV-constrained TERMINAL handover (EuroGNC 2022 α(tf)=0 condition):
+                            // Enter TERMINAL when velocity vector is within seeker FOV of target LOS
+                            // (3-D look angle < getTerminalEntryMaxLookAngleDeg()).  This is the
+                            // physical condition for seeker acquisition.
+                            // Safety override: always enter TERMINAL inside 5 km (too close to wait).
+                            double altAboveTgtCruise = posY - tPosCruise[1];
+                            double velMagC   = Math.sqrt(velX*velX + velY*velY + velZ*velZ);
+                            double dotVLC    = (velMagC > 1.0)
+                                    ? (velX*(dx/range) + velY*(dy/range) + velZ*(dz/range)) / velMagC : -1.0;
+                            double lookAngle3D  = Math.acos(Math.max(-1.0, Math.min(1.0, dotVLC)));
+                            double maxLookRad   = Math.toRadians(getTerminalEntryMaxLookAngleDeg());
+                            // Altitude-delta gate: block TERMINAL while missile is more than 4000 m
+                            // above the target.  At 24 km rho≈0.04 kg/m³ → only ~11G available →
+                            // autopilot lag of 23° at CPA causes a 395 m miss.  Force missile to
+                            // descend to within 4000 m of target altitude before going TERMINAL so
+                            // it has ≥18G and can follow terminal guidance.
+                            // Safety override: always enter TERMINAL inside 5 km range.
+                            if ((lookAngle3D < maxLookRad || range < 5000.0)
+                                    && (altAboveTgtCruise < 4000.0 || range < 5000.0)) {
+                                double VTerm = Math.sqrt(velX*velX+velY*velY+velZ*velZ);
+                                System.out.println(String.format(
+                                    "[RDBG age=%d] CRUISE→TERMINAL range=%.0fm pos=(%.0f,%.0f,%.0f) V=%.0f angP=%.1f lookAngle3D=%.1fdeg altAboveTgt=%.0fm",
+                                    age, range, posX, posY, posZ, VTerm, Math.toDegrees(mAngPitch), Math.toDegrees(lookAngle3D), altAboveTgtCruise));
+                                flightPhase = FlightPhase.TERMINAL;
+                                if (terminalGuidanceFar     != null) terminalGuidanceFar.resetGuidanceFiltersOnly();
+                                if (terminalGuidanceNear    != null) terminalGuidanceNear.resetGuidanceFiltersOnly();
+                                if (terminalGuidanceEndgame != null) terminalGuidanceEndgame.resetGuidanceFiltersOnly();
+                            }
                         }
                     }
                 }
@@ -612,17 +790,28 @@ public abstract class EntityMissileBaseRealistic extends Entity
                     double dx = tPos[0] - posX, dy = tPos[1] - posY, dz = tPos[2] - posZ;
                     double range = Math.sqrt(dx*dx + dy*dy + dz*dz);
                     if (range < 20000.0) {
-                        double VTerm = Math.sqrt(velX*velX+velY*velY+velZ*velZ);
-                        System.out.println(String.format(
-                            "[RDBG age=%d] COAST→TERMINAL range=%.0fm pos=(%.0f,%.0f,%.0f) V=%.0f angP=%.1f",
-                            age, range, posX, posY, posZ, VTerm, Math.toDegrees(mAngPitch)));
-                        flightPhase = FlightPhase.TERMINAL;
-                        // Preserve velocity-estimator state (pre-warmed during CRUISE/COAST);
-                        // only reset the guidance-command filter so stale CRUISE-phase filter
-                        // values don't carry into the first TERMINAL tick.
-                        if (terminalGuidanceFar     != null) terminalGuidanceFar.resetGuidanceFiltersOnly();
-                        if (terminalGuidanceNear    != null) terminalGuidanceNear.resetGuidanceFiltersOnly();
-                        if (terminalGuidanceEndgame != null) terminalGuidanceEndgame.resetGuidanceFiltersOnly();
+                        // FOV-constrained TERMINAL handover (EuroGNC 2022) — same condition as
+                        // CRUISE gate: 3-D look angle < seeker FOV AND altitude delta < 4000 m.
+                        double altAboveTgtCoast = posY - tPos[1];
+                        double velMagKoast   = Math.sqrt(velX*velX + velY*velY + velZ*velZ);
+                        double dotVLKoast    = (velMagKoast > 1.0)
+                                ? (velX*(dx/range) + velY*(dy/range) + velZ*(dz/range)) / velMagKoast : -1.0;
+                        double lookAngleCoast = Math.acos(Math.max(-1.0, Math.min(1.0, dotVLKoast)));
+                        double maxLookKoast   = Math.toRadians(getTerminalEntryMaxLookAngleDeg());
+                        if ((lookAngleCoast < maxLookKoast || range < 5000.0)
+                                && (altAboveTgtCoast < 4000.0 || range < 5000.0)) {
+                            double VTerm = Math.sqrt(velX*velX+velY*velY+velZ*velZ);
+                            System.out.println(String.format(
+                                "[RDBG age=%d] COAST→TERMINAL range=%.0fm pos=(%.0f,%.0f,%.0f) V=%.0f angP=%.1f lookAngle3D=%.1fdeg altAboveTgt=%.0fm",
+                                age, range, posX, posY, posZ, VTerm, Math.toDegrees(mAngPitch), Math.toDegrees(lookAngleCoast), altAboveTgtCoast));
+                            flightPhase = FlightPhase.TERMINAL;
+                            // Preserve velocity-estimator state (pre-warmed during CRUISE/COAST);
+                            // only reset the guidance-command filter so stale CRUISE-phase filter
+                            // values don't carry into the first TERMINAL tick.
+                            if (terminalGuidanceFar     != null) terminalGuidanceFar.resetGuidanceFiltersOnly();
+                            if (terminalGuidanceNear    != null) terminalGuidanceNear.resetGuidanceFiltersOnly();
+                            if (terminalGuidanceEndgame != null) terminalGuidanceEndgame.resetGuidanceFiltersOnly();
+                        }
                     }
                 }
                 break;
@@ -848,16 +1037,17 @@ public abstract class EntityMissileBaseRealistic extends Entity
     protected void updateAutopilot() {
         double V = Math.sqrt(velX*velX + velY*velY + velZ*velZ);
         double maxG = getMaxG(flightPhase);
-        double maxTurnRate = (maxG * GRAVITY / Math.max(V, 1.0)) * DT;
+        double maxTurnRate = (maxG * GRAVITY / Math.max(V, 1.0)) * stepDT;
 
         // Palumbo 2010 Eq.37: G_FC(s) = 1/(τ_FC·s+1) — flight control response lag.
-        // Discrete IIR: β = exp(-DT/τ_FC).
+        // Discrete IIR: β = exp(-stepDT/τ_FC).
+        // stepDT = DT_SUB (0.005 s) during 200Hz terminal sub-steps, DT (0.05 s) otherwise.
         // The guidance law writes the desired direction into thAngPitch/thAngYaw;
         // the autopilot first filters those through τ_FC before applying G-limited drive.
         // This correctly models the finite bandwidth of the flight control system so that
         // the effective navigation ratio experienced by the missile matches the PDF model.
         double tauFC  = getFlightControlTimeConstant();
-        double betaFC = (tauFC > 0.0) ? Math.exp(-DT / tauFC) : 0.0;
+        double betaFC = (tauFC > 0.0) ? Math.exp(-stepDT / tauFC) : 0.0;
         cmdAngPitch = betaFC * cmdAngPitch + (1.0 - betaFC) * thAngPitch;
         cmdAngYaw   = betaFC * cmdAngYaw   + (1.0 - betaFC) * thAngYaw;
 
@@ -951,10 +1141,11 @@ public abstract class EntityMissileBaseRealistic extends Entity
             // Palumbo 2010 Eq.38: G_A(s) = (τ_A·s+1)/v_m — aerodynamic turning rate
             // time constant.  Models the delay between control surface deflection and
             // the resulting lift force buildup (fin + airframe flex).
-            // Discrete IIR: β = exp(-DT/τ_A).
+            // Discrete IIR: β = exp(-stepDT/τ_A).
+            // stepDT = DT_SUB during 200Hz terminal sub-steps, DT otherwise.
             // Applied only to lift (drag and thrust respond immediately to body angle).
             double tauA  = getAeroTimeConstant();
-            double betaA = (tauA > 0.0) ? Math.exp(-DT / tauA) : 0.0;
+            double betaA = (tauA > 0.0) ? Math.exp(-stepDT / tauA) : 0.0;
             laggedFlx = betaA * laggedFlx + (1.0 - betaA) * flxInstant;
             laggedFly = betaA * laggedFly + (1.0 - betaA) * flyInstant;
             laggedFlz = betaA * laggedFlz + (1.0 - betaA) * flzInstant;

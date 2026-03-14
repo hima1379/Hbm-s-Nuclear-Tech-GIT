@@ -45,6 +45,12 @@ This project uses 3D models from the following creators. All rights belong to th
 | SPG62 | **WTigerTw** | [Sketchfab](https://sketchfab.com/WTigerTw) | SPG62 model only / SPG62モデルのみ使用 |
 | New Fusion Reactor | **HbmMods** | [GitHub](https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT) | Original NTM mod model / 原作NTMモデルを使用 |
 
+## Update Log / 更新ログ
+
+| Date / 日付 | Changes / 変更内容 |
+|------------|-------------------|
+| 2026-03-14 | ロフト軌道を追加、近接信管200Hzサブステップスキャンを追加 |
+
 ## Build Guide / ビルド方法
 
 Download the repository, then open a shell prompt in that folder:

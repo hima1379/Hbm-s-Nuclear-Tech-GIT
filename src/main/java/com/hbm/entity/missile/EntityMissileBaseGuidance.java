@@ -17,6 +17,7 @@ package com.hbm.entity.missile;
  * Guidance laws implemented:
  *   GuidanceLIFT     – 80° pitch vertical launch (VLS-specific, practical)
  *   GuidanceTURN     – LOS pursuit pitch-over with lead angle (True PN breaks at large t_go)
+ *   GuidanceLoftAPG  – ICAS-2024 4th-order polynomial altitude shaping (25 km peak)
  *   GuidanceAPG      – True PN midcourse, N=3, τ_f=0.30s (Palumbo/Berglund)
  *   GuidancePN       – True PN terminal, N configurable (Palumbo Eq.17-20, 25, 36)
  *   GuidanceAPN      – Augmented PN with target accel, N configurable (Berglund + Palumbo)
@@ -24,6 +25,7 @@ package com.hbm.entity.missile;
  *   GuidancePIP      – Predicted Impact Point iterative simulation
  *   GuidanceLOS      – Line-of-sight proportional pursuit
  *   GuidancePNLosRate– True PN via instantaneous LOS angular rate (propnavpt.m)
+ *   GuidanceDiffGeo  – Differential Geometry + target accel feedforward (diffgeo.m)
  *
  * ZEM (Zero-Effort-Miss) core:
  *   Palumbo Eq.17-18: V_c = -dR/dt = closing velocity (used for t_go)
@@ -35,7 +37,7 @@ package com.hbm.entity.missile;
  *   – T_LOOKAHEAD arbitrary cap in zemAccelToDirection  → uses K = t_go/N
  *   – MAX_LAT_ACCEL 30G pre-guidance clamp              → G-limit in autopilot only
  *   – GuidanceTURN 1.5× oversteer multiplier            → LOS pursuit + lead angle
- *   – GuidanceAPG loft bias (4% range + 4000m cap)      → True PN midcourse
+ *   – GuidanceAPG loft bias (4% range + 4000m cap)      → replaced by GuidanceLoftAPG
  */
 public abstract class EntityMissileBaseGuidance {
 
@@ -224,6 +226,28 @@ public abstract class EntityMissileBaseGuidance {
                 double tPosX, double tPosY, double tPosZ,
                 double tVelX, double tVelY, double tVelZ,
                 int age) {
+            // Closing velocity check: Vc = -d(R)/dt = -(r_rel · v_rel) / R
+            // ZEM is only valid when the missile is closing on the target (Vc > 0).
+            // When diverging (Vc ≤ 0), the quadratic t_go computation in computeZemRaw
+            // becomes ill-conditioned and produces unstable/flipped commands (as seen
+            // in log: thP flipped from -83.6° to +26.8° in one tick at TERMINAL entry).
+            // Fallback: point directly at target (LOS guidance) until closing again.
+            double dRx = tPosX - mPosX;
+            double dRy = tPosY - mPosY;
+            double dRz = tPosZ - mPosZ;
+            double R   = Math.sqrt(dRx*dRx + dRy*dRy + dRz*dRz);
+            if (R > 0.0) {
+                double dvx = mVelX - tVelX;
+                double dvy = mVelY - tVelY;
+                double dvz = mVelZ - tVelZ;
+                double Vc  = -(dRx*dvx + dRy*dvy + dRz*dvz) / R;
+                if (Vc <= 0.0) {
+                    // Diverging: reset filter and point at target
+                    filtAPitch = 0.0;
+                    filtAYaw   = 0.0;
+                    return new double[]{ dRx, dRy, dRz };
+                }
+            }
             // True PN ZEM core (Palumbo Eq.17-20)
             double[] raw = computeZemRaw(
                     mPosX, mPosY, mPosZ, mVelX, mVelY, mVelZ,
@@ -238,6 +262,229 @@ public abstract class EntityMissileBaseGuidance {
             filtAYaw   = (1.0 - alpha) * raw[1] + alpha * filtAYaw;
             return zemAccelToDirection(filtAPitch, filtAYaw,
                     raw[2], raw[3], raw[4], raw[5], raw[6], N_MID);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // GuidanceLoftAPG – ICAS-2024 4th-order polynomial altitude shaping + APG
+    //
+    // Implements the trajectory-shaping midcourse law from:
+    //   ICAS-2024 paper: "Long-Range Air-to-Air Missile Trajectory Optimization"
+    //   Trajectory 3 (25 km peak): terminal speed ~918 m/s, most robust to PIP changes
+    //
+    // Altitude profile (4th-order polynomial, normalized flight progress s ∈ [0,1]):
+    //   h(s) = h_launch + c·s² + d·s³ + e·s⁴
+    //   Constraints: h(0)=h_launch, h'(0)=0, h(0.5)=h_peak, h(1)=h_target, h'(1)=0
+    //   Solution:
+    //     A = h_peak - h_launch,  B = h_target - h_launch
+    //     c = 16A − 5B,  d = 14B − 32A,  e = 16A − 8B
+    //
+    // Guidance law:
+    //   slope   = (dh/ds) / R_total       (altitude slope at current progress)
+    //   λ_com   = atan(slope)             (ICAS lead-angle command)
+    //   λ_com  += atan(h_err / R_to_tgt)  (altitude error geometric correction)
+    //   pitch cmd = direction at (pitch=λ_com, yaw=bearing_to_target)
+    //
+    // Why this works:
+    //   - At s≈0: slope≈0 → fly horizontal (transition from TURN pitch-over)
+    //   - At s=0.5: slope=0 → level flight at peak altitude
+    //   - At s→1: slope<0 → descend to target
+    //   - Altitude error correction prevents drift from profile over long flight
+    //   - Autopilot τ_FC + G-limit provides smooth tracking (no extra filter needed)
+    //
+    // Physical motivation:
+    //   At 8 km (True PN with maxTgo=40s equilibrium): ρ≈0.525 kg/m³
+    //   At 25 km (this law): ρ≈0.040 kg/m³  →  drag 13× lower
+    //   Sustainer (12,000–35,000 N) can maintain Mach 3–4 at 25 km;
+    //   cannot maintain speed against supersonic drag at 8 km.
+    // -------------------------------------------------------------------------
+    public static class GuidanceLoftAPG extends EntityMissileBaseGuidance {
+        /**
+         * Sentinel value: pass ≤ 0 (or use the no-arg constructor) to compute
+         * peak altitude dynamically from engagement geometry at midcourse entry
+         * (ICAS 2024 method).
+         */
+        private static final double PEAK_ALT_AUTO = -1.0;
+
+        /** Requested peak altitude spec (≤ 0 = dynamic auto-compute). */
+        private final double peakAltitudeSpec;
+        /** Effective peak altitude used by the polynomial (resolved on first call). */
+        private double peakAltitude;
+
+        // State captured at first computeDirection call (= midcourse entry point)
+        private double launchX, launchY, launchZ;
+        private boolean initialized;
+
+        /**
+         * Auto-compute peak altitude from engagement geometry (ICAS 2024).
+         * Uses h_peak = tgt_alt + min(R_horiz·0.12, 12000), capped at 22 km.
+         */
+        public GuidanceLoftAPG() {
+            this(PEAK_ALT_AUTO);
+        }
+
+        /**
+         * @param peakAltitude  desired peak altitude in world Y (metres, absolute).
+         *                      ICAS Trajectory 2: 30000 m;  Trajectory 3: 25000 m.
+         *                      Pass ≤ 0 for dynamic auto-compute (ICAS 2024 Eq.6).
+         */
+        public GuidanceLoftAPG(double peakAltitude) {
+            this.peakAltitudeSpec = peakAltitude;
+            this.peakAltitude     = peakAltitude;   // overwritten on first call if ≤ 0
+        }
+
+        @Override
+        public void reset() {
+            initialized  = false;
+            peakAltitude = peakAltitudeSpec;   // allow recompute on next initialisation
+        }
+
+        @Override
+        public double[] computeDirection(
+                double mPosX, double mPosY, double mPosZ,
+                double mVelX, double mVelY, double mVelZ,
+                double tPosX, double tPosY, double tPosZ,
+                double tVelX, double tVelY, double tVelZ,
+                int age) {
+
+            // Capture midcourse entry position on first call
+            if (!initialized) {
+                launchX     = mPosX;
+                launchY     = mPosY;
+                launchZ     = mPosZ;
+                initialized = true;
+                // ICAS 2024 dynamic peak altitude (when peakAltitudeSpec ≤ 0):
+                //
+                // From ICAS 2024 Fig.3/4 trajectory data:
+                //   Trajectory 2 (robust, 30km peak): 100km range, 10km launch → (30-10)/100 = 0.20
+                //   Trajectory 3 (conservative, 25km): (25-10)/100 = 0.15
+                // We use 0.12 (slightly below Trajectory 3) to ensure rho(h_peak) gives ≥ 20G.
+                //   At 20km: rho≈0.089 kg/m³ → ~20G;  22km: rho≈0.065 → ~15G
+                //
+                // Caps:
+                //   h_above_max  = 12000m  (beyond this the G-limit becomes marginal)
+                //   h_peak_max   = 22000m  (hard altitude ceiling for terminal maneuvrability)
+                //   h_above_min  = R_horiz×0.05, capped at 5000m  (scales with range;
+                //                  fixed 5000m caused 5800m lofting at 10km range → APN divergence)
+                //                  Values: 10km→500m, 50km→2500m, 100km→5000m
+                //   h_peak_min   = launchY + 500m  (must clear launch altitude)
+                if (peakAltitudeSpec <= 0.0) {
+                    double dxInit    = tPosX - mPosX;
+                    double dzInit    = tPosZ - mPosZ;
+                    double R_horiz   = Math.sqrt(dxInit*dxInit + dzInit*dzInit);
+                    double hAbove    = Math.min(R_horiz * 0.12, 12000.0);
+                    double hAboveMin = Math.min(R_horiz * 0.05, 5000.0); // range-scaled minimum loft
+                    peakAltitude     = Math.max(tPosY + Math.max(hAbove, hAboveMin), mPosY + 500.0);
+                    peakAltitude     = Math.min(peakAltitude, 22000.0);
+                }
+            }
+
+            double V = Math.sqrt(mVelX*mVelX + mVelY*mVelY + mVelZ*mVelZ);
+            if (V < 1.0) return new double[]{ tPosX-mPosX, tPosY-mPosY, tPosZ-mPosZ };
+
+            // ── Polynomial altitude profile ───────────────────────────────────
+            double h_launch = launchY;
+            double h_target = tPosY;
+            double h_peak   = peakAltitude;
+
+            double A = h_peak   - h_launch;
+            double B = h_target - h_launch;
+            double c = 16.0*A - 5.0*B;
+            double d = 14.0*B - 32.0*A;
+            double e = 16.0*A - 8.0*B;
+
+            // Total ground range (XZ plane): midcourse entry → target
+            double dxTot   = tPosX - launchX;
+            double dzTot   = tPosZ - launchZ;
+            double R_total = Math.sqrt(dxTot*dxTot + dzTot*dzTot);
+
+            if (R_total < 1.0) {
+                // Very short range or target directly overhead: pure PN fallback
+                double[] fb = computeZemPN(
+                        mPosX, mPosY, mPosZ, mVelX, mVelY, mVelZ,
+                        tPosX, tPosY, tPosZ, tVelX, tVelY, tVelZ, 3.0, null);
+                return (fb != null) ? fb : new double[]{ tPosX-mPosX, tPosY-mPosY, tPosZ-mPosZ };
+            }
+
+            // Normalized flight progress s ∈ [0,1]
+            double dxL       = mPosX - launchX;
+            double dzL       = mPosZ - launchZ;
+            double rLaunched = Math.sqrt(dxL*dxL + dzL*dzL);
+            double s         = Math.max(0.0, Math.min(1.0, rLaunched / R_total));
+
+            // Commanded altitude and slope at progress s
+            double s2      = s * s;
+            double s3      = s2 * s;
+            double s4      = s3 * s;
+            double h_cmd   = h_launch + c*s2 + d*s3 + e*s4;
+            double dh_ds   = 2.0*c*s + 3.0*d*s2 + 4.0*e*s3;
+            double slope   = dh_ds / R_total;   // dh/dR (rise over run in world units)
+
+            // Lead-angle command: atan(slope) (ICAS Eq., zero at peak and endpoints)
+            double lambda_com = Math.atan(slope);
+
+            // Altitude error PD correction
+            // -----------------------------------------------------------------------
+            // Problem: at BOOST entry the missile is pitched ~75° upward from TURN
+            // but the polynomial commands 0° (horizontal) at s=0.  The original
+            // atan(h_err / rangeToTarget) correction is < 0.5° for rangeToTarget
+            // > 100 km, which is far too weak to arrest the overshoot.
+            //
+            // Fix: cap the reference distance at 3000 m so the P-term gives
+            //   ~15° correction per 800 m of altitude error.
+            //   At close range (rangeToTarget < 3000 m) the exact geometric angle
+            //   is used (rangeToTarget), preserving accuracy for the terminal dive.
+            //
+            // D-term: penalise altitude rate error (desired rate vs actual mVelY).
+            //   desired_hdot  = slope * V_horiz  (from polynomial tangent)
+            //   hdot_err      = desired - actual
+            //   This provides pitch-down authority even when h_err is still small
+            //   (i.e., the missile is on-profile but climbing too fast).
+            double dxT           = tPosX - mPosX;
+            double dzT           = tPosZ - mPosZ;
+            double rangeToTarget = Math.max(Math.sqrt(dxT*dxT + dzT*dzT), 100.0);
+            double h_err         = h_cmd - mPosY;
+
+            // P-term: proportional altitude error (strong at long range)
+            double errRef  = Math.min(rangeToTarget, 3000.0);
+            double p_corr  = Math.atan(h_err / errRef);
+
+            // D-term: altitude rate error
+            double vHoriz   = Math.sqrt(mVelX*mVelX + mVelZ*mVelZ);
+            double hdot_des = slope * vHoriz;          // desired vertical speed (m/s)
+            double hdot_err = hdot_des - mVelY;        // +ve = need to climb faster
+            // Convert rate error to angle correction (0.1 s look-ahead).
+            // Ramp D-term authority from ±10° at loft entry (s=0) up to ±30° once
+            // s ≥ 0.08 (about 8 km / 6-8 s into flight).  This prevents the immediate
+            // -30° clamp snap at BOOST entry when the missile still has large residual
+            // climb velocity from the TURN phase (hdot_err ≈ -700 m/s → atan ≈ -90°).
+            // After the transient settles the full ±30° authority is restored.
+            double dMaxRad  = Math.toRadians(10.0 + 20.0 * Math.min(s / 0.08, 1.0));
+            double d_corr   = Math.max(-dMaxRad,
+                              Math.min( dMaxRad,
+                              Math.atan2(hdot_err * 0.1, Math.max(vHoriz * 0.1, 1.0))));
+
+            lambda_com += p_corr + d_corr;
+
+            // Clamp commanded pitch to avoid impossible climb/dive angles
+            lambda_com = Math.max(Math.toRadians(-80.0), Math.min(Math.toRadians(80.0), lambda_com));
+
+            // Azimuth command: always point toward target (lateral PN, natural)
+            double targetBearing = Math.atan2(tPosX - mPosX, tPosZ - mPosZ);
+
+            // Build and return direction vector (autopilot applies τ_FC + G-limit)
+            double cosP = Math.cos(lambda_com);
+            if (!warmupMode) {
+                System.out.println(String.format(
+                    "[LOFT age=%d] s=%.3f h_peak=%.0f h_cmd=%.0f h_cur=%.0f h_err=%.0f slope=%.4f lam_com=%.1fdeg bearing=%.1fdeg",
+                    age, s, peakAltitude, h_cmd, mPosY, h_err, slope,
+                    Math.toDegrees(lambda_com), Math.toDegrees(targetBearing)));
+            }
+            return new double[]{
+                    Math.sin(targetBearing) * cosP,
+                    Math.sin(lambda_com),
+                    Math.cos(targetBearing) * cosP
+            };
         }
     }
 
@@ -422,9 +669,21 @@ public abstract class EntityMissileBaseGuidance {
                 double rawVX = (tPosX - prevTPosX) / DT;
                 double rawVY = (tPosY - prevTPosY) / DT;
                 double rawVZ = (tPosZ - prevTPosZ) / DT;
-                estTVelX = TVEL_SMOOTH * rawVX + (1.0 - TVEL_SMOOTH) * estTVelX;
-                estTVelY = TVEL_SMOOTH * rawVY + (1.0 - TVEL_SMOOTH) * estTVelY;
-                estTVelZ = TVEL_SMOOTH * rawVZ + (1.0 - TVEL_SMOOTH) * estTVelZ;
+                // Rate-limit: clamp EMA output change to ≤ 50G × DT per tick.
+                // Minecraft entity types that batch-update posX every N ticks cause
+                // single-tick rawVX spikes (e.g. 2× normal speed in one tick).  With
+                // TVEL_SMOOTH=0.5 that produces a ~300 m/s step in estTVelX, which
+                // flips the ZEM sign and drives APN to oscillate dive/climb for the
+                // next 17-18 ticks.  Capping the per-tick EMA change at 50G×DT
+                // (≈24.5 m/s) limits the transient to < 8% of the pre-spike error
+                // while still tracking genuine target manoeuvres (max ~10G for aircraft).
+                final double maxVelChange = 50.0 * 9.80665 * DT;
+                double candidateX = TVEL_SMOOTH * rawVX + (1.0 - TVEL_SMOOTH) * estTVelX;
+                double candidateY = TVEL_SMOOTH * rawVY + (1.0 - TVEL_SMOOTH) * estTVelY;
+                double candidateZ = TVEL_SMOOTH * rawVZ + (1.0 - TVEL_SMOOTH) * estTVelZ;
+                estTVelX += Math.max(-maxVelChange, Math.min(maxVelChange, candidateX - estTVelX));
+                estTVelY += Math.max(-maxVelChange, Math.min(maxVelChange, candidateY - estTVelY));
+                estTVelZ += Math.max(-maxVelChange, Math.min(maxVelChange, candidateZ - estTVelZ));
                 useVelX  = estTVelX;
                 useVelY  = estTVelY;
                 useVelZ  = estTVelZ;
@@ -505,6 +764,217 @@ public abstract class EntityMissileBaseGuidance {
             // ──────────────────────────────────────────────────────────────────────────
             return zemAccelToDirection(filtAPitch, filtAYaw,
                     raw[2], raw[3], raw[4], raw[5], raw[6], N);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // GuidanceIACG – Optimal Impact-Angle Constrained Guidance (Ryoo 2005)
+    //
+    // Reference: C.-K. Ryoo, H. Cho, M.-J. Tahk,
+    //   "Optimal Guidance Laws with Terminal Impact Angle Constraint",
+    //   J. Guidance, Control & Dynamics, 28(4), pp.724-732, 2005.
+    //
+    // Law (Case A – lag-free autopilot, Eq.26):
+    //   u*(t) = (V/tgo) · [-6·θ(t) + 4·θ_m(t) + 2·θ_mf]
+    //
+    //   θ(t)   = current LOS pitch angle (atan2(dy, horizR)) [rad]
+    //   θ_m(t) = missile flight-path angle (pitch) [rad]
+    //   θ_mf   = desired terminal impact angle (pitch) [rad]
+    //   tgo    = time-to-go via Ryoo Method 2 (Table 1, sub-1% error):
+    //              θ̄_m  = θ_m  − θ
+    //              θ̄_mf = θ_mf − θ
+    //              V̄    = V·(1 − (θ̄_m²+θ̄_mf²)/15 + θ̄_m·θ̄_mf/30)
+    //              tgo  = R / V̄
+    //
+    // Pitch plane : IACG (impact-angle constrained, Eq.26)
+    // Yaw   plane : ZEM-PN N=6 (no yaw impact-angle constraint)
+    //
+    // Scale convention for zemAccelToDirection (K = tgo/N):
+    //   a_pitch_scaled = u·DT·N/tgo
+    //   ⟹ dgamma = a_pitch_scaled·K/V = u·DT/V  (1-tick forward integration)
+    //
+    // Impact angle:
+    //   Pass impactAnglePitchDeg = Double.NaN to auto-capture the LOS pitch
+    //   at the first active call (= current LOS at TERMINAL entry).
+    //   This commands the missile to hit along whatever line it first sees the
+    //   target on — optimal for anti-air where approach angle varies per shot.
+    //
+    // Target velocity: same EMA estimator as GuidanceAPN (fix G).
+    // -------------------------------------------------------------------------
+    public static class GuidanceIACG extends EntityMissileBaseGuidance {
+        private final double N;
+        private final double tauF;
+        /**
+         * Desired terminal flight-path angle in pitch (rad).
+         * Double.NaN = auto-capture from current LOS pitch at first active call.
+         */
+        private final double impactAnglePitchRad;
+
+        // Guidance command filter
+        private double filtAPitch = 0.0;
+        private double filtAYaw   = 0.0;
+
+        // Captured impact angle (set once from impactAnglePitchRad or LOS)
+        private double capturedThetaMf = Double.NaN;
+
+        // Position-based target velocity estimator (same as GuidanceAPN, fix G)
+        private double prevTPosX = Double.NaN;
+        private double prevTPosY = Double.NaN;
+        private double prevTPosZ = Double.NaN;
+        private double estTVelX  = 0.0;
+        private double estTVelY  = 0.0;
+        private double estTVelZ  = 0.0;
+        private static final double TVEL_SMOOTH_IACG = 0.5;
+
+        /**
+         * @param N                   navigation gain (6.0 = optimal for IACG)
+         * @param tauF                guidance-command filter time constant (s)
+         * @param impactAnglePitchDeg desired terminal flight-path angle (deg);
+         *                            pass Double.NaN for auto-capture from LOS
+         */
+        public GuidanceIACG(double N, double tauF, double impactAnglePitchDeg) {
+            this.N    = N;
+            this.tauF = tauF;
+            this.impactAnglePitchRad = Double.isNaN(impactAnglePitchDeg)
+                    ? Double.NaN
+                    : Math.toRadians(impactAnglePitchDeg);
+        }
+
+        @Override
+        public void reset() {
+            filtAPitch      = 0.0;
+            filtAYaw        = 0.0;
+            capturedThetaMf = Double.NaN;
+            prevTPosX = prevTPosY = prevTPosZ = Double.NaN;
+            estTVelX  = estTVelY = estTVelZ = 0.0;
+        }
+
+        /**
+         * Reset guidance-command filters and the captured impact angle.
+         * capturedThetaMf is reset to NaN so it is re-captured from the actual LOS
+         * at the first TERMINAL tick, not from the stale warm-up call during CRUISE/COAST.
+         * This prevents the IACG from demanding a huge pull-up correction when the missile
+         * enters TERMINAL from a steep lofted-trajectory dive (theta_m >> theta_LOS).
+         */
+        @Override
+        public void resetGuidanceFiltersOnly() {
+            filtAPitch      = 0.0;
+            filtAYaw        = 0.0;
+            capturedThetaMf = Double.NaN;
+        }
+
+        @Override
+        public double[] computeDirection(
+                double mPosX, double mPosY, double mPosZ,
+                double mVelX, double mVelY, double mVelZ,
+                double tPosX, double tPosY, double tPosZ,
+                double tVelX, double tVelY, double tVelZ,
+                int age) {
+
+            // ── Target velocity estimation (fix G, same as GuidanceAPN) ──────
+            double useVelX, useVelY, useVelZ;
+            if (!Double.isNaN(prevTPosX)) {
+                double rawVX = (tPosX - prevTPosX) / DT;
+                double rawVY = (tPosY - prevTPosY) / DT;
+                double rawVZ = (tPosZ - prevTPosZ) / DT;
+                // Same 50G rate-limit as GuidanceAPN — reject single-tick position spikes.
+                final double maxVelChangeI = 50.0 * 9.80665 * DT;
+                double candidateX = TVEL_SMOOTH_IACG * rawVX + (1.0 - TVEL_SMOOTH_IACG) * estTVelX;
+                double candidateY = TVEL_SMOOTH_IACG * rawVY + (1.0 - TVEL_SMOOTH_IACG) * estTVelY;
+                double candidateZ = TVEL_SMOOTH_IACG * rawVZ + (1.0 - TVEL_SMOOTH_IACG) * estTVelZ;
+                estTVelX += Math.max(-maxVelChangeI, Math.min(maxVelChangeI, candidateX - estTVelX));
+                estTVelY += Math.max(-maxVelChangeI, Math.min(maxVelChangeI, candidateY - estTVelY));
+                estTVelZ += Math.max(-maxVelChangeI, Math.min(maxVelChangeI, candidateZ - estTVelZ));
+                useVelX = estTVelX;
+                useVelY = estTVelY;
+                useVelZ = estTVelZ;
+            } else {
+                // First call: seed estimator, return direct pursuit
+                estTVelX  = tVelX; estTVelY = tVelY; estTVelZ = tVelZ;
+                prevTPosX = tPosX; prevTPosY = tPosY; prevTPosZ = tPosZ;
+                return new double[]{ tPosX - mPosX, tPosY - mPosY, tPosZ - mPosZ };
+            }
+            prevTPosX = tPosX; prevTPosY = tPosY; prevTPosZ = tPosZ;
+
+            // ── Geometry ──────────────────────────────────────────────────────
+            double dx = tPosX - mPosX, dy = tPosY - mPosY, dz = tPosZ - mPosZ;
+            double R  = Math.sqrt(dx*dx + dy*dy + dz*dz);
+            double V  = Math.sqrt(mVelX*mVelX + mVelY*mVelY + mVelZ*mVelZ);
+            if (R < 1.0 || V < 1.0) return new double[]{ dx, dy, dz };
+
+            // Missile flight-path angle (pitch, inertial)
+            double horizV  = Math.sqrt(mVelX*mVelX + mVelZ*mVelZ);
+            double theta_m = Math.atan2(mVelY, horizV);
+            double chiM    = Math.atan2(mVelX, mVelZ);
+            double cosG    = Math.cos(theta_m);
+
+            // LOS pitch angle
+            double horizR    = Math.sqrt(dx*dx + dz*dz);
+            double theta_LOS = Math.atan2(dy, horizR);
+
+            // Auto-capture impact angle at first active call
+            if (Double.isNaN(capturedThetaMf)) {
+                capturedThetaMf = Double.isNaN(impactAnglePitchRad)
+                        ? theta_LOS
+                        : impactAnglePitchRad;
+            }
+            double theta_mf = capturedThetaMf;
+
+            // ── tgo — Ryoo 2005 Method 2 (Table 1) ────────────────────────────
+            // V̄ = V·(1 − (θ̄_m²+θ̄_mf²)/15 + θ̄_m·θ̄_mf/30)   where θ̄ = θ − θ_LOS
+            // Error < 1% for all finite angles (paper Table 1); far better than R/V.
+            double tm      = theta_m  - theta_LOS;
+            double tmf     = theta_mf - theta_LOS;
+            double V_bar   = V * (1.0 - (tm*tm + tmf*tmf) / 15.0 + tm*tmf / 30.0);
+            if (V_bar < 1.0) V_bar = 1.0;   // guard extreme angles
+            double tgo = Math.max(R / V_bar, 0.28);   // floor = total guidance loop lag
+
+            // ── IACG pitch command — Ryoo 2005 Eq.26 ─────────────────────────
+            // u*(t) = (V/tgo)·[-6·θ + 4·θ_m + 2·θ_mf]
+            //
+            // Scaled for zemAccelToDirection (which applies K = tgo/N):
+            //   a_scaled = u·DT·N/tgo  →  dgamma = a_scaled·K/V = u·DT/V ✓
+            double f_iacg  = -6.0 * theta_LOS + 4.0 * theta_m + 2.0 * theta_mf;
+            double u_iacg  = (V / tgo) * f_iacg;
+            double aPitch  = u_iacg * DT * N / tgo;
+
+            // ── ZEM-PN yaw command ────────────────────────────────────────────
+            // Palumbo left-axis (yaw, perpendicular to velocity in horizontal plane)
+            double sinC = Math.sin(chiM), cosC = Math.cos(chiM);
+            double ltX  = cosC, ltY = 0.0, ltZ = -sinC;
+
+            // Future positions (estimated target velocity; missile under gravity)
+            double futMX = mPosX + mVelX * tgo;
+            double futMY = mPosY + mVelY * tgo - 0.5 * GRAVITY * tgo * tgo;
+            double futMZ = mPosZ + mVelZ * tgo;
+            double futTX = tPosX + useVelX * tgo;
+            double futTY = tPosY + useVelY * tgo;
+            double futTZ = tPosZ + useVelZ * tgo;
+
+            double zemX   = futTX - futMX, zemY = futTY - futMY, zemZ = futTZ - futMZ;
+            double zemYaw = zemX * ltX + zemY * ltY + zemZ * ltZ;
+            double aYaw   = N * zemYaw / (tgo * tgo);
+
+            // ── Guidance filter (Palumbo Eq.25/36) ───────────────────────────
+            double alpha   = (tauF > 0.0) ? Math.exp(-DT / tauF) : 0.0;
+            filtAPitch = (1.0 - alpha) * aPitch + alpha * filtAPitch;
+            filtAYaw   = (1.0 - alpha) * aYaw   + alpha * filtAYaw;
+
+            // ── Debug log ─────────────────────────────────────────────────────
+            if (!warmupMode) {
+                System.out.println(String.format(
+                        "[IACG age=%d] R=%.0fm tgo=%.2fs " +
+                        "theta=%.1f tm=%.1f tmf=%.1f " +
+                        "f=%.2f u=%.1f aPitch=%.1f aYaw=%.1f",
+                        age, R, tgo,
+                        Math.toDegrees(theta_LOS),
+                        Math.toDegrees(theta_m),
+                        Math.toDegrees(theta_mf),
+                        Math.toDegrees(f_iacg),
+                        u_iacg, filtAPitch, filtAYaw));
+            }
+
+            return zemAccelToDirection(filtAPitch, filtAYaw, theta_m, chiM, V, cosG, tgo, N);
         }
     }
 
@@ -822,6 +1292,194 @@ public abstract class EntityMissileBaseGuidance {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // GuidanceDiffGeo – Differential Geometry (DG) guidance law
+    //
+    // Based on diffgeo.m from ADA556639 companion code (Chaoyong Li, 2009).
+    //
+    // Extends GuidancePNLosRate with target-acceleration feedforward, giving
+    // exact null miss distance against non-maneuvering targets and near-optimal
+    // performance against maneuvering targets (SRBM boost, evasive UAV):
+    //
+    //   n_y = |a_T|·cos(η_T)  / cos(η_m)           + N·V_c·σ̇_yaw   / cos(η_m)
+    //   n_z = a_Tz ·cos(η_Tz) / cos(γ_m − σ_pitch) + N·V_c·σ̇_pitch / cos(γ_m − σ) − g
+    //
+    // Where:
+    //   η_T    = atan2(atX, atZ) − σ_yaw      (horizontal target accel vs LOS)
+    //   η_Tz   = atan2(atY, |a_T_horiz|)       (vertical target accel elevation angle)
+    //   η_m    = chiM − σ_yaw                  (missile look angle, horizontal)
+    //   a_T    = IIR-filtered finite-difference of target velocity (τ = 0.5 s)
+    //
+    // Target acceleration is estimated by differentiating target velocity each tick
+    // and smoothing with a first-order IIR filter (τ_acc = 0.5 s ≈ 10 ticks).
+    // This achieves the same effect as the α-β-γ tracker in abgfilter.m but is
+    // stable at DT = 0.05 s without re-tuning the filter coefficients.
+    //
+    // Cos singularity guard: max(|cos(η)|, 0.05) prevents division by near-zero
+    // when the missile look angle approaches 90° (guidance barrier in diffgeo.m).
+    //
+    // Gravity compensation: +g/V in pitch channel (propnavpt.m convention:
+    // nz −= 9.8045 maps to +GRAVITY/V in heading-angle space).
+    //
+    // Reference: diffgeo.m, abgfilter.m from ADA556639 companion code.
+    // -------------------------------------------------------------------------
+    public static class GuidanceDiffGeo extends EntityMissileBaseGuidance {
+        private final double N;
+        private final double tauFilter;
+
+        // LOS rate state (same initialisation pattern as GuidancePNLosRate)
+        private double prevLosYaw   = Double.NaN;
+        private double prevLosPitch = Double.NaN;
+        private double filtLosRateYaw   = 0.0;
+        private double filtLosRatePitch = 0.0;
+
+        // Target acceleration estimate: IIR-smoothed finite difference of tVel.
+        // Seeded to NaN so the first tick skips the finite-diff step (no prevTVel).
+        private double prevTVelX = Double.NaN;
+        private double prevTVelY, prevTVelZ;
+        private double filtAccX = 0.0, filtAccY = 0.0, filtAccZ = 0.0;
+
+        // Smoothing time constant for target acceleration estimate.
+        // 0.5 s = 10 ticks: fast enough to track rapid manoeuvres (1–2 s pull-up),
+        // smooth enough to reject quantisation noise in Minecraft entity velocity.
+        private static final double TAU_ACC = 0.50;
+
+        /**
+         * @param N          navigation gain (5 per ADA556639 optimal analysis)
+         * @param tauFilter  LOS-rate IIR filter time constant (s);
+         *                   0.10 for near terminal, 0.05 for endgame
+         */
+        public GuidanceDiffGeo(double N, double tauFilter) {
+            this.N         = N;
+            this.tauFilter = tauFilter;
+        }
+
+        @Override
+        public void reset() {
+            prevLosYaw       = Double.NaN;
+            prevLosPitch     = Double.NaN;
+            filtLosRateYaw   = 0.0;
+            filtLosRatePitch = 0.0;
+            prevTVelX        = Double.NaN;
+            filtAccX = filtAccY = filtAccZ = 0.0;
+        }
+
+        @Override
+        public double[] computeDirection(
+                double mPosX, double mPosY, double mPosZ,
+                double mVelX, double mVelY, double mVelZ,
+                double tPosX, double tPosY, double tPosZ,
+                double tVelX, double tVelY, double tVelZ,
+                int age) {
+
+            double rx = tPosX - mPosX;
+            double ry = tPosY - mPosY;
+            double rz = tPosZ - mPosZ;
+            double dist = Math.sqrt(rx * rx + ry * ry + rz * rz);
+            if (dist < 1.0) return new double[]{ rx, ry, rz };
+
+            double V = Math.sqrt(mVelX * mVelX + mVelY * mVelY + mVelZ * mVelZ);
+            if (V < 1.0) return new double[]{ rx, ry, rz };
+
+            // ── Target acceleration estimate (abgfilter.m equivalent) ──────────
+            // Finite-difference of target velocity smoothed by IIR (τ = TAU_ACC).
+            // Raw accel capped at 15 G (≈ 147 m/s²) to reject quantisation spikes
+            // that appear when a Minecraft entity updates its motionX/Y/Z abruptly.
+            if (!Double.isNaN(prevTVelX)) {
+                final double MAX_TACC = 147.0; // 15 G
+                double rawAX = clamp((tVelX - prevTVelX) / DT, -MAX_TACC, MAX_TACC);
+                double rawAY = clamp((tVelY - prevTVelY) / DT, -MAX_TACC, MAX_TACC);
+                double rawAZ = clamp((tVelZ - prevTVelZ) / DT, -MAX_TACC, MAX_TACC);
+                double aAlpha = 1.0 - Math.exp(-DT / TAU_ACC);
+                filtAccX = aAlpha * rawAX + (1.0 - aAlpha) * filtAccX;
+                filtAccY = aAlpha * rawAY + (1.0 - aAlpha) * filtAccY;
+                filtAccZ = aAlpha * rawAZ + (1.0 - aAlpha) * filtAccZ;
+            }
+            prevTVelX = tVelX;  prevTVelY = tVelY;  prevTVelZ = tVelZ;
+
+            // ── LOS angles ────────────────────────────────────────────────────
+            double rh       = Math.sqrt(rx * rx + rz * rz);
+            double losYaw   = Math.atan2(rx, rz);
+            double losPitch = Math.atan2(ry, rh);
+
+            // ── LOS angular rate (identical to GuidancePNLosRate) ─────────────
+            double losRateYaw, losRatePitch;
+            if (Double.isNaN(prevLosYaw)) {
+                double dRx = tVelX - mVelX, dRy = tVelY - mVelY, dRz = tVelZ - mVelZ;
+                losRateYaw   = (rz * dRx - rx * dRz) / Math.max(rh * rh, 1.0);
+                double rhDotdR = (rh > 0.01) ? (rx * dRx + rz * dRz) / rh : 0.0;
+                losRatePitch = (rh * dRy - ry * rhDotdR) / Math.max(dist * dist, 1.0);
+            } else {
+                losRateYaw   = normalizeAngle(losYaw   - prevLosYaw)   / DT;
+                losRatePitch = (losPitch - prevLosPitch) / DT;
+            }
+            prevLosYaw   = losYaw;
+            prevLosPitch = losPitch;
+
+            // Cap raw LOS rate at 0.5 rad/s (≈ 28.6°/s) to reject noise spikes
+            final double MAX_RAW_LOS_RATE = 0.5;
+            losRateYaw   = clamp(losRateYaw,   -MAX_RAW_LOS_RATE, MAX_RAW_LOS_RATE);
+            losRatePitch = clamp(losRatePitch, -MAX_RAW_LOS_RATE, MAX_RAW_LOS_RATE);
+
+            double alpha = 1.0 - Math.exp(-DT / Math.max(tauFilter, DT * 0.5));
+            filtLosRateYaw   = alpha * losRateYaw   + (1.0 - alpha) * filtLosRateYaw;
+            filtLosRatePitch = alpha * losRatePitch + (1.0 - alpha) * filtLosRatePitch;
+
+            // ── Closing velocity V_c (clamped to ≥ 0 for PN gain term) ───────
+            // When Vc < 0 (missile overshot), gain goes to zero → natural saturation,
+            // removing the "Rdot > 0 barrier" identified in thebigstop.m.
+            double Vc   = (rx*(mVelX-tVelX) + ry*(mVelY-tVelY) + rz*(mVelZ-tVelZ)) / dist;
+            double VcPN = Math.max(Vc, 0.0);
+
+            // ── Missile flight-path angles ─────────────────────────────────────
+            double mHoriz = Math.sqrt(mVelX * mVelX + mVelZ * mVelZ);
+            double mYaw   = Math.atan2(mVelX, mVelZ);
+            double mPitch = Math.atan2(mVelY, mHoriz);
+
+            // ── DG look angles with cos singularity guard ─────────────────────
+            // η_m (horizontal and vertical separately)
+            double etaMYaw   = normalizeAngle(mYaw - losYaw);
+            double etaMPitch = mPitch - losPitch;
+            // Floor at 0.05 removes the cos → 0 "guidance barrier" from diffgeo.m
+            double cosEtaYaw   = Math.max(Math.abs(Math.cos(etaMYaw)),   0.05);
+            double cosEtaPitch = Math.max(Math.abs(Math.cos(etaMPitch)), 0.05);
+
+            // ── DG feedforward: estimated target acceleration projected onto axes
+            // Horizontal (diffgeo.m: norm(tgt_accel)*cos(eta_t)/cos(eta_m))
+            double atHorizMag = Math.sqrt(filtAccX * filtAccX + filtAccZ * filtAccZ);
+            double etaT       = normalizeAngle(Math.atan2(filtAccX, filtAccZ) - losYaw);
+            double ffYaw      = atHorizMag * Math.cos(etaT) / cosEtaYaw;
+
+            // Vertical (diffgeo.m: u(21)*cos(eta_tz)/cos(theta−philos))
+            // eta_tz = atan2(atY, atHorizMag): angle of total accel above horizontal
+            double etaTz  = Math.atan2(filtAccY, Math.max(atHorizMag, 0.01));
+            double ffPitch = filtAccY * Math.cos(etaTz) / cosEtaPitch;
+
+            // ── Full DG command (diffgeo.m Eq. ny, nz) ───────────────────────
+            //   n_y = ffYaw   + N·V_c·σ̇_yaw   / cos(η_m)
+            //   n_z = ffPitch + N·V_c·σ̇_pitch / cos(γ_m − σ)
+            // (gravity compensation applied separately below as +g/V in angle space)
+            double accelYaw   = ffYaw   + N * VcPN * filtLosRateYaw   / cosEtaYaw;
+            double accelPitch = ffPitch + N * VcPN * filtLosRatePitch / cosEtaPitch;
+
+            // ── Convert lateral acceleration to commanded heading angles ──────
+            double yawCorr   = clamp(accelYaw   / V, -Math.PI / 2, Math.PI / 2);
+            double pitchCorr = clamp(accelPitch / V, -Math.PI / 2, Math.PI / 2);
+            double cmdYaw    = mYaw + yawCorr;
+            // Gravity compensation: +g/V ≡ propnavpt.m's "nz −= 9.8045" in angle space.
+            // Clamp total cmdPitch to ±π/2 to prevent past-vertical guidance reversal.
+            double cmdPitch  = clamp(mPitch + pitchCorr + GRAVITY / V, -Math.PI / 2, Math.PI / 2);
+
+            double cosCmdP = Math.cos(cmdPitch);
+            double dx = Math.sin(cmdYaw) * cosCmdP;
+            double dy = Math.sin(cmdPitch);
+            double dz = Math.cos(cmdYaw) * cosCmdP;
+            double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (len < 1e-9) return new double[]{ rx, ry, rz };
+            return new double[]{ dx / len, dy / len, dz / len };
+        }
+    }
+
     // =========================================================================
     // SHARED HELPERS: Palumbo (2010) ZEM-PN / ZEM-APN core
     // =========================================================================
@@ -927,13 +1585,15 @@ public abstract class EntityMissileBaseGuidance {
                 if (t_go < 0.0) t_go = dist / V;   // Both roots negative: diverging
             }
         }
-        // Floor at τ_total = τ_seeker + τ_FC + τ_A ≈ 0.28 s (SM-6 total loop lag).
-        // PN/APN gain = N/t_go². As t_go → 0 the gain explodes, generating acceleration
-        // commands that far exceed what the flight control system can execute in the
-        // remaining time-to-go.  Flooring at τ_total prevents the commanded direction
-        // change (= N·ZEM / t_go² × (t_go/N) / V = ZEM / (t_go·V)) from exceeding
-        // ZEM / (τ_total·V), which is the physically realisable guidance bandwidth limit.
-        if (t_go < 0.28) t_go = 0.28;
+        // Floor at 2×DT (2 simulation ticks = 0.10 s).
+        // The original 0.28 s floor (SM-6 real-world τ_seeker+τ_FC+τ_A) was too large:
+        // in head-on geometry the quadratic formula gives t_go < 0.28 s from ~560 m
+        // range onward, so the floor froze the gain and guidance commands shrank as
+        // ZEM decreased — the missile under-corrected in the final frames and missed.
+        // The ±π/2 dgamma clamp in zemAccelToDirection already prevents unrealistically
+        // large angle commands; this floor only guards against division-by-zero (t_go→0).
+        // 2 ticks is the minimum physically meaningful look-ahead in this simulation.
+        if (t_go < 2.0 * DT) t_go = 2.0 * DT;
         // Optional cap: prevents -½·g·t_go² gravity term from overwhelming the ZEM
         // at long range during midcourse. At t_go=90s: gravity term = -39.7 km;
         // capped at 40s: -7.8 km → equilibrium cruise altitude ~8 km above target.
@@ -1016,7 +1676,7 @@ public abstract class EntityMissileBaseGuidance {
         double K = t_go / N;
 
         // Fix E-2: Clamp each angular increment to ±π/2 (±90°).
-        // At endgame t_go can be as small as 0.28 s (floor) and ZEM can be large
+        // At endgame t_go can be as small as 2×DT (floor) and ZEM can be large
         // (hundreds of metres), so a_pitch·K/V can exceed 2π without this clamp.
         // An unclamped Δγ wraps gamma_cmd past ±180°, making dy = sin(gamma_cmd)
         // negative (missile commanded to dive) — physically catastrophic.
